@@ -17,7 +17,7 @@ const RegisterPage = () => {
       email: "",
       password: "",
       phonenumber: "",
-      gender: "",
+      gender: "male",
     },
     store: {
       name: "",
@@ -50,21 +50,10 @@ const RegisterPage = () => {
   const renderStepComponent = () => {
     switch (step) {
       case 0:
-        return (
-          <Step1OwnerAccount
-            formData={formData}
-            setFormData={setFormData}
-            nextStep={nextStep}
-          />
-        );
+        return <Step1OwnerAccount formData={formData} setFormData={setFormData} nextStep={nextStep} />;
       case 1:
         return (
-          <Step2BasicStoreInfo
-            formData={formData}
-            setFormData={setFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
+          <Step2BasicStoreInfo formData={formData} setFormData={setFormData} nextStep={nextStep} prevStep={prevStep} />
         );
       case 2:
         return (
@@ -84,18 +73,11 @@ const RegisterPage = () => {
             }
             nextStep={nextStep}
             prevStep={prevStep}
-            inputClass="w-full p-2 border rounded mt-1"
+            inputClass='w-full p-2 border rounded mt-1'
           />
         );
       case 3:
-        return (
-          <Step4Paperwork
-            formData={formData}
-            setFormData={setFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        );
+        return <Step4Paperwork formData={formData} setFormData={setFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 4:
         return (
           <Step5Confirm
@@ -110,15 +92,18 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-200 px-4 py-8">
-      
-      <h1 className="text-3xl font-bold text-center mb-8">Đăng ký cửa hàng</h1>
+    <div className='w-full min-h-screen bg-gray-200 px-4 py-8'>
+      <h1 className='text-3xl font-bold text-center mb-8'>Đăng ký cửa hàng</h1>
 
-      {/* Step Progress */}
-      <StepRegister currentStep={step} />
+      <div className='flex flex-col md:flex-row gap-8'>
+        {/* Step Register ở cột trái */}
+        <div className='md:w-1/4'>
+          <StepRegister currentStep={step} vertical />
+        </div>
 
-      {/* Form Step */}
-      <div className="mt-8">{renderStepComponent()}</div>
+        {/* Nội dung form ở cột phải */}
+        <div className='md:w-3/4'>{renderStepComponent()}</div>
+      </div>
     </div>
   );
 };

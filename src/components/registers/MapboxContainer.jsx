@@ -2,11 +2,7 @@ import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-const MapBoxComponent = ({
-  currentLatitude,
-  currentLongitude,
-  onLocationSelect,
-}) => {
+const MapBoxComponent = ({ currentLatitude, currentLongitude, onLocationSelect }) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -45,11 +41,6 @@ const MapBoxComponent = ({
     if (markerRef.current && currentLatitude && currentLongitude) {
       markerRef.current.setLngLat([currentLongitude, currentLatitude]);
       mapRef.current?.setCenter([currentLongitude, currentLatitude]);
-      console.log(
-        "Marker position updated:",
-        currentLatitude,
-        currentLongitude
-      );
     }
   }, [currentLatitude, currentLongitude]);
 

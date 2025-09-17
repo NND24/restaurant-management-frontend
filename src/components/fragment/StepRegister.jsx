@@ -8,60 +8,52 @@ const steps = [
   { title: "Xác nhận", description: "Hoàn tất đăng ký cửa hàng" },
 ];
 
-const StepRegister = ({ currentStep = 0 }) => {
+const StepRegister = ({ currentStep = 0, vertical = false }) => {
   return (
-    <ol className="flex flex-col sm:flex-row justify-between items-center w-full space-y-6 sm:space-y-0 sm:space-x-0 mb-6">
+    <ol className={`flex gap-1 ${vertical ? "flex-col items-start" : "flex-row justify-between items-center"}`}>
       {steps.map((step, index) => {
         const isActive = index === currentStep;
         const isCompleted = index < currentStep;
 
         return (
-          <li key={index} className="flex-1 flex items-center">
-            <div className="flex items-center w-full relative">
-              {/* Line (except first item) */}
-              {index > 0 && (
-                <div
-                  className={`flex-grow h-1 ${
-                    isCompleted ? "bg-blue-600" : "bg-gray-300"
-                  }`}
-                />
-              )}
-
-              {/* Circle + Content */}
-              <div className="flex items-center space-x-2">
+          <li key={index} className={`${vertical ? "relative last:mb-0" : "flex-1 flex items-center"}`}>
+            <div className={`flex ${vertical ? "items-start gap-4" : "items-center gap-2"} relative`}>
+              {/* Circle + Line container */}
+              <div className='flex flex-col items-center'>
+                {/* Circle */}
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-semibold transition-all duration-300 ${
                     isActive
-                      ? "border-blue-600 bg-blue-100 text-blue-600"
+                      ? "border-orange-600 bg-orange-100 text-orange-600"
                       : isCompleted
-                      ? "border-blue-600 bg-blue-600 text-white"
+                      ? "border-orange-600 bg-orange-600 text-white"
                       : "border-gray-300 text-gray-500 bg-white"
                   }`}
                 >
                   {index + 1}
                 </div>
-                <div className="hidden sm:block">
-                  <div
-                    className={`text-sm font-medium ${
-                      isActive
-                        ? "text-blue-600"
-                        : isCompleted
-                        ? "text-gray-700"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {step.title}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {step.description}
-                  </div>
-                </div>
+
+                {/* Vertical Line */}
+                {vertical && index < steps.length - 1 && <div className={`w-1 h-12 bg-gray-300 mt-2`} />}
               </div>
 
-              {/* Line (for the current item except last) */}
-              {index < steps.length - 1 && (
-                <div className="flex-grow h-1 bg-gray-300 ml-2 hidden sm:block"></div>
-              )}
+              {/* Text */}
+              <div className='ml-4'>
+                <div
+                  className={`font-semibold ${
+                    isActive ? "text-orange-600" : isCompleted ? "text-gray-700" : "text-gray-400"
+                  }`}
+                >
+                  {step.title}
+                </div>
+                <div
+                  className={`text-sm ${
+                    isActive ? "text-orange-600" : isCompleted ? "text-gray-700" : "text-gray-400"
+                  }`}
+                >
+                  {step.description}
+                </div>
+              </div>
             </div>
           </li>
         );

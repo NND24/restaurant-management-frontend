@@ -1,9 +1,5 @@
 "use client";
-import {
-  deleteOwner,
-  registerStore,
-  registerStoreOwner,
-} from "@/service/register";
+import { deleteOwner, registerStore, registerStoreOwner } from "@/service/register";
 import { uploadRegisterImages } from "@/service/upload";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -16,82 +12,41 @@ const Step5Confirm = ({ formData, prevStep }) => {
   const { owner, store, paperWork } = formData;
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    console.log("🧾 paperWork hiện tại:", formData?.paperWork);
-
-    if (formData?.paperWork) {
-      const { IC_front, IC_back, businessLicense, storePicture } =
-        formData.paperWork;
-      console.log("🪪 CMND Mặt Trước:", IC_front?.name);
-      console.log("🪪 CMND Mặt Sau:", IC_back?.name);
-      console.log("📄 Giấy phép KD:", businessLicense?.name);
-      console.log(
-        "🏪 Ảnh cửa hàng:",
-        storePicture?.map((file) => file.name)
-      );
-    }
-  }, [formData.paperWork]);
-
+  // Xử lý đăng ký
   const handleRegister = async () => {
     setLoading(true);
-    console.log("Paper work: ", paperWork);
     try {
       // 1. Register owner
       const ownerRes = await registerStoreOwner(owner);
       if (!ownerRes || ownerRes.status !== 201) {
-        toast.error(" Đăng ký chủ cửa hàng thất bại");
+        toast.error("Đăng ký chủ cửa hàng thất bại");
         return;
       }
-
       const ownerId = ownerRes.data.data._id;
 
       // 2. Upload avatar & cover
-      const avatarForm = new FormData();
-      avatarForm.append("file", store.avatar.file);
-      const [avatarUrl] = await uploadRegisterImages(avatarForm);
-
-      const coverForm = new FormData();
-      coverForm.append("file", store.cover.file);
-      const [coverUrl] = await uploadRegisterImages(coverForm);
+      const [avatarUrl, coverUrl] = await Promise.all([
+        uploadRegisterImages(new FormData().append("file", store.avatar.file)),
+        uploadRegisterImages(new FormData().append("file", store.cover.file)),
+      ]);
 
       // 3. Upload paperwork
-      // Upload IC_front
-      const icFrontForm = new FormData();
-      icFrontForm.append("file", paperWork.IC_front);
-      const [IC_front] = await uploadRegisterImages(icFrontForm);
+      const IC_front = await uploadRegisterImages(new FormData().append("file", paperWork.IC_front));
+      const IC_back = await uploadRegisterImages(new FormData().append("file", paperWork.IC_back));
+      const businessLicense = await uploadRegisterImages(new FormData().append("file", paperWork.businessLicense));
+      const storePicturesForm = new FormData();
+      paperWork.storePicture.forEach((file) => storePicturesForm.append("file", file));
+      const storePictures = await uploadRegisterImages(storePicturesForm);
 
-      // Upload IC_back
-      const icBackForm = new FormData();
-      icBackForm.append("file", paperWork.IC_back);
-      const [IC_back] = await uploadRegisterImages(icBackForm);
-
-      // Upload businessLicense
-      const licenseForm = new FormData();
-      licenseForm.append("file", paperWork.businessLicense);
-      const [businessLicense] = await uploadRegisterImages(licenseForm);
-
-      // Upload storePictures (mảng nhiều ảnh)
-      const storePicsForm = new FormData();
-      paperWork.storePicture.forEach((file) => {
-        storePicsForm.append("file", file);
-      });
-      const storePictures = await uploadRegisterImages(storePicsForm);
-
-      // 4. Final store payload
+      // 4. Store payload
       const storePayload = {
         ...store,
-        ownerId: ownerId,
+        ownerId,
         avatar: avatarUrl,
         cover: coverUrl,
-        paperWork: {
-          IC_front,
-          IC_back,
-          businessLicense,
-          storePicture: storePictures,
-        },
+        paperWork: { IC_front, IC_back, businessLicense, storePicture: storePictures },
       };
 
-      console.log("Register payload ", storePayload);
       // 5. Register store
       const res = await registerStore(storePayload);
       if (res.status === true) {
@@ -124,163 +79,121 @@ const Step5Confirm = ({ formData, prevStep }) => {
     }
   };
 
-  return (
-    <div className="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        Xác nhận thông tin
-      </h2>
-
-      {/* Chủ cửa hàng */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Thông tin chủ cửa hàng
-        </h3>
-        <p>
-          <strong>Họ tên:</strong> {owner.name}
-        </p>
-        <p>
-          <strong>Email:</strong> {owner.email}
-        </p>
-        <p>
-          <strong>Số điện thoại:</strong> {owner.phonenumber}
-        </p>
+  // Component nhỏ hiển thị hình ảnh
+  const ImagePreview = ({ file, label }) => {
+    const src = file instanceof File ? URL.createObjectURL(file) : file;
+    return (
+      <div className='flex flex-col items-center'>
+        <p className='text-sm text-gray-600'>{label}</p>
+        <img src={src} alt={label} className='w-28 h-28 object-cover rounded border' />
       </div>
+    );
+  };
+
+  return (
+    <div className='w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg'>
+      {/* Chủ cửa hàng */}
+      <section className='mb-6 p-4 bg-gray-50 rounded-lg shadow-sm'>
+        <h3 className='text-lg font-semibold text-gray-700 mb-3 border-b pb-2'>Chủ cửa hàng</h3>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Họ tên</span>
+            <span className='font-medium text-gray-800'>{owner.name}</span>
+          </div>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Email</span>
+            <span className='font-medium text-gray-800'>{owner.email}</span>
+          </div>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>SĐT</span>
+            <span className='font-medium text-gray-800'>{owner.phonenumber}</span>
+          </div>
+        </div>
+      </section>
 
       {/* Cửa hàng */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Thông tin cửa hàng
-        </h3>
-        <p>
-          <strong>Tên cửa hàng:</strong> {store.name}
-        </p>
-        <p>
-          <strong>Danh mục:</strong>{" "}
-          {store.storeCategory.map((cat) => cat.name).join(", ")}
-        </p>
-        <p>
-          <strong>Mô tả:</strong> {store.description}
-        </p>
-
-        <div className="flex gap-4 mt-4">
-          {store.avatar && (
-            <div>
-              <p className="text-sm text-gray-600">Ảnh đại diện:</p>
-              <img
-                src={store.avatar.preview}
-                alt="avatar"
-                className="w-32 h-32 object-cover rounded border"
-              />
-            </div>
-          )}
-          {store.cover && (
-            <div>
-              <p className="text-sm text-gray-600">Ảnh bìa:</p>
-              <img
-                src={store.cover.preview}
-                alt="cover"
-                className="w-max h-32 object-cover rounded border"
-              />
-            </div>
-          )}
+      <section className='mb-6 p-4 bg-gray-50 rounded-lg shadow-sm'>
+        <h3 className='text-lg font-semibold text-gray-700 mb-3 border-b pb-2'>Cửa hàng</h3>
+        <div className='grid grid-cols-1 gap-3'>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Tên</span>
+            <span className='font-medium text-gray-800'>{store.name}</span>
+          </div>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Danh mục</span>
+            <span className='font-medium text-gray-800'>{store.storeCategory.map((c) => c.name).join(", ")}</span>
+          </div>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Mô tả</span>
+            <span className='font-medium text-gray-800'>{store.description}</span>
+          </div>
+          <div className='flex gap-4 mt-3'>
+            {store.avatar && <ImagePreview file={store.avatar.preview} label='Avatar' />}
+            {store.cover && <ImagePreview file={store.cover.preview} label='Cover' />}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Địa chỉ */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Địa chỉ</h3>
-        <p>
-          <strong>Địa chỉ đầy đủ:</strong> {store.address.full_address}
-        </p>
-        <p>
-          <strong>Latitude:</strong> {store.address.lat}
-        </p>
-        <p>
-          <strong>Longitude:</strong> {store.address.lon}
-        </p>
-      </div>
+      <section className='mb-6 p-4 bg-gray-50 rounded-lg shadow-sm'>
+        <h3 className='text-lg font-semibold text-gray-700 mb-3 border-b pb-2'>Địa chỉ</h3>
+        <div className='grid grid-cols-1 gap-3'>
+          <div className='flex flex-col'>
+            <span className='text-gray-500 text-sm'>Địa chỉ đầy đủ</span>
+            <span className='font-medium text-gray-800'>{store.address.full_address}</span>
+          </div>
+        </div>
+      </section>
 
       {/* Giấy tờ */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Giấy tờ</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {paperWork.IC_front && (
-            <div>
-              <p className="text-sm">CMND/CCCD mặt trước:</p>
-              <img
-                src={URL.createObjectURL(paperWork.IC_front)}
-                alt="IC Front"
-                className="w-full h-32 object-cover rounded border"
-              />
-            </div>
-          )}
-          {paperWork.IC_back && (
-            <div>
-              <p className="text-sm">CMND/CCCD mặt sau:</p>
-              <img
-                src={URL.createObjectURL(paperWork.IC_back)}
-                alt="IC Back"
-                className="w-full h-32 object-cover rounded border"
-              />
-            </div>
-          )}
-          {paperWork.businessLicense && (
-            <div>
-              <p className="text-sm">Giấy phép kinh doanh:</p>
-              <img
-                src={URL.createObjectURL(paperWork.businessLicense)}
-                alt="Business License"
-                className="w-full h-32 object-cover rounded border"
-              />
-            </div>
-          )}
+      <section className='mb-6 p-4 bg-gray-50 rounded-lg shadow-sm'>
+        <h3 className='text-lg font-semibold text-gray-700 mb-3 border-b pb-2'>Giấy tờ</h3>
+        <div className='flex flex-wrap gap-4 mt-3'>
+          {paperWork.IC_front && <ImagePreview file={paperWork.IC_front} label='CMND/CCCD Mặt Trước' />}
+          {paperWork.IC_back && <ImagePreview file={paperWork.IC_back} label='CMND/CCCD Mặt Sau' />}
+          {paperWork.businessLicense && <ImagePreview file={paperWork.businessLicense} label='Giấy phép KD' />}
         </div>
-      </div>
+      </section>
 
       {/* Ảnh cửa hàng */}
       {paperWork.storePicture.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Ảnh cửa hàng
-          </h3>
-          <div className="grid grid-cols-3 gap-4">
-            {paperWork.storePicture.map((src, index) => (
-              <img
-                key={index}
-                src={URL.createObjectURL(src)}
-                alt={`store-pic-${index}`}
-                className="w-full h-32 object-cover rounded border"
-              />
+        <section className='mb-6 p-4 bg-gray-50 rounded-lg shadow-sm'>
+          <h3 className='text-lg font-semibold text-gray-700 mb-3 border-b pb-2'>Ảnh cửa hàng</h3>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-3'>
+            {paperWork.storePicture.map((file, idx) => (
+              <div key={idx} className='flex flex-col items-center'>
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`store-pic-${idx}`}
+                  className='w-full h-32 object-cover rounded border'
+                />
+                <span className='text-sm text-gray-500 mt-1'>Ảnh {idx + 1}</span>
+              </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Nút điều hướng */}
-      <div className="flex justify-between mt-8">
+      <div className='flex justify-between mt-8'>
         <button
           onClick={prevStep}
-          className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
+          className='px-6 py-2 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-400 hover:to-gray-500 text-white font-semibold transition'
         >
           Quay lại
         </button>
         <button
           onClick={confirmRegister}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          className='px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
         >
           Gửi đăng ký
         </button>
       </div>
+
+      {/* Loader */}
       {loading && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <ThreeDots
-            visible={true}
-            height="80"
-            width="80"
-            color="#fc6011"
-            radius="9"
-            ariaLabel="three-dots-loading"
-          />
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50'>
+          <ThreeDots visible={true} height='80' width='80' color='#fc6011' radius='9' />
         </div>
       )}
     </div>

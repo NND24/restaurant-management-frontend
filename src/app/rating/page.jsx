@@ -1,208 +1,167 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { getStoreRatings, replyToRating } from "@/service/rating";
 import Modal from "@/components/Modal";
-import ReactPaginate from "react-paginate";
-import { ThreeDots } from "react-loader-spinner";
-import Header from "@/components/Header";
-import NavBar from "@/components/NavBar";
+import { viVN } from "@/utils/constants";
 
 const StoreReviewPage = () => {
-    const [reviews, setReviews] = useState([]);
-    const [filter, setFilter] = useState("all");
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
-    const [selectedReview, setSelectedReview] = useState(null);
-    const [replyText, setReplyText] = useState("");
-    const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(0); // DataGrid page index (0-based)
+  const [pageSize, setPageSize] = useState(5);
+  const [rowCount, setRowCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-    const fetchReviews = async () => {
-        setLoading(true);
-        const replied =
-            filter === "replied"
-                ? "true"
-                : filter === "not_replied"
-                ? "false"
-                : undefined;
-        const res = await getStoreRatings({ page, limit: 5, replied });
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [replyText, setReplyText] = useState("");
 
-        if (res?.success) {
-            setReviews(res.data);
-            setTotalPages(res.totalPages || 0);
-        }
-        setLoading(false);
-    };
+  const fetchReviews = async () => {
+    setLoading(true);
+    const replied = filter === "replied" ? "true" : filter === "not_replied" ? "false" : undefined;
 
-    useEffect(() => {
+    const res = await getStoreRatings({
+      page: page + 1, // API đang dùng 1-based
+      limit: pageSize,
+      replied,
+    });
+
+    if (res?.success) {
+      setReviews(res.data ?? []);
+      setRowCount(res.totalItems || 0);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, [page, pageSize, filter]);
+
+  const handleReplyOpen = (review) => {
+    setSelectedReview(review);
+    setReplyText(review.storeReply || "");
+  };
+
+  const handleReplySave = async () => {
+    if (selectedReview) {
+      const res = await replyToRating(selectedReview._id, replyText);
+      if (res?.success) {
+        setSelectedReview(null);
         fetchReviews();
-    }, [page, filter]);
+      }
+    }
+  };
 
-    const handleReplyOpen = (review) => {
-        setSelectedReview(review);
-        setReplyText(review.storeReply || "");
-    };
+  const rows = reviews.map((r) => ({
+    id: r._id,
+    avatar: r.user?.avatar?.url,
+    customer: r.user?.name,
+    ratingValue: r.ratingValue,
+    comment: r.comment,
+    storeReply: r.storeReply,
+    status: r.storeReply ? "Đã phản hồi" : "Chưa phản hồi",
+    raw: r,
+  }));
 
-    const handleReplySave = async () => {
-        if (selectedReview) {
-            const res = await replyToRating(selectedReview._id, replyText);
-            if (res?.success) {
-                setSelectedReview(null);
-                fetchReviews(); // refresh
-            }
-        }
-    };
-
-    const handlePageClick = (event) => {
-        setPage(event.selected + 1);
-    };
-
-    return (
-        <div className="max-w-3xl mx-auto px-4 py-6">
-            <Header title="Đánh giá" goBack={true} />
-
-            <div className="mb-4 mt-20">
-                <select
-                    value={filter}
-                    onChange={(e) => {
-                        setPage(1);
-                        setFilter(e.target.value);
-                    }}
-                    className="border px-3 py-2 rounded"
-                >
-                    <option value="all">Tất cả</option>
-                    <option value="replied">Đã phản hồi</option>
-                    <option value="not_replied">Chưa phản hồi</option>
-                </select>
-            </div>
-
-            {loading ? (
-                <div className="flex justify-center items-center min-h-[200px]">
-                    <ThreeDots
-                        visible={true}
-                        height="80"
-                        width="80"
-                        color="#fc6011"
-                        radius="9"
-                        ariaLabel="three-dots-loading"
-                    />
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {reviews.map((review) => (
-                        <div
-                            key={review._id}
-                            className="border rounded-lg p-4 shadow"
-                        >
-                            <div className="flex items-center gap-3 mb-2">
-                                <img
-                                    src={review.user?.avatar?.url}
-                                    alt={review.user?.name}
-                                    className="w-10 h-10 rounded-full object-cover"
-                                />
-                                <span className="font-semibold">
-                                    {review.user?.name}
-                                </span>
-                            </div>
-
-                            <div className="text-yellow-500 mb-1">
-                                {Array(review.ratingValue).fill("★").join("")}
-                                {Array(5 - review.ratingValue)
-                                    .fill("☆")
-                                    .join("")}
-                            </div>
-
-                            <p className="mb-2">{review.comment}</p>
-
-                            {review.storeReply ? (
-                                <div className="bg-gray-100 p-2 rounded mb-2 text-sm text-gray-700">
-                                    <strong>Phản hồi của cửa hàng:</strong>{" "}
-                                    {review.storeReply}
-                                </div>
-                            ) : null}
-
-                            <button
-                                onClick={() => handleReplyOpen(review)}
-                                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                            >
-                                {review.storeReply
-                                    ? "Chỉnh sửa phản hồi"
-                                    : "Phản hồi"}
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {totalPages > 1 && (
-                <div className="mt-6">
-                    <ReactPaginate
-                        previousLabel={
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2}
-                                stroke="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M15 19l-7-7 7-7"
-                                />
-                            </svg>
-                        }
-                        nextLabel={
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2}
-                                stroke="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M9 5l7 7-7 7"
-                                />
-                            </svg>
-                        }
-                        breakLabel="..."
-                        pageCount={totalPages}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={3}
-                        onPageChange={handlePageClick}
-                        forcePage={page - 1}
-                        containerClassName="pagination flex space-x-2"
-                        activeClassName="bg-orange-500 text-white"
-                        pageClassName="border px-3 py-1 rounded-lg cursor-pointer"
-                        previousClassName="border px-3 py-1 rounded-lg cursor-pointer"
-                        nextClassName="border px-3 py-1 rounded-lg cursor-pointer"
-                        disabledClassName="opacity-50 cursor-not-allowed"
-                    />
-                </div>
-            )}
-
-            <Modal
-                open={!!selectedReview}
-                onClose={() => setSelectedReview(null)}
-                title="Phản hồi khách hàng"
-                confirmTitle="Lưu phản hồi"
-                onConfirm={handleReplySave}
-            >
-                <textarea
-                    className="w-full border border-gray-700 ring-1 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={4}
-                    placeholder="Nhập phản hồi của bạn tại đây..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                />
-            </Modal>
-            <NavBar page='orders' />
+  const columns = [
+    {
+      field: "avatar",
+      headerName: "Khách hàng",
+      width: 200,
+      renderCell: (params) => (
+        <div className='flex items-center gap-2'>
+          <img src={params.row.avatar} alt={params.row.customer} className='w-8 h-8 rounded-full object-cover' />
+          <span>{params.row.customer}</span>
         </div>
-    );
+      ),
+    },
+    {
+      field: "ratingValue",
+      headerName: "Đánh giá",
+      width: 120,
+      renderCell: (params) => (
+        <div className='text-yellow-500'>
+          {"★".repeat(params.row.ratingValue) + "☆".repeat(5 - params.row.ratingValue)}
+        </div>
+      ),
+    },
+    { field: "comment", headerName: "Bình luận", width: 250 },
+    {
+      field: "storeReply",
+      headerName: "Phản hồi",
+      width: 250,
+      renderCell: (params) =>
+        params.row.storeReply ? (
+          <span className='text-gray-700'>{params.row.storeReply}</span>
+        ) : (
+          <span className='text-gray-400 italic'>Chưa phản hồi</span>
+        ),
+    },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) => (
+        <span className={params.value === "Đã phản hồi" ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+          {params.value}
+        </span>
+      ),
+    },
+    {
+      field: "action",
+      headerName: "Hành động",
+      width: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <button
+          onClick={() => handleReplyOpen(params.row.raw)}
+          className='px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm'
+        >
+          {params.row.storeReply ? "Chỉnh sửa" : "Phản hồi"}
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <div style={{ height: "70vh", width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          rowCount={rowCount}
+          pagination
+          paginationMode='server'
+          page={page}
+          pageSize={pageSize}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPageSizeChange={(newSize) => setPageSize(newSize)}
+          rowsPerPageOptions={[5, 10, 20]}
+          loading={loading}
+          components={{ Toolbar: GridToolbar }}
+          autoHeight={false}
+          localeText={viVN}
+        />
+      </div>
+
+      <Modal
+        open={!!selectedReview}
+        onClose={() => setSelectedReview(null)}
+        title='Phản hồi khách hàng'
+        confirmTitle='Lưu phản hồi'
+        onConfirm={handleReplySave}
+      >
+        <textarea
+          className='w-full border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          rows={4}
+          placeholder='Nhập phản hồi của bạn tại đây...'
+          value={replyText}
+          onChange={(e) => setReplyText(e.target.value)}
+        />
+      </Modal>
+    </div>
+  );
 };
 
 export default StoreReviewPage;

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 import React, { useState } from "react";
 
-const Tabs = ({ 
-  tabs, 
-  defaultActiveTab = 0, 
-  onTabChange, 
-  tabClassName = "py-3 text-sm font-medium flex justify-center items-center transition-colors duration-200",
-  activeTabClassName = "text-[#fc6011] bg-gray-100 border-b-2 border-[#fc6011]"
+const Tabs = ({
+  tabs,
+  defaultActiveTab = 0,
+  onTabChange,
+  tabClassName = "py-3 px-4 text-sm font-medium flex justify-center items-center transition-colors duration-200",
+  activeTabClassName = "text-[#fc6011] border-b-2 border-[#fc6011] bg-orange-50",
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
@@ -16,25 +16,31 @@ const Tabs = ({
   };
 
   return (
-    <div className="w-full mt-2 h-lvh">
+    <div className='w-full'>
       {/* Navigation Tabs */}
-      <div 
-        className={`grid border-b-2 border-gray-200 bg-white sticky top-0 z-10`}
-        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }} // Dynamic columns
+      <div
+        className={`grid border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm`}
+        style={{
+          gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))`,
+        }}
       >
         {tabs.map((tab, index) => (
           <button
             key={index}
             onClick={() => handleTabClick(index)}
-            className={`${tabClassName} ${activeTab === index ? activeTabClassName : "text-gray-500 bg-white hover:bg-gray-50 hover:text-[#fc6011]"}`}
+            className={`
+              ${tabClassName} 
+              ${activeTab === index ? activeTabClassName : "text-gray-500 hover:text-[#fc6011] hover:bg-gray-50"}
+            `}
           >
-            {tab.label}
+            {tab.icon && <span className='mr-2 text-lg'>{tab.icon}</span>}
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Content Area */}
-      <div className="py-4">{tabs[activeTab]?.component}</div>
+      <div className='py-6 px-2'>{tabs[activeTab]?.component}</div>
     </div>
   );
 };

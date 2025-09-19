@@ -1,8 +1,6 @@
-'use client';
+"use client";
 
-import NavBar from "@/components/NavBar";
 import React, { useState, useEffect } from "react";
-import Header from "@/components/Header";
 import Tabs from "@/components/Tabs";
 import DishTab from "@/components/tabs/DishMenuTab";
 import ToppingTab from "@/components/tabs/ToppingMenuTab";
@@ -38,19 +36,7 @@ const Page = () => {
     { label: "Topping", component: <ToppingTab /> },
   ];
 
-  return (
-    <>
-      <Header title="Thực đơn" goBack={true} />
-      <div className='pt-[70px] pb-[10px] bg-gray-100'>
-        <Tabs
-          tabs={tabData}
-          defaultActiveTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-      </div>
-      <NavBar page='menu' />
-    </>
-  );
+  return <Tabs tabs={tabData} defaultActiveTab={activeTab} onTabChange={handleTabChange} />;
 };
 
 export default Page;

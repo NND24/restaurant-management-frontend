@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --main-color: #fc6011;
   --primary-color: #4a4b4d;
@@ -36,15 +35,39 @@ a {
   color: inherit;
 }
 
-@media only screen and (min-width: 768px) {
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
+/* Scrollbar tổng thể */
+::-webkit-scrollbar {
+  width: 8px; /* chiều rộng scrollbar */
+  height: 8px; /* chiều cao scrollbar cho horizontal scroll */
+}
 
-  ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-color: #5c5c5c4b;
-  }
+/* Track: nền scrollbar */
+::-webkit-scrollbar-track {
+  background: #f0f0f0; /* màu nền track */
+  border-radius: 10px;
+}
+
+/* Thumb: phần di chuyển */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(92, 92, 92, 0.3); /* màu cơ bản */
+  border-radius: 10px;
+  border: 2px solid #f0f0f0; /* tạo padding giữa thumb và track */
+}
+
+/* Thumb khi hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(92, 92, 92, 0.6);
+}
+
+/* Thumb khi active kéo */
+::-webkit-scrollbar-thumb:active {
+  background-color: rgba(92, 92, 92, 0.8);
+}
+
+/* Optional: scrollbar nhỏ khi overlay dropdown */
+.MuiAutocomplete-listbox {
+  max-height: 200px; /* giới hạn height */
+  overflow-y: auto; /* bật scroll */
 }
 
 /* SWIPER START */
@@ -156,7 +179,7 @@ a {
 
 /* Admin */
 .admin-container {
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   display: flex;
   height: 100%;
 }

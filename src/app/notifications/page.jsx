@@ -1,6 +1,5 @@
 "use client";
 import Header from "../../components/Header";
-import NavBar from "../../components/NavBar";
 import Notification from "../../components/Notification";
 import React, { useEffect, useState } from "react";
 import { updateNotificationStatus } from "@/service/notification";
@@ -31,10 +30,6 @@ const page = () => {
                 handleNotificationStatusChange={handleNotificationStatusChange}
               />
             ))}
-      </div>
-
-      <div className=''>
-        <NavBar page='notifications' />
       </div>
     </div>
   );

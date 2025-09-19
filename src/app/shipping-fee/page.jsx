@@ -1,39 +1,51 @@
 "use client";
-import Header from "@/components/Header";
+
 import React, { useEffect, useState } from "react";
 import localStorageService from "@/utils/localStorageService";
 
 import FloatingButton from "@/components/fragment/FloatingButton";
 import Swal from "sweetalert2";
-import {
-  addShipingFee,
-  deleteShippingFee,
-  getAllShippingFee,
-  updateShippingFee,
-} from "@/service/shippingFee";
+import { addShipingFee, deleteShippingFee, getAllShippingFee, updateShippingFee } from "@/service/shippingFee";
 import { toast } from "react-toastify";
 import ShippingFeeModal from "@/components/popups/ShippingFee";
-const page = () => {
+
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+
+const viVN = {
+  toolbarColumns: "Cột",
+  toolbarFilters: "Bộ lọc",
+  toolbarDensity: "Mật độ",
+  toolbarExport: "Xuất",
+  noRowsLabel: "Không có dữ liệu",
+  MuiTablePagination: {
+    labelRowsPerPage: "Số hàng mỗi trang:",
+    labelDisplayedRows: ({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`,
+  },
+};
+
+const Page = () => {
   const [fees, setFees] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [storeId, setStoreId] = useState(localStorageService.getStoreId());
   const [feeBeingEdited, setFeeBeingEdited] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchShippingFee = async () => {
     try {
+      setLoading(true);
       const res = await getAllShippingFee(storeId);
       if (res.status === "success") {
         setFees(res.data);
       } else {
         toast.error("Lỗi khi lấy shipping fee:", res.message);
       }
+      setLoading(false);
     } catch (error) {
       toast.error("Không thể kết nối đến server.");
     }
   };
 
-  // Gọi trong useEffect
   useEffect(() => {
     if (storeId) fetchShippingFee();
   }, [storeId]);
@@ -48,7 +60,7 @@ const page = () => {
       } else {
         toast.error(res.message || "Lỗi khi tạo mức giá");
       }
-    } catch (err) {
+    } catch {
       toast.error("Lỗi khi tạo mức giá");
     }
   };
@@ -70,7 +82,7 @@ const page = () => {
       } else {
         toast.error(res.message || "Lỗi khi cập nhật mức giá");
       }
-    } catch (err) {
+    } catch {
       toast.error("Lỗi khi cập nhật mức giá");
     }
   };
@@ -89,12 +101,10 @@ const page = () => {
 
     if (result.isConfirmed) {
       try {
-        const res = await deleteShippingFee(storeId, shippingFeeId); // gọi API xoá
-
+        const res = await deleteShippingFee(storeId, shippingFeeId);
         if (res.status === "success") {
           Swal.fire("Đã xóa!", "Mức giá đã được xóa.", "success");
-
-          fetchShippingFee(); // refresh danh sách
+          fetchShippingFee();
         }
       } catch (err) {
         Swal.fire("Lỗi!", err.message || "Xóa mức giá thất bại", "error");
@@ -102,66 +112,63 @@ const page = () => {
     }
   };
 
+  const rows = fees.map((fee, index) => ({
+    id: fee._id,
+    fromDistance: fee.fromDistance,
+    feePerKm: fee.feePerKm,
+  }));
+
+  const columns = [
+    { field: "fromDistance", headerName: "Mốc khoảng cách (km)", width: 200 },
+    {
+      field: "feePerKm",
+      headerName: "Mức giá",
+      width: 200,
+      valueFormatter: (params) => {
+        const value = Number(params.value) || 0;
+        return new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+          maximumFractionDigits: 0,
+        }).format(value);
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params) => (
+        <div className='flex gap-4'>
+          <button
+            className='text-blue-600 hover:underline'
+            onClick={() => handleEditShippingFee(fees.find((f) => f._id === params.row.id))}
+          >
+            Sửa
+          </button>
+          <button className='text-red-600 hover:underline' onClick={() => handleDeleteShippingFee(params.row.id)}>
+            Xóa
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
-      <Header title="Giá giao hàng" goBack={true} />
       <FloatingButton onClick={() => setShowForm(true)} />
-      <div className="pt-[70px] pb-[10px] bg-gray-100 mx-[50px]">
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200 rounded-lg border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-sm font-medium text-gray-700"
-                >
-                  Mốc khoảng cách (km)
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-sm font-medium text-gray-700"
-                >
-                  Mức giá
-                </th>
 
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-sm font-medium text-gray-700"
-                >
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white text-sm text-gray-800">
-              {fees.map((fee) => (
-                <tr key={fee._id}>
-                  <td className="px-6 py-4">{fee.fromDistance}</td>
-                  <td className="px-6 py-4">
-                    {new Intl.NumberFormat("vi-VN").format(fee.feePerKm)} VND
-                  </td>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={10}
+        rowsPerPageOptions={[5, 10, 20]}
+        autoHeight
+        disableSelectionOnClick
+        components={{ Toolbar: GridToolbar }}
+        loading={loading}
+        localeText={viVN}
+      />
 
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-8">
-                      <button
-                        className="text-blue-600 hover:underline"
-                        onClick={() => handleEditShippingFee(fee)}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteShippingFee(fee._id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
       {showForm && (
         <ShippingFeeModal
           isOpen={showForm}
@@ -170,9 +177,7 @@ const page = () => {
             setFeeBeingEdited(null);
             setViewOnly(false);
           }}
-          onSubmit={
-            feeBeingEdited ? handleUpdateShippingFee : handleCreateShippingFee
-          }
+          onSubmit={feeBeingEdited ? handleUpdateShippingFee : handleCreateShippingFee}
           initialData={feeBeingEdited}
           isUpdate={!!feeBeingEdited}
           readOnly={viewOnly}
@@ -182,4 +187,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import LabelWithIcon from "@/components/LableWithIcon";
-import Modal from "../Modal";
 import { getAllTopping, addToppingGroupOnly } from "@/service/topping";
-import Loading from "@/components/Loading";
 import localStorageService from "@/utils/localStorageService";
 
 // MUI DataGrid
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Modal from "@/components/Modal";
 
 const ToppingMenuTab = () => {
   const router = useRouter();

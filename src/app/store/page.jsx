@@ -1,5 +1,4 @@
 "use client";
-import Header from "@/components/Header";
 import {
   getInformation,
   toggleOpenStatus,
@@ -111,9 +110,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           avatarUrl = res[0].url;
         } else {
-          throw new Error(
-            "Upload avatar failed: " + (res?.message || "Unknown error")
-          );
+          throw new Error("Upload avatar failed: " + (res?.message || "Unknown error"));
         }
       }
 
@@ -126,9 +123,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           coverUrl = res[0].url;
         } else {
-          throw new Error(
-            "Upload cover failed: " + (res?.message || "Unknown error")
-          );
+          throw new Error("Upload cover failed: " + (res?.message || "Unknown error"));
         }
       }
 
@@ -157,8 +152,7 @@ const page = () => {
       let IC_front_url = previewUrls?.IC_front?.url || "";
       let IC_back_url = previewUrls?.IC_back?.url || "";
       let businessLicense_url = previewUrls?.businessLicense?.url || "";
-      let storePicture_urls =
-        previewUrls?.storePicture?.map((img) => img.url) || [];
+      let storePicture_urls = previewUrls?.storePicture?.map((img) => img.url) || [];
 
       // Upload từng ảnh nếu có file mới
       if (files.IC_front) {
@@ -207,13 +201,9 @@ const page = () => {
 
       // Gửi API cập nhật paperwork (phải đúng định dạng)
       const updateRes = await updatePaperwork({
-        IC_front: IC_front_url
-          ? { url: IC_front_url, filePath: "" }
-          : undefined,
+        IC_front: IC_front_url ? { url: IC_front_url, filePath: "" } : undefined,
         IC_back: IC_back_url ? { url: IC_back_url, filePath: "" } : undefined,
-        businessLicense: businessLicense_url
-          ? { url: businessLicense_url, filePath: "" }
-          : undefined,
+        businessLicense: businessLicense_url ? { url: businessLicense_url, filePath: "" } : undefined,
         storePicture: storePicture_urls.map((url) => ({
           url,
           filePath: "",
@@ -250,10 +240,9 @@ const page = () => {
 
   return (
     <>
-      <Header title="Thông tin cửa hàng" goBack={true} />
-      <div className="pt-[70px] pb-[10px] bg-gray-100 px-[100px]">
+      <div className='pt-[70px] pb-[10px] bg-gray-100 px-[100px]'>
         {storeInfo && (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             {/* Giờ hoạt động cửa hàng */}
             <StoreTime
               openHour={storeInfo.openHour}
@@ -264,11 +253,7 @@ const page = () => {
             />
 
             {/* Thông tin cửa hàng */}
-            <StoreInfo
-              storeInfo={storeInfo}
-              categories={categories}
-              onUpdateInfo={handleUpdateInfo}
-            />
+            <StoreInfo storeInfo={storeInfo} categories={categories} onUpdateInfo={handleUpdateInfo} />
 
             {/* Ảnh cửa hàng */}
             <StoreImages
@@ -278,16 +263,10 @@ const page = () => {
             />
 
             {/* Địa chỉ cửa hàng */}
-            <StoreAddress
-              address={storeInfo.address}
-              onUpdateAddress={handleUpdateAddress}
-            />
+            <StoreAddress address={storeInfo.address} onUpdateAddress={handleUpdateAddress} />
 
             {/* Giấy tờ */}
-            <StorePaperwork
-              storeInfo={storeInfo}
-              onUpdatePaperwork={handleUpdatePaperwork}
-            />
+            <StorePaperwork storeInfo={storeInfo} onUpdatePaperwork={handleUpdatePaperwork} />
           </div>
         )}
       </div>

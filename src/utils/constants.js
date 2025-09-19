@@ -1,3 +1,31 @@
+export const viVN = {
+  toolbarDensity: "Mật độ",
+  toolbarDensityLabel: "Mật độ",
+  toolbarDensityCompact: "Nhỏ",
+  toolbarDensityStandard: "Chuẩn",
+  toolbarDensityComfortable: "Rộng",
+  toolbarColumns: "Cột",
+  toolbarColumnsLabel: "Chọn cột",
+  toolbarFilters: "Bộ lọc",
+  toolbarFiltersLabel: "Hiện bộ lọc",
+  toolbarFiltersTooltipHide: "Ẩn bộ lọc",
+  toolbarFiltersTooltipShow: "Hiện bộ lọc",
+  toolbarExport: "Xuất",
+  toolbarExportLabel: "Xuất",
+  toolbarExportCSV: "Xuất CSV",
+  toolbarExportPrint: "In",
+
+  noRowsLabel: "Không có dữ liệu",
+  footerRowSelected: (count) =>
+    count !== 1 ? `${count.toLocaleString()} hàng đã chọn` : `${count.toLocaleString()} hàng đã chọn`,
+  footerTotalRows: "Tổng số hàng:",
+
+  MuiTablePagination: {
+    labelRowsPerPage: "Số hàng mỗi trang:",
+    labelDisplayedRows: ({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`,
+  },
+};
+
 export const provinces = [
   { name: "Hà Nội", lat: 21.0285, lon: 105.8542 },
   { name: "Hồ Chí Minh", lat: 10.762622, lon: 106.660172 },

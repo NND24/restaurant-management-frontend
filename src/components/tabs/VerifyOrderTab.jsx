@@ -80,11 +80,8 @@ export default function VerifyOrderTab({ storeId }) {
 
   const rows = orders.map((o, idx) => ({
     id: o._id,
-    stt: idx + 1,
     orderNo: `#${generateOrderNumber(o._id)}`,
     customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
-    phone: o.shipInfo?.contactPhonenumber,
-    address: o.shipInfo?.address,
     quantity: o.items?.reduce((sum, i) => sum + (i.quantity || 0), 0),
     total: formatVND(o.finalTotal),
     createdAt: new Date(o.createdAt).toLocaleString("vi-VN"),
@@ -93,11 +90,8 @@ export default function VerifyOrderTab({ storeId }) {
   }));
 
   const columns = [
-    { field: "stt", headerName: "STT", width: 70 },
     { field: "orderNo", headerName: "Mã đơn", width: 120 },
     { field: "customer", headerName: "Khách hàng", width: 150 },
-    { field: "phone", headerName: "SĐT", width: 120 },
-    { field: "address", headerName: "Địa chỉ", flex: 1 },
     { field: "quantity", headerName: "Số món", width: 100 },
     { field: "total", headerName: "Tổng tiền", width: 130 },
     { field: "createdAt", headerName: "Ngày tạo", width: 180 },
@@ -126,7 +120,7 @@ export default function VerifyOrderTab({ storeId }) {
   ];
 
   return (
-    <div style={{ height: 600, width: "100%" }}>
+    <div style={{ height: 500, width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}

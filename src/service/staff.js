@@ -1,16 +1,7 @@
 import axios from "../libs/axiosInstance";
-export const getAllStaff = async (storeId, options = {}) => {
+export const getAllStaff = async (storeId) => {
   try {
-    const { page = 1, limit = 10, search = "", role = "" } = options;
-
-    const res = await axios.get(`/staff/stores/${storeId}`, {
-      params: {
-        page,
-        limit,
-        search,
-        role, // ✅ đúng key
-      },
-    });
+    const res = await axios.get(`/staff/stores/${storeId}`);
 
     return res.data;
   } catch (error) {

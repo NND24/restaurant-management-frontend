@@ -40,7 +40,7 @@ const Tabs = ({
       </div>
 
       {/* Content Area */}
-      <div className='py-6 px-2'>{tabs[activeTab]?.component}</div>
+      <div className='py-4'>{tabs[activeTab]?.component}</div>
     </div>
   );
 };

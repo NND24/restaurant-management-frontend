@@ -5,12 +5,9 @@ import { DataGrid } from "@mui/x-data-grid";
 import { getAllDish, toggleSaleStatus } from "@/service/dish";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import LabelWithIcon from "../../components/LableWithIcon";
 import localStorageService from "@/utils/localStorageService";
 import { Switch, Box, Typography, Tooltip, IconButton } from "@mui/material";
-import { FaEye, FaPen, FaPlus, FaTrash } from "react-icons/fa";
-import Modal from "@/components/Modal";
-import DishCreate from "@/components/dish/DishCreateModal";
+import { FaPlus } from "react-icons/fa";
 import DishCreateModal from "@/components/dish/DishCreateModal";
 
 const page = () => {

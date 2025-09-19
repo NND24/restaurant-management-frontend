@@ -40,16 +40,12 @@ const page = () => {
   }
 
   return (
-    <>
-      <div className='pb-[10px] bg-gray-100'>
-        <Tabs
-          key={activeTab} // 👈 force re-render when either changes
-          tabs={tabData}
-          defaultActiveTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-      </div>
-    </>
+    <Tabs
+      key={activeTab} // 👈 force re-render when either changes
+      tabs={tabData}
+      defaultActiveTab={activeTab}
+      onTabChange={handleTabChange}
+    />
   );
 };
 

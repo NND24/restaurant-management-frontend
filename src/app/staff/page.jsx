@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { getAllStaff, deleteStaff, getStaff, createStaff, updateStaff } from "@/service/staff";
+import { getAllStaff, deleteStaff, createStaff, updateStaff } from "@/service/staff";
 import localStorageService from "@/utils/localStorageService";
-import { FaTrash, FaEdit } from "react-icons/fa";
-import { IconButton, Fab } from "@mui/material";
+import { FaPlus } from "react-icons/fa";
+import { IconButton, Box, Tooltip } from "@mui/material";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import StaffModel from "@/components/popups/Staff";
@@ -21,7 +21,7 @@ export default function StaffDataGrid() {
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const res = await getAllStaff(storeId, { page: 1, limit: 1000 });
+      const res = await getAllStaff(storeId);
       if (res.success) setStaff(res.data.employees);
     } catch (err) {
       toast.error("Lỗi khi load staff");
@@ -54,11 +54,14 @@ export default function StaffDataGrid() {
   const rows = staff.map((st) => ({
     id: st._id,
     name: st.name,
+    phonenumber: st.phonenumber,
+    gender: st.gender === "male" ? "Nam" : "Nữ",
     role: st.role.includes("manager") ? "Quản lý" : st.role.includes("owner") ? "Chủ nhà hàng" : "Nhân viên",
     avatar: st.avatar.url || "/default-avatar.png",
   }));
 
   const columns = [
+    { field: "id", headerName: "Mã nhân viên", width: 180 },
     {
       field: "name",
       headerName: "Họ và tên",
@@ -70,43 +73,74 @@ export default function StaffDataGrid() {
         </div>
       ),
     },
+    { field: "phonenumber", headerName: "Số điện thoại", width: 180 },
+    { field: "gender", headerName: "Giới tính", width: 80 },
     { field: "role", headerName: "Chức vụ", width: 180 },
     {
       field: "actions",
       headerName: "Hành động",
       width: 150,
       renderCell: (params) => (
-        <div className='flex gap-2'>
-          <IconButton
-            color='primary'
-            onClick={() => {
-              /* open edit */
-            }}
-          >
-            <FaEdit />
-          </IconButton>
-          <IconButton color='error' onClick={() => handleDeleteStaff(params.row.id)}>
-            <FaTrash />
-          </IconButton>
+        <div className='flex space-x-1'>
+          <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
+            <IconButton
+              size='small'
+              color='primary'
+              onClick={() => {
+                // Thêm logic xem chi tiết
+                console.log("Xem chi tiết", params.row._id);
+              }}
+            >
+              👁️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
+            <IconButton
+              size='small'
+              color='info'
+              onClick={() => {
+                // Thêm logic chỉnh sửa
+                console.log("Chỉnh sửa", params.row._id);
+              }}
+            >
+              ✏️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
+            <IconButton size='small' color='error' onClick={() => handleDeleteStaff(params.row.id)}>
+              🗑️
+            </IconButton>
+          </Tooltip>
         </div>
       ),
     },
   ];
 
   return (
-    <div style={{ height: "80vh", width: "100%" }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={10}
-        components={{ Toolbar: GridToolbar }}
-        loading={loading}
-        localeText={viVN}
-      />
-
-      <Fab color='primary' sx={{ position: "fixed", bottom: 24, right: 24 }} onClick={() => setShowForm(true)}>
-        +
-      </Fab>
+    <div>
+      <div className='flex flex-col justify-between gap-2 border-b pb-2 mb-2'>
+        <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+          <button
+            onClick={() => setShowForm(true)}
+            className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+          >
+            <FaPlus className='text-lg' />
+            <span>Thêm</span>
+          </button>
+        </div>
+      </div>
+      <Box sx={{ height: 480, width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSize={10}
+          components={{ Toolbar: GridToolbar }}
+          loading={loading}
+          localeText={viVN}
+        />
+      </Box>
 
       {showForm && (
         <StaffModel

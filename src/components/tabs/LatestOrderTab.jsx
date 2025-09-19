@@ -4,6 +4,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { getAllOrders, updateOrder } from "@/service/order";
 import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
+import { Button } from "@mui/material";
 
 const formatVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", {
@@ -100,10 +101,10 @@ const LatestOrder = ({ storeId }) => {
       valueGetter: (_, row) => (typeof row?.finalTotal === "number" ? formatVND(row.finalTotal) : "0 ₫"),
     },
     {
-      field: "paymentMethod",
-      headerName: "Thanh toán",
+      field: "createdAt",
+      headerName: "Ngày tạo",
       flex: 1,
-      valueGetter: (_, row) => paymentTypes[row?.paymentMethod] || "--",
+      valueGetter: (_, row) => new Date(row.createdAt).toLocaleString("vi-VN"),
     },
     {
       field: "status",
@@ -116,18 +117,22 @@ const LatestOrder = ({ storeId }) => {
       headerName: "Hành động",
       flex: 1,
       renderCell: (params) => (
-        <button
-          className='px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600'
+        <Button
+          variant='contained'
+          sx={{
+            backgroundColor: "#fc6011",
+          }}
+          size='small'
           onClick={() => handleConfirm(params.row)}
         >
           Xác nhận
-        </button>
+        </Button>
       ),
     },
   ];
 
   return (
-    <div style={{ height: 600, width: "100%" }}>
+    <div style={{ height: 500, width: "100%" }}>
       <DataGrid
         rows={orders}
         columns={columns}

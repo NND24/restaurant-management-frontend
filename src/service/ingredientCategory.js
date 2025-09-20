@@ -31,9 +31,9 @@ export const getIngredientCategoryById = async (id) => {
   }
 };
 
-export const updateIngredientCategory = async ({ id, name, description }) => {
+export const updateIngredientCategory = async ({ id, data }) => {
   try {
-    let data = { name, description };
+    console.log(id);
     const res = await axios.put(`/ingredient-category/${id}`, data);
     return res.data;
   } catch (error) {
@@ -42,7 +42,7 @@ export const updateIngredientCategory = async ({ id, name, description }) => {
   }
 };
 
-export const deleteIngredientCategory = async ({ id }) => {
+export const deleteIngredientCategory = async (id) => {
   try {
     const res = await axios.delete(`/ingredient-category/${id}`);
     return res.data;

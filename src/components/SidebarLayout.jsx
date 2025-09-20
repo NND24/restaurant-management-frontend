@@ -77,19 +77,16 @@ export default function SidebarLayout({ children }) {
           </MenuItem>
 
           <SubMenu icon={<FaUtensils />} label='Thực đơn'>
-            <MenuItem active={pathname.startsWith("/dish")} onClick={() => handleMenuClick("/dish")}>
+            <MenuItem active={pathname === "/dish"} onClick={() => handleMenuClick("/dish")}>
               Món ăn
             </MenuItem>
-            <MenuItem active={pathname.startsWith("/topping")} onClick={() => handleMenuClick("/topping")}>
+            <MenuItem active={pathname === "/topping"} onClick={() => handleMenuClick("/topping")}>
               Topping
             </MenuItem>
-            <MenuItem active={pathname.startsWith("/dish-category")} onClick={() => handleMenuClick("/dish-category")}>
+            <MenuItem active={pathname === "/dish-category"} onClick={() => handleMenuClick("/dish-category")}>
               Loại món ăn
             </MenuItem>
-            <MenuItem
-              active={pathname.startsWith("/topping-category")}
-              onClick={() => handleMenuClick("/topping-category")}
-            >
+            <MenuItem active={pathname === "/topping-category"} onClick={() => handleMenuClick("/topping-category")}>
               Loại topping
             </MenuItem>
           </SubMenu>

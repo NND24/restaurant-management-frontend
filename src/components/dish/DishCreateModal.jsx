@@ -18,7 +18,7 @@ import {
 import { FaRegImage, FaTimes } from "react-icons/fa";
 import { createDish } from "@/service/dish";
 import { getAllTopping } from "@/service/topping";
-import { getAllCategories } from "@/service/dishCategory";
+import { getDishCategories } from "@/service/dishCategory";
 import { uploadImages } from "@/service/upload";
 
 const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
@@ -35,7 +35,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const [toppingRes, categoryRes] = await Promise.all([getAllTopping({ storeId }), getAllCategories({ storeId })]);
+      const [toppingRes, categoryRes] = await Promise.all([getAllTopping({ storeId }), getDishCategories({ storeId })]);
       setAllToppings(toppingRes?.data || []);
       setAllCategories(categoryRes?.data || []);
     };

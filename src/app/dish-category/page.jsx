@@ -1,118 +1,166 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import LabelWithIcon from "@/components/LableWithIcon";
-import Modal from "@/components/Modal";
-import { toast } from "react-toastify";
-import { getAllCategories, createCategory, updateCategory, deleteCategory } from "@/service/dishCategory";
 import { DataGrid } from "@mui/x-data-grid";
+import localStorageService from "@/utils/localStorageService";
+import { Box, Tooltip, IconButton } from "@mui/material";
+import { FaPlus } from "react-icons/fa";
+import { viVN } from "@/utils/constants";
+import Swal from "sweetalert2";
+import DishCategoryCreateModal from "@/components/dish-category/DishCategoryCreateModal";
+import DishCategoryDetailModal from "@/components/dish-category/DishCategoryDetailModal";
+import DishCategoryEditModal from "@/components/dish-category/DishCategoryEditModal";
+import { getDishCategories, deleteDishCategory } from "@/service/dishCategory";
 
-const Page = () => {
-  const storeData = typeof window !== "undefined" ? localStorage.getItem("store") : null;
-  const storeId = storeData ? JSON.parse(storeData)?._id : null;
+const page = () => {
+  const getRole = localStorageService.getRole();
+  const blockEdit = getRole === "staff";
+  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
+  const storeId = storeData ? JSON.parse(storeData)?._id : "";
 
-  const [categories, setCategories] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [allIngredientCategories, setAllIngredientCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [openCreateDishCategory, setOpenCreateDishCategory] = useState(false);
+  const [openDetailDishCategory, setOpenDetailDishCategory] = useState(false);
+  const [openEditDishCategory, setOpenEditDishCategory] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  const fetchCategories = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await getAllCategories({ storeId });
-      setCategories(res?.data || []);
+      setError(null);
+      const res = await getDishCategories(storeId);
+      const list = res?.data?.data || res?.data || [];
+      setAllIngredientCategories(list);
     } catch (err) {
-      toast.error("Lỗi khi tải danh mục");
-      console.error(err);
+      console.error("Failed to fetch dishes", err);
+      setError("Lỗi tải danh sách món");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (storeId) fetchCategories();
+    fetchData();
   }, [storeId]);
 
-  const handleCreateCategory = async (e) => {
-    e.preventDefault();
-    if (!categoryName.trim()) return;
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn?",
+      text: "Loại món ăn này sẽ bị xóa vĩnh viễn.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
 
-    try {
-      await createCategory({ storeId, name: categoryName });
-      toast.success("Tạo danh mục thành công");
-      setIsModalOpen(false);
-      setCategoryName("");
-      await fetchCategories();
-    } catch (err) {
-      toast.error("Tạo danh mục thất bại");
-      console.error(err);
-    }
-  };
-
-  const handleUpdateCategory = async () => {
-    if (!categoryName.trim() || !selectedCategory) return;
-
-    try {
-      await updateCategory({
-        categoryId: selectedCategory._id,
-        name: categoryName,
-      });
-      toast.success("Cập nhật danh mục thành công");
-      setIsModalOpen(false);
-      setCategoryName("");
-      setSelectedCategory(null);
-      await fetchCategories();
-    } catch (err) {
-      toast.error("Cập nhật danh mục thất bại");
-      console.error(err);
-    }
-  };
-
-  const handleDeleteCategory = async () => {
-    if (!selectedCategory) return;
-
-    try {
-      await deleteCategory({ categoryId: selectedCategory._id });
-      toast.success("Xóa danh mục thành công");
-      setIsDeleteModalOpen(false);
-      setSelectedCategory(null);
-      await fetchCategories();
-    } catch (err) {
-      toast.error("Xóa danh mục thất bại");
-      console.error(err);
+    if (result.isConfirmed) {
+      try {
+        await deleteDishCategory(id);
+        Swal.fire("Đã xóa!", "Loại món ăn đã được xóa.", "success");
+        fetchData();
+      } catch (err) {
+        Swal.fire("Lỗi!", err.message || "Xóa loại món ăn thất bại", "error");
+      }
     }
   };
 
   const columns = [
-    { field: "name", headerName: "Tên danh mục", flex: 1 },
+    {
+      field: "name",
+      headerName: "Tên loại món ăn",
+      width: 250,
+      headerAlign: "center",
+      renderCell: (params) => <span>{params.row?.name || ""}</span>,
+    },
+
+    {
+      field: "description",
+      headerName: "Mô tả",
+      headerAlign: "center",
+      flex: 1,
+      renderCell: (params) => <span>{params.row?.description || ""}</span>,
+    },
+    {
+      field: "isActive",
+      headerName: "Trạng thái",
+      headerAlign: "center",
+      align: "center",
+      width: 130,
+      renderCell: (params) => (
+        <span
+          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
+            params.row?.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          {params.row?.isActive ? "Hoạt động" : "Ngưng"}
+        </span>
+      ),
+    },
     {
       field: "actions",
       headerName: "Hành động",
       sortable: false,
       filterable: false,
+      headerAlign: "center",
+      align: "center",
+      width: 150,
       renderCell: (params) => (
-        <div className='flex space-x-2'>
-          <button
-            onClick={() => {
-              setSelectedCategory(params.row);
-              setCategoryName(params.row.name);
-              setIsModalOpen(true);
-            }}
-            className='text-blue-500'
-          >
-            ✏️
-          </button>
-          <button
-            onClick={() => {
-              setSelectedCategory(params.row);
-              setIsDeleteModalOpen(true);
-            }}
-            className='text-red-500'
-          >
-            🗑️
-          </button>
+        <div className='flex justify-center items-center space-x-1 w-full h-full'>
+          <Tooltip title='Xem chi tiết'>
+            <IconButton
+              size='small'
+              color='primary'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedCategoryId(params.row._id);
+                setOpenDetailDishCategory(true);
+              }}
+            >
+              👁️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Chỉnh sửa'>
+            <IconButton
+              size='small'
+              color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedCategoryId(params.row._id);
+                setOpenEditDishCategory(true);
+              }}
+            >
+              ✏️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Xoá'>
+            <IconButton
+              size='small'
+              color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                handleDelete(params.row._id);
+              }}
+            >
+              🗑️
+            </IconButton>
+          </Tooltip>
         </div>
       ),
     },
@@ -120,58 +168,65 @@ const Page = () => {
 
   return (
     <>
-      {/* Modal thêm/sửa */}
-      <Modal
-        open={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedCategory(null);
-        }}
-        onConfirm={selectedCategory ? handleUpdateCategory : handleCreateCategory}
-        title={selectedCategory ? "Cập nhật danh mục" : "Thêm danh mục"}
-        confirmTitle='Lưu'
-        closeTitle='Hủy'
-      >
-        <form onSubmit={selectedCategory ? handleUpdateCategory : handleCreateCategory}>
-          <input
-            type='text'
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-            placeholder='Nhập tên danh mục'
-            className='w-full p-2 border rounded-md mb-4'
-            required
-          />
-        </form>
-      </Modal>
+      {openCreateDishCategory && (
+        <DishCategoryCreateModal
+          open={openCreateDishCategory}
+          onClose={() => setOpenCreateDishCategory(false)}
+          storeId={storeId}
+          onCreated={fetchData}
+        />
+      )}
 
-      {/* Modal xóa */}
-      <Modal
-        open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteCategory}
-        title='Xác nhận xóa'
-        confirmTitle='Xóa'
-        closeTitle='Hủy'
-      >
-        <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
-      </Modal>
+      {openDetailDishCategory && (
+        <DishCategoryDetailModal
+          open={openDetailDishCategory}
+          onClose={() => setOpenDetailDishCategory(false)}
+          id={selectedCategoryId}
+        />
+      )}
 
-      {/* Thanh toolbar */}
-      <div className='flex justify-between items-center border-b pb-2 mx-4'>
-        <LabelWithIcon title='Thêm' iconPath='/assets/plus.png' onClick={() => setIsModalOpen(true)} />
+      {openEditDishCategory && (
+        <DishCategoryEditModal
+          open={openEditDishCategory}
+          onClose={() => setOpenEditDishCategory(false)}
+          id={selectedCategoryId}
+          onUpdated={fetchData}
+        />
+      )}
+
+      <div className='flex align-center justify-between mb-2'>
+        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Loại món ăn</span>
+
+        {!blockEdit && (
+          <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+            <button
+              onClick={() => setOpenCreateDishCategory(true)}
+              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+            >
+              <FaPlus className='text-lg' />
+              <span>Thêm</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* DataGrid */}
-      <DataGrid
-        rows={categories.map((c) => ({ id: c._id, ...c }))}
-        columns={columns}
-        pageSize={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        disableRowSelectionOnClick
-        loading={isLoading}
-      />
+      <Box sx={{ height: 525, width: "100%" }}>
+        <DataGrid
+          rows={allIngredientCategories}
+          columns={columns}
+          getRowId={(row) => row._id}
+          pagination
+          pageSizeOptions={[]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 8 } },
+          }}
+          loading={isLoading}
+          disableRowSelectionOnClick
+          localeText={viVN}
+        />
+      </Box>
     </>
   );
 };
 
-export default Page;
+export default page;

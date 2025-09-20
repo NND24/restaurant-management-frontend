@@ -2,16 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { getIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import localStorageService from "@/utils/localStorageService";
-import { Box, Typography, Tooltip, IconButton } from "@mui/material";
+import { Box, Tooltip, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
-import IngredientCategoryCreateModal from "@/components/ingredient-category/IngredientCategoryCreateModal";
+import Swal from "sweetalert2";
 import { viVN } from "@/utils/constants";
+import IngredientCategoryCreateModal from "@/components/ingredient-category/IngredientCategoryCreateModal";
 import IngredientCategoryDetailModal from "@/components/ingredient-category/IngredientCategoryDetailModal";
 import IngredientCategoryEditModal from "@/components/ingredient-category/IngredientCategoryEditModal";
-import Swal from "sweetalert2";
-import { deleteIngredientCategory } from "@/service/ingredientCategory";
+import { getIngredientCategoriesByStore, deleteIngredientCategory } from "@/service/ingredientCategory";
 
 const page = () => {
   const getRole = localStorageService.getRole();

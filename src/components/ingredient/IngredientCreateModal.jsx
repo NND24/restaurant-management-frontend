@@ -150,6 +150,16 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={handleChange}
             fullWidth
             required
+            SelectProps={{
+              MenuProps: {
+                PaperProps: {
+                  style: {
+                    maxHeight: 300,
+                    overflowY: "auto",
+                  },
+                },
+              },
+            }}
           >
             {allCategories.map((c) => (
               <MenuItem key={c._id} value={c._id}>

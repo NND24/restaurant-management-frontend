@@ -31,9 +31,18 @@ export const getBatchesByIngredient = async (id) => {
   }
 };
 
-export const updateBatch = async ({ id }) => {
+export const getBatchById = async (id) => {
   try {
-    let data = {};
+    const res = await axios.get(`/ingredient-batch/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const updateBatch = async ({ id, data }) => {
+  try {
     const res = await axios.put(`/ingredient-batch/${id}`, data);
     return res.data;
   } catch (error) {

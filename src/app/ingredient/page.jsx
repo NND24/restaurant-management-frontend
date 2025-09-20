@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
-import { Box, Typography, Tooltip, IconButton } from "@mui/material";
+import { Box, Tooltip, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import { viVN } from "@/utils/constants";
 import IngredientCreateModal from "@/components/ingredient/IngredientCreateModal";
@@ -80,6 +80,7 @@ const page = () => {
       field: "unit",
       headerName: "Đơn vị tính",
       headerAlign: "center",
+      align: "center",
       width: 120,
       renderCell: (params) => <span>{params.row?.unit?.name || ""}</span>,
     },

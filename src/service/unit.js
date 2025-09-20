@@ -11,9 +11,9 @@ export const createUnit = async ({ name, type, storeId }) => {
   }
 };
 
-export const getStoreUnits = async (storeId) => {
+export const getUnits = async (storeId) => {
   try {
-    const res = await axios.get(`/unit/store/${storeId}`);
+    const res = await axios.get(`/unit/`);
     return res.data;
   } catch (error) {
     console.error(error);

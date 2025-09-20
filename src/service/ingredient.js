@@ -42,7 +42,7 @@ export const updateIngredient = async ({ id, name, unit, description, category, 
   }
 };
 
-export const deleteIngredient = async ({ id }) => {
+export const deleteIngredient = async (id) => {
   try {
     const res = await axios.delete(`/ingredient/${id}`);
     return res.data;

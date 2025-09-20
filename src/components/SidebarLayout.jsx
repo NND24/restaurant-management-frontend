@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
 import { FaBoxes, FaBoxOpen, FaChartBar, FaShoppingCart, FaStore, FaUtensils } from "react-icons/fa";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";
 import localStorageService from "@/utils/localStorageService";
 import Link from "next/link";
@@ -10,15 +9,14 @@ import Image from "next/image";
 
 export default function SidebarLayout({ children }) {
   const router = useRouter();
-  const [activeMenu, setActiveMenu] = useState("stats");
+  const pathname = usePathname(); // 👈 Lấy route hiện tại
 
   const { notifications } = useSocket();
   const storeName = localStorageService.getStore()?.name ?? "Cửa hàng";
 
   const unreadCount = notifications.filter((noti) => noti.status === "unread").length;
 
-  const handleMenuClick = (menu, path) => {
-    setActiveMenu(menu);
+  const handleMenuClick = (path) => {
     router.push(path);
   };
 
@@ -30,9 +28,7 @@ export default function SidebarLayout({ children }) {
         <header className='bg-white border-b px-4 py-3 flex items-center justify-between'>
           <h1 className='text-lg font-bold text-[#fc6011] truncate'>{storeName}</h1>
 
-          {/* Notifications + User */}
           <div className='flex items-center space-x-5'>
-            {/* Notifications */}
             <Link href='/notifications' className='relative'>
               <Image
                 src='/assets/notification.png'
@@ -74,78 +70,78 @@ export default function SidebarLayout({ children }) {
         >
           <MenuItem
             icon={<FaChartBar />}
-            active={activeMenu === "stats"}
-            onClick={() => handleMenuClick("stats", "/statistics")}
+            active={pathname.startsWith("/statistics")} // 👈 check route
+            onClick={() => handleMenuClick("/statistics")}
           >
             Thống kê
           </MenuItem>
 
           <SubMenu icon={<FaUtensils />} label='Thực đơn'>
-            <MenuItem active={activeMenu === "dish"} onClick={() => handleMenuClick("dish", "/dish")}>
+            <MenuItem active={pathname.startsWith("/dish")} onClick={() => handleMenuClick("/dish")}>
               Món ăn
             </MenuItem>
-            <MenuItem active={activeMenu === "topping"} onClick={() => handleMenuClick("topping", "/topping")}>
+            <MenuItem active={pathname.startsWith("/topping")} onClick={() => handleMenuClick("/topping")}>
               Topping
             </MenuItem>
-            <MenuItem
-              active={activeMenu === "dish-category"}
-              onClick={() => handleMenuClick("dish-category", "/dish-category")}
-            >
+            <MenuItem active={pathname.startsWith("/dish-category")} onClick={() => handleMenuClick("/dish-category")}>
               Loại món ăn
             </MenuItem>
             <MenuItem
-              active={activeMenu === "topping-category"}
-              onClick={() => handleMenuClick("topping-category", "/topping-category")}
+              active={pathname.startsWith("/topping-category")}
+              onClick={() => handleMenuClick("/topping-category")}
             >
               Loại topping
             </MenuItem>
           </SubMenu>
 
           <SubMenu icon={<FaShoppingCart />} label='Đơn hàng'>
-            <MenuItem active={activeMenu === "current"} onClick={() => handleMenuClick("current", "/orders/current")}>
+            <MenuItem
+              active={pathname.startsWith("/orders/current")}
+              onClick={() => handleMenuClick("/orders/current")}
+            >
               Đơn hàng
             </MenuItem>
-            <MenuItem active={activeMenu === "history"} onClick={() => handleMenuClick("history", "/orders/history")}>
+            <MenuItem
+              active={pathname.startsWith("/orders/history")}
+              onClick={() => handleMenuClick("/orders/history")}
+            >
               Lịch sử đơn hàng
             </MenuItem>
-            <MenuItem active={activeMenu === "rating"} onClick={() => handleMenuClick("rating", "/rating")}>
+            <MenuItem active={pathname.startsWith("/rating")} onClick={() => handleMenuClick("/rating")}>
               Đánh giá
             </MenuItem>
           </SubMenu>
 
           <SubMenu icon={<FaStore />} label='Cửa hàng'>
-            <MenuItem active={activeMenu === "store"} onClick={() => handleMenuClick("store", "/store")}>
+            <MenuItem active={pathname.startsWith("/store")} onClick={() => handleMenuClick("/store")}>
               Thông tin
             </MenuItem>
-            <MenuItem active={activeMenu === "staff"} onClick={() => handleMenuClick("staff", "/staff")}>
+            <MenuItem active={pathname.startsWith("/staff")} onClick={() => handleMenuClick("/staff")}>
               Nhân viên
             </MenuItem>
-            <MenuItem active={activeMenu === "voucher"} onClick={() => handleMenuClick("voucher", "/voucher")}>
+            <MenuItem active={pathname.startsWith("/voucher")} onClick={() => handleMenuClick("/voucher")}>
               Voucher
             </MenuItem>
           </SubMenu>
 
           <SubMenu icon={<FaBoxes />} label='Nguyên liệu'>
-            <MenuItem active={activeMenu === "ingredient"} onClick={() => handleMenuClick("ingredient", "/ingredient")}>
+            <MenuItem active={pathname === "/ingredient"} onClick={() => handleMenuClick("/ingredient")}>
               Nguyên liệu
             </MenuItem>
             <MenuItem
-              active={activeMenu === "ingredient-batch"}
-              onClick={() => handleMenuClick("ingredient-batch", "/ingredient-batch")}
+              active={pathname.startsWith("/ingredient-batch")}
+              onClick={() => handleMenuClick("/ingredient-batch")}
             >
               Lô nguyên liệu
             </MenuItem>
+            <MenuItem active={pathname.startsWith("/waste")} onClick={() => handleMenuClick("/waste")}>
+              Nguyên liệu hỏng
+            </MenuItem>
             <MenuItem
-              active={activeMenu === "ingredient-category"}
-              onClick={() => handleMenuClick("ingredient-category", "/ingredient-category")}
+              active={pathname === "/ingredient-category"}
+              onClick={() => handleMenuClick("/ingredient-category")}
             >
               Loại nguyên liệu
-            </MenuItem>
-            <MenuItem active={activeMenu === "unit"} onClick={() => handleMenuClick("unit", "/unit")}>
-              Đơn vị
-            </MenuItem>
-            <MenuItem active={activeMenu === "waste"} onClick={() => handleMenuClick("waste", "/waste")}>
-              Nguyên liệu hỏng
             </MenuItem>
           </SubMenu>
         </Menu>

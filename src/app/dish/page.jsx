@@ -9,6 +9,7 @@ import localStorageService from "@/utils/localStorageService";
 import { Switch, Box, Typography, Tooltip, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import DishCreateModal from "@/components/dish/DishCreateModal";
+import { viVN } from "@/utils/constants";
 
 const page = () => {
   const router = useRouter();
@@ -21,7 +22,7 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openCreateDishModal, setOpenCreateDishModal] = useState(false);
 
   const fetchAllDishes = async () => {
     try {
@@ -119,14 +120,38 @@ const page = () => {
       headerName: "Danh mục",
       headerAlign: "center",
       width: 150,
-      valueGetter: (params) => params.row?.category?.name || "Khác",
+      renderCell: (params) => {
+        const row = params.row;
+        if (!row) return null;
+        return <span>{params.row?.category?.name}</span>;
+      },
     },
     {
       field: "price",
       headerName: "Giá",
       headerAlign: "center",
       width: 120,
-      valueGetter: (params) => (params.row?.price ? params.row?.price.toLocaleString() + "₫" : "0₫"),
+      renderCell: (params) => {
+        const row = params.row;
+        if (!row) return null;
+        return <span>{params.row?.price ? params.row?.price.toLocaleString() + "₫" : "0₫"}</span>;
+      },
+    },
+    {
+      field: "stockStatus",
+      headerName: "Trạng thái",
+      headerAlign: "center",
+      width: 130,
+      renderCell: (params) => (
+        <span
+          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
+            params.value === "AVAILABLE" ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
+          }`}
+          onClick={() => toggleItemEnabled(params.row?._id)}
+        >
+          {params.value === "AVAILABLE" ? "Hoạt động" : "Ngưng"}
+        </span>
+      ),
     },
     {
       field: "actions",
@@ -177,26 +202,13 @@ const page = () => {
         </div>
       ),
     },
-    {
-      field: "stockStatus",
-      headerName: "Trạng thái",
-      headerAlign: "center",
-      width: 130,
-      renderCell: (params) => (
-        <Switch
-          checked={params.row?.stockStatus === "AVAILABLE"}
-          onChange={() => toggleItemEnabled(params.row?._id)}
-          disabled={blockEdit}
-        />
-      ),
-    },
   ];
 
   return (
     <>
       <DishCreateModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        open={openCreateDishModal}
+        onClose={() => setOpenCreateDishModal(false)}
         storeId={storeId}
         onCreated={fetchAllDishes}
       />
@@ -205,7 +217,7 @@ const page = () => {
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setOpenCreateDishModal(true)}
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
@@ -226,6 +238,7 @@ const page = () => {
           }}
           loading={isLoading}
           disableRowSelectionOnClick
+          localeText={viVN}
         />
       </Box>
     </>

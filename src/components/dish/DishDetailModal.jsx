@@ -16,12 +16,15 @@ import {
   MenuItem,
 } from "@mui/material";
 import { FaRegImage, FaTimes } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 import { createDish } from "@/service/dish";
 import { getAllTopping } from "@/service/topping";
 import { getAllCategories } from "@/service/dishCategory";
 import { uploadImages } from "@/service/upload";
 
-const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
+const DishDetailModal = ({ open, onClose, dishId, onCreated }) => {
+  const router = useRouter();
+
   const [allToppings, setAllToppings] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [image, setImage] = useState(null);
@@ -35,12 +38,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const [toppingRes, categoryRes] = await Promise.all([getAllTopping({ storeId }), getAllCategories({ storeId })]);
+      const [toppingRes, categoryRes] = await Promise.all([getAllTopping({ dishId }), getAllCategories({ dishId })]);
       setAllToppings(toppingRes?.data || []);
       setAllCategories(categoryRes?.data || []);
     };
     fetchInitialData();
-  }, [storeId]);
+  }, [dishId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,7 +75,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
       toppingGroups: selectedToppings.map((t) => t._id),
     };
 
-    await createDish({ storeId, dishData: newDish });
+    await createDish({ dishId, dishData: newDish });
     onCreated?.();
     onClose();
   };
@@ -269,4 +272,4 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   );
 };
 
-export default DishCreateModal;
+export default DishDetailModal;

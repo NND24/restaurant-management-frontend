@@ -10,7 +10,7 @@ import {
   deleteDish as deleteDishService,
 } from "@/service/dish";
 import { getAllTopping } from "@/service/topping";
-import { getAllCategories } from "@/service/category";
+import { getAllCategories } from "@/service/dishCategory";
 import localStorageService from "@/utils/localStorageService";
 import { uploadImages, deleteFile } from "@/service/upload";
 

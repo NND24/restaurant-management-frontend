@@ -75,18 +75,7 @@ const page = () => {
       headerName: "Tên loại nguyên liệu",
       width: 250,
       headerAlign: "center",
-      renderCell: (params) => (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Typography sx={{ fontWeight: 500 }}>{params.value}</Typography>
-        </Box>
-      ),
+      renderCell: (params) => <span>{params.row?.name || ""}</span>,
     },
 
     {
@@ -94,11 +83,7 @@ const page = () => {
       headerName: "Mô tả",
       headerAlign: "center",
       flex: 1,
-      renderCell: (params) => {
-        const row = params.row;
-        if (!row) return null;
-        return <span>{params.row?.description}</span>;
-      },
+      renderCell: (params) => <span>{params.row?.description || ""}</span>,
     },
     {
       field: "isActive",
@@ -125,11 +110,16 @@ const page = () => {
       align: "center",
       width: 150,
       renderCell: (params) => (
-        <div className='flex justify-center items-center space-x-1 w-full'>
-          <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
+        <div className='flex justify-center items-center space-x-1 w-full h-full'>
+          <Tooltip title='Xem chi tiết'>
             <IconButton
               size='small'
               color='primary'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
               onClick={() => {
                 setSelectedCategoryId(params.row._id);
                 setOpenDetailIngredientCategory(true);
@@ -139,10 +129,15 @@ const page = () => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
+          <Tooltip title='Chỉnh sửa'>
             <IconButton
               size='small'
               color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
               onClick={() => {
                 setSelectedCategoryId(params.row._id);
                 setOpenEditIngredientCategory(true);
@@ -152,10 +147,15 @@ const page = () => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
+          <Tooltip title='Xoá'>
             <IconButton
               size='small'
               color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
               onClick={() => {
                 handleDelete(params.row._id);
               }}
@@ -170,25 +170,31 @@ const page = () => {
 
   return (
     <>
-      <IngredientCategoryCreateModal
-        open={openCreateIngredientCategory}
-        onClose={() => setOpenCreateIngredientCategory(false)}
-        storeId={storeId}
-        onCreated={fetchData}
-      />
+      {openCreateIngredientCategory && (
+        <IngredientCategoryCreateModal
+          open={openCreateIngredientCategory}
+          onClose={() => setOpenCreateIngredientCategory(false)}
+          storeId={storeId}
+          onCreated={fetchData}
+        />
+      )}
 
-      <IngredientCategoryDetailModal
-        open={openDetailIngredientCategory}
-        onClose={() => setOpenDetailIngredientCategory(false)}
-        id={selectedCategoryId}
-      />
+      {openDetailIngredientCategory && (
+        <IngredientCategoryDetailModal
+          open={openDetailIngredientCategory}
+          onClose={() => setOpenDetailIngredientCategory(false)}
+          id={selectedCategoryId}
+        />
+      )}
 
-      <IngredientCategoryEditModal
-        open={openEditIngredientCategory}
-        onClose={() => setOpenEditIngredientCategory(false)}
-        id={selectedCategoryId}
-        onUpdated={fetchData}
-      />
+      {openEditIngredientCategory && (
+        <IngredientCategoryEditModal
+          open={openEditIngredientCategory}
+          onClose={() => setOpenEditIngredientCategory(false)}
+          id={selectedCategoryId}
+          onUpdated={fetchData}
+        />
+      )}
 
       <div className='flex align-center justify-between mb-2'>
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Loại nguyên liệu</span>

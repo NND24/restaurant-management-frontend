@@ -1,13 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Button } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import Swal from "sweetalert2";
 import localStorageService from "@/utils/localStorageService";
 import { addVoucher, deleteVoucher, getAllVoucher, toggleVoucherActive, updateVoucher } from "@/service/voucher";
 import VoucherModal from "@/components/popups/Voucher";
-import FloatingButton from "@/components/fragment/FloatingButton";
 import { viVN } from "@/utils/constants";
+import { FaPlus } from "react-icons/fa";
 
 const VoucherPage = () => {
   const [vouchers, setVouchers] = useState([]);
@@ -102,17 +102,24 @@ const VoucherPage = () => {
     }
   };
 
+  const rows = vouchers.map((voucher) => ({
+    id: voucher?._id, // cần id cho DataGrid
+    _id: voucher?._id,
+    code: voucher?.code,
+    discountType: voucher?.discountType,
+    discountValue: voucher?.discountValue,
+    usageLimit: voucher?.usageLimit,
+    usedCount: voucher?.usedCount,
+    isActive: voucher?.isActive,
+  }));
+
   // define columns
   const columns = [
     {
       field: "code",
       headerName: "Mã giảm giá",
       flex: 1,
-      renderCell: (params) => (
-        <span onClick={() => handleViewVoucher(params.row)} className='cursor-pointer text-blue-600 hover:underline'>
-          {params.value}
-        </span>
-      ),
+      renderCell: (params) => <span className='text-blue-600'>{params.value}</span>,
     },
     {
       field: "discountType",
@@ -124,16 +131,20 @@ const VoucherPage = () => {
       field: "discountValue",
       headerName: "Giá trị",
       flex: 1,
-      valueGetter: (params) =>
-        params.row?.discountType === "percentage"
-          ? `${params.row?.discountValue}%`
-          : `${params.row?.discountValue?.toLocaleString()} đ`,
+      renderCell: (params) => {
+        const row = params.row;
+        if (!row) return null;
+        return (
+          <span>
+            {row.discountType === "percentage" ? `${row.discountValue}%` : `${row.discountValue?.toLocaleString()} đ`}
+          </span>
+        );
+      },
     },
     {
       field: "usageLimit",
       headerName: "Số lượng",
       flex: 1,
-      valueGetter: (params) => params.row?.usageLimit ?? "Không giới hạn",
     },
     { field: "usedCount", headerName: "Đã dùng", flex: 1 },
     {
@@ -142,9 +153,10 @@ const VoucherPage = () => {
       flex: 1,
       renderCell: (params) => (
         <span
-          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
             params.value ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
           }`}
+          onClick={() => handleToggleActive(params.row?._id)}
         >
           {params.value ? "Hoạt động" : "Ngưng"}
         </span>
@@ -156,20 +168,24 @@ const VoucherPage = () => {
       flex: 1.5,
       sortable: false,
       renderCell: (params) => (
-        <div className='flex gap-3'>
-          <Button size='small' onClick={() => handleEditVoucher(params.row)}>
-            Sửa
-          </Button>
-          <Button size='small' color='error' onClick={() => handleDeleteVoucher(params.row?._id)}>
-            Xóa
-          </Button>
-          <Button
-            size='small'
-            color={params.row?.isActive ? "warning" : "success"}
-            onClick={() => handleToggleActive(params.row?._id)}
-          >
-            {params.row?.isActive ? "Ngưng" : "Kích hoạt"}
-          </Button>
+        <div className='flex space-x-1'>
+          <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
+            <IconButton size='small' color='primary' onClick={() => handleViewVoucher(params.row)}>
+              👁️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
+            <IconButton size='small' color='info' onClick={() => handleEditVoucher(params.row)}>
+              ✏️
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
+            <IconButton size='small' color='error' onClick={() => handleDeleteVoucher(params.row?._id)}>
+              🗑️
+            </IconButton>
+          </Tooltip>
         </div>
       ),
     },
@@ -177,18 +193,30 @@ const VoucherPage = () => {
 
   return (
     <>
-      <FloatingButton onClick={() => setShowForm(true)} />
-      <DataGrid
-        rows={vouchers}
-        columns={columns}
-        getRowId={(row) => row?._id}
-        pageSize={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        disableSelectionOnClick
-        components={{ Toolbar: GridToolbar }}
-        loading={loading}
-        localeText={viVN}
-      />
+      <div className='flex flex-col justify-between gap-2 border-b pb-2 mb-2'>
+        <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+          <button
+            onClick={() => setShowForm(true)}
+            className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+          >
+            <FaPlus className='text-lg' />
+            <span>Thêm</span>
+          </button>
+        </div>
+      </div>
+      <Box sx={{ height: 500, width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          getRowId={(row) => row?._id}
+          pageSize={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          disableSelectionOnClick
+          components={{ Toolbar: GridToolbar }}
+          loading={loading}
+          localeText={viVN}
+        />
+      </Box>
 
       {showForm && (
         <VoucherModal

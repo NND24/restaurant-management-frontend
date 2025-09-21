@@ -15,6 +15,15 @@ export const getStoreToppingGroups = async (storeId) => {
   }
 };
 
+export const getActiveStoreToppingGroups = async (storeId) => {
+  try {
+    const res = await axios.get(`/topping/topping-group/store/${storeId}/active`);
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
 export const getToppingGroupById = async (groupId) => {
   try {
     const res = await axios.get(`/topping/topping-group/${groupId}`);

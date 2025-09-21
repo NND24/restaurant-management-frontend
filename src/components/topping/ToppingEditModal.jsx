@@ -124,8 +124,8 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           quantity: i.quantity,
         })),
       };
-      await updateTopping({ id, data: payload });
-      toast.success("Cập nhật topping thành công");
+      await updateTopping({ toppingId: id, data: payload });
+      toast.success("Cập nhật món phụ thành công");
       onUpdated?.();
       onClose();
     } catch (err) {

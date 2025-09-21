@@ -10,26 +10,21 @@ import {
   Box,
   IconButton,
   MenuItem,
-  Chip,
-  Autocomplete,
-  Paper,
 } from "@mui/material";
 import { FaTimes, FaPlus, FaMinus } from "react-icons/fa";
-import { createTopping, getActiveStoreToppingGroups } from "@/service/topping";
+import { createTopping } from "@/service/topping";
 import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import { getIngredientsByCategory } from "@/service/ingredient";
 import { toast } from "react-toastify";
 
-const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
+const ToppingCreateToGroupModal = ({ open, onClose, storeId, toppingGroup, onCreated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
     isActive: true,
     ingredients: [],
-    toppingGroups: [],
   });
   const [allCategories, setAllCategories] = useState([]);
-  const [allToppingGroups, setAllToppingGroups] = useState([]);
   const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedIngredient, setSelectedIngredient] = useState("");
@@ -38,22 +33,12 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
   // Lấy danh sách loại nguyên liệu
   useEffect(() => {
     if (open) {
-      setFormData({ name: "", price: 0, isActive: true, ingredients: [], toppingGroups: [] });
+      setFormData({ name: "", price: 0, isActive: true, ingredients: [] });
       const fetchCategories = async () => {
         const res = await getActiveIngredientCategoriesByStore(storeId);
         setAllCategories(res?.data || []);
       };
       fetchCategories();
-
-      const fetchToppingGroups = async () => {
-        try {
-          const res = await getActiveStoreToppingGroups(storeId);
-          setAllToppingGroups(res?.data || []);
-        } catch (err) {
-          console.error("Failed to load toppingGroups", err);
-        }
-      };
-      fetchToppingGroups();
       setSelectedCategory("");
       setIngredientsByCategory([]);
     }
@@ -115,7 +100,7 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
           ingredient: i.ingredient._id,
           quantity: i.quantity,
         })),
-        toppingGroupIds: formData.toppingGroups.map((t) => t._id),
+        toppingGroupIds: [toppingGroup._id],
       };
       await createTopping({ storeId, data: payload });
       onCreated?.();
@@ -138,6 +123,8 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
+          <TextField label='Nhóm món thêm' value={toppingGroup.name} fullWidth InputProps={{ readOnly: true }} />
+
           <TextField
             label='Tên Món thêm'
             value={formData.name}
@@ -265,86 +252,6 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
             </Box>
           )}
 
-          <Autocomplete
-            multiple
-            options={allToppingGroups}
-            getOptionLabel={(option) => option.name}
-            value={formData.toppingGroups}
-            onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppingGroups: newValue }))}
-            disableCloseOnSelect
-            renderOption={(props, option, { selected }) => (
-              <li
-                {...props}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 12px",
-                  backgroundColor: selected ? "#fcf0e8" : "white",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type='checkbox'
-                  checked={selected}
-                  readOnly
-                  style={{ width: 16, height: 16, accentColor: "#fc6011" }}
-                />
-                {option.name}
-              </li>
-            )}
-            renderTags={() => null}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant='outlined'
-                label='Chọn món nhóm món thêm'
-                placeholder='Chọn nhóm món thêm...'
-                fullWidth
-              />
-            )}
-            PaperComponent={({ children }) => (
-              <Paper
-                elevation={3}
-                sx={{
-                  maxHeight: 240,
-                  overflowY: "auto",
-                  "&::-webkit-scrollbar": { width: 6 },
-                  "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
-                }}
-              >
-                {children}
-              </Paper>
-            )}
-            fullWidth
-          />
-
-          {/* Chip list hiển thị riêng dưới input */}
-          {formData.toppingGroups.length > 0 && (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-              {formData.toppingGroups.map((option) => (
-                <Chip
-                  key={option._id}
-                  label={option.name}
-                  onDelete={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      toppingGroups: prev.toppingGroups.filter((t) => t._id !== option._id),
-                    }))
-                  }
-                  size='medium'
-                  sx={{
-                    backgroundColor: "#fc6011",
-                    color: "#fff",
-                    fontWeight: 500,
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-
           <TextField
             select
             label='Trạng thái'
@@ -370,4 +277,4 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
   );
 };
 
-export default ToppingCreateModal;
+export default ToppingCreateToGroupModal;

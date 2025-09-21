@@ -1,5 +1,5 @@
 "use client";
-import { FaBoxes, FaBoxOpen, FaChartBar, FaShoppingCart, FaStore, FaUtensils } from "react-icons/fa";
+import { FaBoxes, FaChartBar, FaShoppingCart, FaStore, FaUtensils } from "react-icons/fa";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";

@@ -50,7 +50,7 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        Chi tiết Món thêm
+        Chi tiết món thêm
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -58,7 +58,7 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
-          <TextField label='Tên Món thêm' value={topping.name} fullWidth InputProps={{ readOnly: true }} />
+          <TextField label='Tên món thêm' value={topping.name} fullWidth InputProps={{ readOnly: true }} />
 
           <TextField label='Giá' value={topping.price} fullWidth InputProps={{ readOnly: true }} />
 

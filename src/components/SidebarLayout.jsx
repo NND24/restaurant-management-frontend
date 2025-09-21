@@ -70,28 +70,36 @@ export default function SidebarLayout({ children }) {
         >
           <MenuItem
             icon={<FaChartBar />}
-            active={pathname.startsWith("/statistics")} // 👈 check route
+            active={pathname.startsWith("/statistics")}
             onClick={() => handleMenuClick("/statistics")}
           >
             Thống kê
           </MenuItem>
 
-          <SubMenu icon={<FaUtensils />} label='Thực đơn'>
+          <SubMenu
+            icon={<FaUtensils />}
+            label='Thực đơn'
+            defaultOpen={pathname.startsWith("/dish") || pathname.startsWith("/topping")}
+          >
+            <MenuItem active={pathname === "/dish-group"} onClick={() => handleMenuClick("/dish-group")}>
+              Nhóm món ăn
+            </MenuItem>
             <MenuItem active={pathname === "/dish"} onClick={() => handleMenuClick("/dish")}>
               Món ăn
             </MenuItem>
+            <MenuItem active={pathname === "/topping-group"} onClick={() => handleMenuClick("/topping-group")}>
+              Nhóm món thêm
+            </MenuItem>
             <MenuItem active={pathname === "/topping"} onClick={() => handleMenuClick("/topping")}>
-              Topping
-            </MenuItem>
-            <MenuItem active={pathname === "/dish-category"} onClick={() => handleMenuClick("/dish-category")}>
-              Loại món ăn
-            </MenuItem>
-            <MenuItem active={pathname === "/topping-category"} onClick={() => handleMenuClick("/topping-category")}>
-              Loại topping
+              Món thêm
             </MenuItem>
           </SubMenu>
 
-          <SubMenu icon={<FaShoppingCart />} label='Đơn hàng'>
+          <SubMenu
+            icon={<FaShoppingCart />}
+            label='Đơn hàng'
+            defaultOpen={pathname.startsWith("/orders") || pathname.startsWith("/rating")}
+          >
             <MenuItem
               active={pathname.startsWith("/orders/current")}
               onClick={() => handleMenuClick("/orders/current")}
@@ -109,7 +117,13 @@ export default function SidebarLayout({ children }) {
             </MenuItem>
           </SubMenu>
 
-          <SubMenu icon={<FaStore />} label='Cửa hàng'>
+          <SubMenu
+            icon={<FaStore />}
+            label='Cửa hàng'
+            defaultOpen={
+              pathname.startsWith("/store") || pathname.startsWith("/staff") || pathname.startsWith("/voucher")
+            }
+          >
             <MenuItem active={pathname.startsWith("/store")} onClick={() => handleMenuClick("/store")}>
               Thông tin
             </MenuItem>
@@ -121,7 +135,11 @@ export default function SidebarLayout({ children }) {
             </MenuItem>
           </SubMenu>
 
-          <SubMenu icon={<FaBoxes />} label='Nguyên liệu'>
+          <SubMenu
+            icon={<FaBoxes />}
+            label='Nguyên liệu'
+            defaultOpen={pathname.startsWith("/ingredient") || pathname.startsWith("/waste")}
+          >
             <MenuItem active={pathname === "/ingredient"} onClick={() => handleMenuClick("/ingredient")}>
               Nguyên liệu
             </MenuItem>

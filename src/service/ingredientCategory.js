@@ -21,6 +21,16 @@ export const getIngredientCategoriesByStore = async (storeId) => {
   }
 };
 
+export const getActiveIngredientCategoriesByStore = async (storeId) => {
+  try {
+    const res = await axios.get(`/ingredient-category/store/active/${storeId}`);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
 export const getIngredientCategoryById = async (id) => {
   try {
     const res = await axios.get(`/ingredient-category/${id}`);

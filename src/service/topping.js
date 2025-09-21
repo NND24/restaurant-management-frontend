@@ -1,65 +1,59 @@
 import axios from "../libs/axiosInstance";
 
-export const getAllTopping = async ({ storeId, limit, page }) => {
-  try {
-    const params = new URLSearchParams();
-    if (limit) params.append("limit", limit);
-    if (page) params.append("page", page);
+/**
+ * ========================
+ * ToppingGroup
+ * ========================
+ */
 
-    const res = await axios.get(`/topping/store/${storeId}?${params.toString()}`);
+export const getStoreToppingGroups = async (storeId) => {
+  try {
+    const res = await axios.get(`/topping/topping-group/store/${storeId}`);
     return res.data;
   } catch (error) {
-    console.error("Error fetching toppings:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const getTopping = async ({ groupId }) => {
+export const getToppingGroupById = async (groupId) => {
   try {
     const res = await axios.get(`/topping/topping-group/${groupId}`);
     return res.data;
   } catch (error) {
-    console.error("Error fetching topping group:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const addToppingToGroup = async ({ groupId, name, price }) => {
+export const createToppingGroup = async ({ storeId, data }) => {
   try {
-    const res = await axios.post(`/topping/topping-group/${groupId}/topping`, { name, price });
+    const res = await axios.post(`/topping/topping-group/${storeId}`, data);
     return res.data;
   } catch (error) {
-    console.error("Error adding topping:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const addToppingGroupOnly = async ({ storeId, name }) => {
+export const addToppingsToGroup = async ({ groupId, data }) => {
   try {
-    const res = await axios.post(`/topping/store/${storeId}/topping-group`, { name });
+    const res = await axios.post(`/topping/topping-group/${groupId}/toppings`, data);
     return res.data;
   } catch (error) {
-    console.error("Error creating topping group:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const removeToppingFromGroup = async ({ groupId, toppingId }) => {
+export const updateToppingGroup = async ({ groupId, data }) => {
   try {
-    const res = await axios.delete(`/topping/topping-group/${groupId}/topping/${toppingId}`);
+    const res = await axios.put(`/topping/topping-group/${groupId}`, data);
     return res.data;
   } catch (error) {
-    console.error("Error removing topping:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const updateTopping = async ({ groupId, toppingId, name, price }) => {
+export const toggleActiveToppingGroup = async (groupId) => {
   try {
-    const res = await axios.put(`/topping/topping-group/${groupId}/topping/${toppingId}`, {
-      name,
-      price,
-    });
+    const res = await axios.put(`/topping/topping-group/${groupId}/toggle-active`);
     return res.data;
   } catch (error) {
     console.error("Error updating topping:", error);
@@ -67,9 +61,71 @@ export const updateTopping = async ({ groupId, toppingId, name, price }) => {
   }
 };
 
-export const removeToppingGroup = async ({ groupId }) => {
+export const deleteToppingGroup = async (groupId) => {
   try {
     const res = await axios.delete(`/topping/topping-group/${groupId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error removing topping:", error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+/**
+ * ========================
+ * Topping
+ * ========================
+ */
+
+export const getStoreToppings = async (storeId) => {
+  try {
+    const res = await axios.get(`/topping/store/${storeId}`);
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const getToppingById = async (toppingId) => {
+  try {
+    const res = await axios.get(`/topping/${toppingId}`);
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const createTopping = async ({ storeId, data }) => {
+  try {
+    const res = await axios.post(`/topping/${storeId}`, data);
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const updateTopping = async ({ toppingId, data }) => {
+  try {
+    const res = await axios.put(`/topping/${toppingId}`, data);
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const toggleActiveTopping = async (toppingId) => {
+  try {
+    const res = await axios.put(`/topping/${toppingId}/toggle-active`);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating topping:", error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const deleteTopping = async (toppingId) => {
+  try {
+    const res = await axios.delete(`/topping/${toppingId}`);
     return res.data;
   } catch (error) {
     console.error("Error removing topping:", error);

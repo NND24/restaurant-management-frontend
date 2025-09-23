@@ -240,7 +240,7 @@ const page = () => {
 
   return (
     <>
-      <div className='pt-[70px] pb-[10px] bg-gray-100 px-[100px]'>
+      <div className='overflow-y-scroll h-full'>
         {storeInfo && (
           <div className='space-y-6'>
             {/* Giờ hoạt động cửa hàng */}

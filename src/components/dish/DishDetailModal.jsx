@@ -7,83 +7,51 @@ import {
   DialogActions,
   Button,
   TextField,
-  Autocomplete,
-  Chip,
   Box,
-  Paper,
-  Typography,
   IconButton,
-  MenuItem,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Chip,
 } from "@mui/material";
-import { FaRegImage, FaTimes } from "react-icons/fa";
-import { useRouter } from "next/navigation";
-import { createDish } from "@/service/dish";
-import { getAllTopping } from "@/service/topping";
-import { getAllCategories } from "@/service/dishCategory";
-import { uploadImages } from "@/service/upload";
+import { FaTimes } from "react-icons/fa";
+import { getDish } from "@/service/dish";
 
-const DishDetailModal = ({ open, onClose, dishId, onCreated }) => {
-  const router = useRouter();
-
-  const [allToppings, setAllToppings] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
-  const [image, setImage] = useState(null);
-  const [selectedToppings, setSelectedToppings] = useState([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    description: "",
-    category: "",
-  });
+const DishDetailModal = ({ open, onClose, id }) => {
+  const [dish, setDish] = useState(null);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      const [toppingRes, categoryRes] = await Promise.all([getAllTopping({ dishId }), getAllCategories({ dishId })]);
-      setAllToppings(toppingRes?.data || []);
-      setAllCategories(categoryRes?.data || []);
-    };
-    fetchInitialData();
-  }, [dishId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setImage(URL.createObjectURL(file));
-  };
-
-  const handleSave = async () => {
-    let uploadedImage = { filePath: "", url: image };
-
-    if (image && !image.startsWith("http")) {
-      const fileInput = document.getElementById("imageUpload");
-      if (fileInput.files.length) {
-        const form = new FormData();
-        form.append("file", fileInput.files[0]);
-        const res = await uploadImages(form);
-        uploadedImage = { filePath: res[0].filePath, url: res[0].url };
-      }
+    if (open && id) {
+      const fetchData = async () => {
+        try {
+          const res = await getDish(id);
+          if (res?.success) {
+            setDish(res.data);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchData();
     }
+  }, [open, id]);
 
-    const newDish = {
-      ...formData,
-      price: Number(formData.price),
-      image: uploadedImage,
-      toppingGroups: selectedToppings.map((t) => t._id),
-    };
-
-    await createDish({ dishId, dishData: newDish });
-    onCreated?.();
-    onClose();
-  };
+  if (!dish) return null;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle>
-        Thêm món ăn
+      <DialogTitle
+        sx={{
+          m: 0,
+          py: 1,
+          fontWeight: "bold",
+          fontSize: "1.25rem",
+          color: "#4a4b4d",
+          borderBottom: "1px solid #e0e0e0",
+        }}
+      >
+        Chi tiết món ăn
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -91,181 +59,85 @@ const DishDetailModal = ({ open, onClose, dishId, onCreated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
-          {/* Image Upload */}
-          <Box>
-            <Typography variant='subtitle1' gutterBottom>
-              Hình ảnh
-            </Typography>
-            <Paper
-              variant='outlined'
-              sx={{
-                width: 150,
-                height: 150,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                cursor: "pointer",
-              }}
-              onClick={() => document.getElementById("imageUpload").click()}
-            >
-              {image ? (
-                <img src={image} alt='Preview' style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <FaRegImage size={32} color='#aaa' />
-              )}
-              <input
-                type='file'
-                id='imageUpload'
-                accept='image/*'
-                style={{ display: "none" }}
-                onChange={handleImageUpload}
+          {/* Tên món */}
+          <TextField label='Tên món' value={dish.name} fullWidth InputProps={{ readOnly: true }} />
+
+          {/* Giá */}
+          <TextField label='Giá' value={dish.price} fullWidth InputProps={{ readOnly: true }} />
+
+          {/* Hình ảnh */}
+          {dish.image?.url && (
+            <Box>
+              <Typography variant='subtitle1' sx={{ mb: 0.5, fontWeight: "bold" }}>
+                Hình ảnh
+              </Typography>
+              <img
+                src={dish.image.url}
+                alt={dish.name}
+                style={{ width: 200, height: 150, objectFit: "cover", borderRadius: 8 }}
               />
-            </Paper>
-          </Box>
+            </Box>
+          )}
 
-          {/* Form Fields */}
-          <Box display='flex' gap={2} flexWrap='wrap'>
-            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
+          {/* Mô tả */}
+          {dish.description && (
             <TextField
-              label='Giá*'
-              name='price'
-              type='number'
-              value={formData.price}
-              onChange={handleChange}
+              label='Mô tả'
+              value={dish.description}
               fullWidth
+              multiline
+              rows={3}
+              InputProps={{ readOnly: true }}
             />
-          </Box>
+          )}
 
-          <TextField
-            label='Mô tả'
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={3}
-          />
+          {/* Nguyên liệu */}
+          {dish.ingredients.length > 0 && (
+            <Box>
+              <Typography variant='subtitle1' sx={{ mb: 0.5, fontWeight: "bold" }}>
+                Nguyên liệu
+              </Typography>
+              <List dense>
+                {dish.ingredients?.map((ing) => (
+                  <ListItem key={ing._id} sx={{ p: 0 }}>
+                    <ListItemText
+                      primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
+                        ing.ingredient?.unit?.name || ""
+                      }`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
 
-          <TextField
-            select
-            label='Danh mục*'
-            value={formData.category}
-            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-            fullWidth
-            variant='outlined'
-          >
-            {allCategories.map((c) => (
-              <MenuItem key={c._id} value={c._id}>
-                {c.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {/* Toppings */}
-          <Box>
-            <Autocomplete
-              multiple
-              options={allToppings}
-              getOptionLabel={(option) => option.name}
-              value={selectedToppings}
-              onChange={(e, newValue) => setSelectedToppings(newValue)}
-              disableCloseOnSelect
-              renderOption={(props, option, { selected }) => (
-                <li
-                  {...props}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "8px 12px",
-                    backgroundColor: selected ? "#fcf0e8" : "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  <input
-                    type='checkbox'
-                    checked={selected}
-                    readOnly
-                    style={{
-                      width: 16,
-                      height: 16,
-                      accentColor: "#fc6011",
-                    }}
-                  />
-                  {option.name}
-                </li>
-              )}
-              renderTags={() => null} // ✅ ẩn chip mặc định trong input
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant='outlined'
-                  label='Toppings'
-                  placeholder='Chọn topping...'
-                  fullWidth
-                  InputProps={{
-                    ...params.InputProps,
-                    sx: {
-                      minHeight: 48,
-                      padding: "4px 8px",
-                      borderRadius: "8px",
-                      backgroundColor: "#fff",
-                      "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ddd" },
-                      "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fc6011" },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#fc6011", borderWidth: 2 },
-                    },
-                  }}
-                />
-              )}
-              PaperComponent={({ children }) => (
-                <Paper
-                  elevation={3}
-                  sx={{
-                    maxHeight: 240,
-                    overflowY: "auto",
-                    "&::-webkit-scrollbar": { width: 6 },
-                    "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
-                  }}
-                >
-                  {children}
-                </Paper>
-              )}
-              fullWidth
-            />
-
-            {/* Chip list hiển thị riêng dưới input */}
-            {selectedToppings.length > 0 && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-                {selectedToppings.map((option, index) => (
-                  <Chip
-                    key={option._id}
-                    label={option.name}
-                    onDelete={() => setSelectedToppings((prev) => prev.filter((t) => t._id !== option._id))}
-                    size='medium'
-                    sx={{
-                      backgroundColor: "#fc6011",
-                      color: "#fff",
-                      fontWeight: 500,
-                      borderRadius: "16px",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                      "&:hover": { backgroundColor: "#e5550f" },
-                      "& .MuiChip-deleteIcon": { color: "#fff", "&:hover": { color: "#ffdbb3" } },
-                    }}
-                  />
+          {/* Nhóm topping */}
+          {dish.toppingGroups?.length > 0 && (
+            <Box>
+              <Typography variant='subtitle1' sx={{ mb: 0.5, fontWeight: "bold" }}>
+                Nhóm món thêm
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                {dish.toppingGroups.map((tg) => (
+                  <Chip key={tg._id} label={tg.name} sx={{ backgroundColor: "#fc6011", color: "#fff" }} />
                 ))}
               </Box>
-            )}
-          </Box>
+            </Box>
+          )}
+
+          {/* Trạng thái */}
+          <TextField
+            label='Trạng thái'
+            value={dish.isActive ? "Hoạt động" : "Ngưng"}
+            fullWidth
+            InputProps={{ readOnly: true }}
+          />
         </Box>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} color='secondary' variant='outlined'>
-          Hủy
-        </Button>
-        <Button onClick={handleSave} color='primary' variant='contained'>
-          Lưu
+      <DialogActions sx={{ px: 3 }}>
+        <Button onClick={onClose} color='primary' variant='contained'>
+          Đóng
         </Button>
       </DialogActions>
     </Dialog>

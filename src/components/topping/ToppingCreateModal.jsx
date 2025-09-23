@@ -298,7 +298,7 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
               <TextField
                 {...params}
                 variant='outlined'
-                label='Chọn món nhóm món thêm'
+                label='Chọn nhóm món thêm'
                 placeholder='Chọn nhóm món thêm...'
                 fullWidth
               />

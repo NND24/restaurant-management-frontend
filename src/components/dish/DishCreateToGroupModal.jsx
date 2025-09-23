@@ -7,22 +7,23 @@ import {
   DialogActions,
   Button,
   TextField,
-  Autocomplete,
-  Chip,
   Box,
-  Paper,
-  Typography,
   IconButton,
   MenuItem,
+  Typography,
+  Paper,
+  Autocomplete,
+  Chip,
 } from "@mui/material";
-import { FaMinus, FaPlus, FaRegImage, FaTimes } from "react-icons/fa";
+import { FaTimes, FaPlus, FaMinus, FaRegImage } from "react-icons/fa";
 import { createDish } from "@/service/dish";
-import { getActiveStoreToppingGroups } from "@/service/topping";
-import { uploadImages } from "@/service/upload";
-import { getIngredientsByCategory } from "@/service/ingredient";
 import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
+import { getIngredientsByCategory } from "@/service/ingredient";
+import { toast } from "react-toastify";
+import { uploadImages } from "@/service/upload";
+import { getActiveStoreToppingGroups } from "@/service/topping";
 
-const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
+const DishCreateToGroupModal = ({ open, onClose, storeId, dishGroup, onCreated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
@@ -39,6 +40,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Lấy danh sách loại nguyên liệu
   useEffect(() => {
     if (open) {
       setFormData({ name: "", price: 0, description: "", stockStatus: "ACTIVE", ingredients: [], toppingGroups: [] });
@@ -62,6 +64,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     }
   }, [open, storeId]);
 
+  // Khi chọn loại nguyên liệu → load danh sách nguyên liệu theo loại
   useEffect(() => {
     if (!selectedCategory) return setIngredientsByCategory([]);
     const fetchIngredients = async () => {
@@ -140,15 +143,14 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
           quantity: i.quantity,
         })),
         toppingGroups: formData.toppingGroups.map((t) => t._id),
+        dishGroupIds: [dishGroup._id],
         stockStatus: formData.stockStatus,
       };
-
       await createDish({ storeId, data: payload });
       onCreated?.();
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error("Thêm món ăn thất bại");
     } finally {
       setLoading(false);
     }
@@ -157,7 +159,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Thêm món ăn
+        Thêm món ăn cho nhóm
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -165,18 +167,24 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
-          {/* Form Fields */}
-          <Box display='flex' gap={2} flexWrap='wrap'>
-            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
-            <TextField
-              label='Giá*'
-              name='price'
-              type='number'
-              value={formData.price}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Box>
+          <TextField label='Nhóm món ăn' value={dishGroup.name} fullWidth InputProps={{ readOnly: true }} />
+
+          <TextField
+            label='Tên món ăn'
+            value={formData.name}
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            fullWidth
+            required
+          />
+
+          <TextField
+            label='Giá'
+            type='number'
+            value={formData.price}
+            onChange={(e) => setFormData((prev) => ({ ...prev, price: Number(e.target.value) }))}
+            fullWidth
+            required
+          />
 
           {/* Image Upload */}
           <Box>
@@ -437,4 +445,4 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   );
 };
 
-export default DishCreateModal;
+export default DishCreateToGroupModal;

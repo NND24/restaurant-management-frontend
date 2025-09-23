@@ -2,26 +2,33 @@
 
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { deleteDish, getAllDish, toggleSaleStatus } from "@/service/dish";
-import Image from "next/image";
 import localStorageService from "@/utils/localStorageService";
-import { Box, Typography, Tooltip, IconButton } from "@mui/material";
-import { FaPlus } from "react-icons/fa";
-import DishCreateModal from "@/components/dish/DishCreateModal";
+import { Box, Tooltip, IconButton } from "@mui/material";
+import { FaCog, FaPlus } from "react-icons/fa";
 import { viVN } from "@/utils/constants";
+import Swal from "sweetalert2";
+import { deleteDish } from "@/service/dish";
+import { getDishGroupById } from "@/service/dishGroup";
+import { useParams } from "next/navigation";
+import DishGroupManageModal from "@/components/dish-group/DishGroupManageModal";
+import DishCreateToGroupModal from "@/components/dish/DishCreateToGroupModal";
+import Image from "next/image";
 import DishDetailModal from "@/components/dish/DishDetailModal";
 import DishEditModal from "@/components/dish/DishEditModal";
-import Swal from "sweetalert2";
 
 const page = () => {
+  const { dishGroupId } = useParams();
+
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
   const storeId = storeData ? JSON.parse(storeData)?._id : "";
 
   const [allDishes, setAllDishes] = useState([]);
+  const [dishGroup, setDishGroup] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openManage, setOpenManage] = useState(false);
   const [openCreateDishModal, setOpenCreateDishModal] = useState(false);
   const [openDetailDish, setOpenDetailDish] = useState(false);
   const [openEditDish, setOpenEditDish] = useState(false);
@@ -31,8 +38,9 @@ const page = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const dishData = await getAllDish(storeId);
-      const list = dishData?.data?.data || dishData?.data || [];
+      const res = await getDishGroupById(dishGroupId);
+      const list = res?.data?.data?.dishes || res?.data?.dishes || [];
+      setDishGroup(res?.data);
       setAllDishes(list);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
@@ -46,28 +54,10 @@ const page = () => {
     fetchData();
   }, [storeId]);
 
-  const toggleItemEnabled = async (id) => {
-    try {
-      await toggleSaleStatus({ dishId: id });
-      setAllDishes((prev) =>
-        prev.map((item) =>
-          item._id === id
-            ? {
-                ...item,
-                stockStatus: item.stockStatus === "AVAILABLE" ? "OUT_OF_STOCK" : "AVAILABLE",
-              }
-            : item
-        )
-      );
-    } catch (err) {
-      console.error("Failed to toggle sale status", err);
-    }
-  };
-
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Bạn có chắc chắn?",
-      text: "Món thêm này sẽ bị xóa vĩnh viễn.",
+      text: "Món ăn này nhóm sẽ bị xóa vĩnh viễn.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -79,15 +69,14 @@ const page = () => {
     if (result.isConfirmed) {
       try {
         await deleteDish(id);
-        Swal.fire("Đã xóa!", "Món thêm đã được xóa.", "success");
+        Swal.fire("Đã xóa!", "Món ăn đã  nhómđược xóa.", "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa Món thêm thất bại", "error");
+        Swal.fire("Lỗi!", err.message || "Xóa Món ăn thấ nhómt bại", "error");
       }
     }
   };
 
-  // Cấu hình cột cho DataGrid
   const columns = [
     {
       field: "image",
@@ -193,23 +182,6 @@ const page = () => {
       width: 150,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          <Tooltip title='Danh sách nhóm món thêm của món'>
-            <IconButton
-              size='small'
-              color='primary'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                router.push(`/dish/${params.row._id}`);
-              }}
-            >
-              🧾
-            </IconButton>
-          </Tooltip>
-
           <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
             <IconButton
               size='small'
@@ -268,10 +240,11 @@ const page = () => {
   return (
     <>
       {openCreateDishModal && (
-        <DishCreateModal
+        <DishCreateToGroupModal
           open={openCreateDishModal}
           onClose={() => setOpenCreateDishModal(false)}
           storeId={storeId}
+          dishGroup={dishGroup}
           onCreated={fetchData}
         />
       )}
@@ -290,8 +263,31 @@ const page = () => {
         />
       )}
 
-      <div className='flex flex-col justify-between gap-2 border-b pb-2 mb-2'>
-        {!blockEdit && (
+      {openManage && (
+        <DishGroupManageModal
+          open={openManage}
+          onClose={() => setOpenManage(false)}
+          groupId={dishGroupId}
+          storeId={storeId}
+          currentDishes={allDishes}
+          onUpdated={fetchData}
+        />
+      )}
+
+      <div className='flex align-center justify-between mb-2'>
+        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món ăn của nhóm {dishGroup?.name}</span>
+
+        <div className='flex gap-2'>
+          <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+            <button
+              onClick={() => setOpenManage(true)}
+              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+            >
+              <FaCog className='text-lg' />
+              <span> Quản lý</span>
+            </button>
+          </div>
+
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
             <button
               onClick={() => setOpenCreateDishModal(true)}
@@ -301,7 +297,7 @@ const page = () => {
               <span>Thêm</span>
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       <Box sx={{ height: 525, width: "100%" }}>

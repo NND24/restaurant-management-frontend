@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { createDish } from "@/service/dish";
 import { getAllTopping } from "@/service/topping";
-import { getAllCategories } from "@/service/dishCategory";
+import { getAllCategories } from "@/service/dishGroup";
 import { uploadImages } from "@/service/upload";
 
 const CreateDish = () => {

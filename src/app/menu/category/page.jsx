@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import LabelWithIcon from "@/components/LableWithIcon";
 import Modal from "@/components/Modal";
 import { toast } from "react-toastify";
-import { getAllCategories, createCategory, updateCategory, deleteCategory } from "@/service/dishCategory";
+import { getAllCategories, createCategory, updateCategory, deleteCategory } from "@/service/dishGroup";
 import { DataGrid } from "@mui/x-data-grid";
 
 const Page = () => {

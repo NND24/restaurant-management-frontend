@@ -115,7 +115,7 @@ const ToppingCreateToGroupModal = ({ open, onClose, storeId, toppingGroup, onCre
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Thêm món thêm
+        Thêm món thêm cho nhóm
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>

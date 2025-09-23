@@ -7,61 +7,86 @@ import {
   DialogActions,
   Button,
   TextField,
-  Autocomplete,
-  Chip,
   Box,
-  Paper,
-  Typography,
   IconButton,
   MenuItem,
+  Paper,
+  Chip,
+  Typography,
+  Autocomplete,
 } from "@mui/material";
-import { FaMinus, FaPlus, FaRegImage, FaTimes } from "react-icons/fa";
-import { createDish } from "@/service/dish";
+import { FaTimes, FaPlus, FaMinus, FaRegImage } from "react-icons/fa";
+import { getDish, updateDish } from "@/service/dish";
+import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
+import { getIngredientsByCategory } from "@/service/ingredient";
 import { getActiveStoreToppingGroups } from "@/service/topping";
 import { uploadImages } from "@/service/upload";
-import { getIngredientsByCategory } from "@/service/ingredient";
-import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
+import { toast } from "react-toastify";
 
-const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
+const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
     description: "",
     ingredients: [],
     toppingGroups: [],
-    stockStatus: "AVAILABLE", // AVAILABLE | INACTIVE | OUT_OF_STOCK
+    stockStatus: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
   });
   const [allCategories, setAllCategories] = useState([]);
-  const [allToppingGroups, setAllToppingGroups] = useState([]);
   const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
-  const [selectedIngredient, setSelectedIngredient] = useState("");
+  const [allToppingGroups, setAllToppingGroups] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedIngredient, setSelectedIngredient] = useState("");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Load categories & toppingGroups khi mở modal
   useEffect(() => {
     if (open) {
-      setFormData({ name: "", price: 0, description: "", stockStatus: "ACTIVE", ingredients: [], toppingGroups: [] });
       const fetchCategories = async () => {
         const res = await getActiveIngredientCategoriesByStore(storeId);
         setAllCategories(res?.data || []);
       };
-      fetchCategories();
-
       const fetchToppingGroups = async () => {
-        try {
-          const res = await getActiveStoreToppingGroups(storeId);
-          setAllToppingGroups(res?.data || []);
-        } catch (err) {
-          console.error("Failed to load toppingGroups", err);
-        }
+        const res = await getActiveStoreToppingGroups(storeId);
+        setAllToppingGroups(res?.data || []);
       };
+      fetchCategories();
       fetchToppingGroups();
-      setSelectedCategory("");
-      setIngredientsByCategory([]);
     }
   }, [open, storeId]);
 
+  // Load dish hiện tại
+  useEffect(() => {
+    if (open && id) {
+      const fetchDish = async () => {
+        try {
+          const res = await getDish(id);
+          if (res?.success) {
+            const d = res.data;
+            setFormData({
+              name: d.name,
+              price: d.price,
+              description: d.description || "",
+              stockStatus: d.stockStatus || "ACTIVE",
+              ingredients:
+                d.ingredients?.map((i) => ({
+                  ingredient: i.ingredient,
+                  quantity: i.quantity,
+                })) || [],
+              toppingGroups: d.toppingGroups || [],
+            });
+            setImage(d.image?.url || null);
+          }
+        } catch (err) {
+          console.error("Error fetching dish:", err);
+        }
+      };
+      fetchDish();
+    }
+  }, [open, id]);
+
+  // Load nguyên liệu theo category
   useEffect(() => {
     if (!selectedCategory) return setIngredientsByCategory([]);
     const fetchIngredients = async () => {
@@ -96,34 +121,16 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     }));
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) setImage(URL.createObjectURL(file));
   };
 
   const handleSave = async () => {
-    let uploadedImage = { filePath: "", url: image };
-
-    if (image && !image.startsWith("http")) {
-      const fileInput = document.getElementById("imageUpload");
-      if (fileInput.files.length) {
-        const form = new FormData();
-        form.append("file", fileInput.files[0]);
-        const res = await uploadImages(form);
-        uploadedImage = { filePath: res[0].filePath, url: res[0].url };
-      }
-    }
-
     if (!formData.name.trim()) {
-      toast.error("Tên Món thêm là bắt buộc");
+      toast.error("Tên món ăn là bắt buộc");
       return;
     }
-
     if (formData.ingredients.length === 0) {
       toast.error("Cần chọn ít nhất 1 nguyên liệu");
       return;
@@ -131,24 +138,38 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
     try {
       setLoading(true);
+
+      let uploadedImage = { filePath: "", url: image };
+      if (image && !image.startsWith("http")) {
+        const fileInput = document.getElementById("editDishImageUpload");
+        if (fileInput.files.length) {
+          const form = new FormData();
+          form.append("file", fileInput.files[0]);
+          const res = await uploadImages(form);
+          uploadedImage = { filePath: res[0].filePath, url: res[0].url };
+        }
+      }
+
       const payload = {
-        ...formData,
+        name: formData.name,
         price: Number(formData.price),
+        description: formData.description,
+        stockStatus: formData.stockStatus,
         image: uploadedImage,
         ingredients: formData.ingredients.map((i) => ({
           ingredient: i.ingredient._id,
           quantity: i.quantity,
         })),
-        toppingGroups: formData.toppingGroups.map((t) => t._id),
-        stockStatus: formData.stockStatus,
+        toppingGroupIds: formData.toppingGroups.map((t) => t._id),
       };
 
-      await createDish({ storeId, data: payload });
-      onCreated?.();
+      await updateDish({ dishId: id, data: payload });
+      toast.success("Cập nhật món ăn thành công");
+      onUpdated?.();
       onClose();
     } catch (err) {
-      console.error(err);
-      toast.error("Thêm món ăn thất bại");
+      console.error("Update dish failed:", err);
+      toast.error("Cập nhật thất bại");
     } finally {
       setLoading(false);
     }
@@ -157,7 +178,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Thêm món ăn
+        Chỉnh sửa món ăn
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -165,18 +186,22 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
-          {/* Form Fields */}
-          <Box display='flex' gap={2} flexWrap='wrap'>
-            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
-            <TextField
-              label='Giá*'
-              name='price'
-              type='number'
-              value={formData.price}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Box>
+          <TextField
+            label='Tên món ăn'
+            value={formData.name}
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            fullWidth
+            required
+          />
+
+          <TextField
+            label='Giá'
+            type='number'
+            value={formData.price}
+            onChange={(e) => setFormData((prev) => ({ ...prev, price: Number(e.target.value) }))}
+            fullWidth
+            required
+          />
 
           {/* Image Upload */}
           <Box>
@@ -194,7 +219,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 position: "relative",
                 cursor: "pointer",
               }}
-              onClick={() => document.getElementById("imageUpload").click()}
+              onClick={() => document.getElementById("editDishImageUpload").click()}
             >
               {image ? (
                 <img src={image} alt='Preview' style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -203,7 +228,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
               )}
               <input
                 type='file'
-                id='imageUpload'
+                id='editDishImageUpload'
                 accept='image/*'
                 style={{ display: "none" }}
                 onChange={handleImageUpload}
@@ -213,23 +238,22 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             label='Mô tả'
-            name='description'
             value={formData.description}
-            onChange={handleChange}
+            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             fullWidth
             multiline
             rows={3}
           />
 
+          {/* Chọn nguyên liệu */}
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            {/* Select loại nguyên liệu */}
             <TextField
               select
               label='Loại nguyên liệu'
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
-                setSelectedIngredient(""); // reset khi đổi loại
+                setSelectedIngredient("");
               }}
               sx={{ flex: 1 }}
             >
@@ -240,7 +264,6 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
               ))}
             </TextField>
 
-            {/* Select nguyên liệu theo loại */}
             <TextField
               select
               label='Nguyên liệu'
@@ -262,25 +285,23 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             </TextField>
           </Box>
 
-          {/* Nguyên liệu đã chọn */}
+          {/* Danh sách nguyên liệu */}
           {formData.ingredients.length > 0 && (
             <Box className='border rounded-md space-y-1'>
               {formData.ingredients.map((i) => {
-                // Xác định bước tăng/giảm theo loại unit
                 let step = 1;
                 let unitLabel = i.ingredient.unit?.name || "";
-
                 switch (i.ingredient.unit?.type) {
                   case "weight":
-                    step = 50; // 50g
+                    step = 50;
                     if (!unitLabel) unitLabel = "g";
                     break;
                   case "volume":
-                    step = 10; // 10ml
+                    step = 10;
                     if (!unitLabel) unitLabel = "ml";
                     break;
                   case "count":
-                    step = 1; // 1 cái
+                    step = 1;
                     if (!unitLabel) unitLabel = "cái";
                     break;
                   default:
@@ -297,14 +318,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                       <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
                         <FaMinus />
                       </IconButton>
-
-                      {/* Input để chỉnh số lượng trực tiếp */}
                       <TextField
                         size='small'
                         type='number'
                         value={i.quantity}
                         onChange={(e) => {
-                          const val = Math.max(0, Number(e.target.value)); // không cho âm
+                          const val = Math.max(0, Number(e.target.value));
                           setFormData((prev) => ({
                             ...prev,
                             ingredients: prev.ingredients.map((ing) =>
@@ -315,9 +334,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                         inputProps={{ step }}
                         sx={{ width: 70, textAlign: "center" }}
                       />
-
                       <span>{unitLabel}</span>
-
                       <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
                         <FaPlus />
                       </IconButton>
@@ -331,6 +348,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             </Box>
           )}
 
+          {/* Topping groups */}
           <Autocomplete
             multiple
             options={allToppingGroups}
@@ -350,12 +368,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                   cursor: "pointer",
                 }}
               >
-                <input
-                  type='checkbox'
-                  checked={selected}
-                  readOnly
-                  style={{ width: 16, height: 16, accentColor: "#fc6011" }}
-                />
+                <input type='checkbox' checked={selected} readOnly style={{ width: 16, height: 16 }} />
                 {option.name}
               </li>
             )}
@@ -365,27 +378,13 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 {...params}
                 variant='outlined'
                 label='Chọn nhóm món thêm'
-                placeholder='Chọn nhóm món thêm...'
+                placeholder='Chọn nhóm...'
                 fullWidth
               />
-            )}
-            PaperComponent={({ children }) => (
-              <Paper
-                elevation={3}
-                sx={{
-                  maxHeight: 240,
-                  overflowY: "auto",
-                  "&::-webkit-scrollbar": { width: 6 },
-                  "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
-                }}
-              >
-                {children}
-              </Paper>
             )}
             fullWidth
           />
 
-          {/* Chip list hiển thị riêng dưới input */}
           {formData.toppingGroups.length > 0 && (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
               {formData.toppingGroups.map((option) => (
@@ -403,8 +402,6 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                     backgroundColor: "#fc6011",
                     color: "#fff",
                     fontWeight: 500,
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
                   }}
                 />
               ))}
@@ -418,7 +415,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={(e) => setFormData((prev) => ({ ...prev, stockStatus: e.target.value }))}
             fullWidth
           >
-            <MenuItem value='AVAILABLE'>Hoạt động</MenuItem>
+            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
             <MenuItem value='INACTIVE'>Ngưng</MenuItem>
             <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
           </TextField>
@@ -437,4 +434,4 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   );
 };
 
-export default DishCreateModal;
+export default DishEditModal;

@@ -132,15 +132,18 @@ const LatestOrder = ({ storeId }) => {
   ];
 
   return (
-    <div style={{ height: 500, width: "100%" }}>
+    <div style={{ height: 525, width: "100%" }}>
       <DataGrid
         rows={orders}
         columns={columns}
         getRowId={(row) => row._id}
-        pageSizeOptions={[5, 10, 20]}
-        disableRowSelectionOnClick
-        slots={{ toolbar: GridToolbar }}
+        pagination
+        pageSizeOptions={[]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 8 } },
+        }}
         loading={loading}
+        disableRowSelectionOnClick
         localeText={viVN}
       />
     </div>

@@ -6,35 +6,39 @@ import { Box, Tooltip, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { viVN } from "@/utils/constants";
-import DishGroupCreateModal from "@/components/Dish-group/DishGroupCreateModal";
-import DishGroupDetailModal from "@/components/Dish-group/DishGroupDetailModal";
-import DishGroupEditModal from "@/components/Dish-group/DishGroupEditModal";
-import { getStoreDishGroups, deleteDishGroupById } from "@/service/dishGroup";
+import ToppingGroupCreateModal from "@/components/topping-group/ToppingGroupCreateModal";
+import ToppingGroupDetailModal from "@/components/topping-group/ToppingGroupDetailModal";
+import ToppingGroupEditModal from "@/components/topping-group/ToppingGroupEditModal";
+import { getStoreToppingGroups, deleteToppingGroup } from "@/service/topping";
+import { getDish } from "@/service/dish";
 import { useRouter } from "next/navigation";
 
 const page = () => {
   const router = useRouter();
+  const { dishId } = useParams();
 
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
   const storeId = storeData ? JSON.parse(storeData)?._id : "";
 
-  const [allDishGroups, setAllDishGroups] = useState([]);
+  const [allToppingGroups, setAllToppingGroups] = useState([]);
+  const [dish, setDish] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openCreateDishGroup, setOpenCreateDishGroup] = useState(false);
-  const [openDetailDishGroup, setOpenDetailDishGroup] = useState(false);
-  const [openEditDishGroup, setOpenEditDishGroup] = useState(false);
-  const [selectedDishGroupId, setSelectedDishGroupId] = useState(null);
+  const [openCreateToppingGroup, setOpenCreateToppingGroup] = useState(false);
+  const [openDetailToppingGroup, setOpenDetailToppingGroup] = useState(false);
+  const [openEditToppingGroup, setOpenEditToppingGroup] = useState(false);
+  const [selectedToppingGroupId, setSelectedToppingGroupId] = useState(null);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const unitData = await getStoreDishGroups(storeId);
-      const list = unitData?.data?.data || unitData?.data || [];
-      setAllDishGroups(list);
+      const unitData = await getDish(storeId);
+      const list = unitData?.data?.data?.toppingGroups || unitData?.data?.toppingGroups || [];
+      setAllToppingGroups(list);
+      setDish(res?.data);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
       setError("Lỗi tải danh sách món");
@@ -50,7 +54,7 @@ const page = () => {
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Bạn có chắc chắn?",
-      text: "Nhóm món ăn này sẽ bị xóa vĩnh viễn.",
+      text: "Nhóm món thêm này sẽ bị xóa vĩnh viễn.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -61,11 +65,11 @@ const page = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteDishGroupById(id);
-        Swal.fire("Đã xóa!", "Nhóm món ăn đã được xóa.", "success");
+        await deleteToppingGroup(id);
+        Swal.fire("Đã xóa!", "Nhóm món thêm đã được xóa.", "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa Nhóm món ăn thất bại", "error");
+        Swal.fire("Lỗi!", err.message || "Xóa Nhóm món thêm thất bại", "error");
       }
     }
   };
@@ -73,17 +77,17 @@ const page = () => {
   const columns = [
     {
       field: "name",
-      headerName: "Tên nhóm món ăn",
+      headerName: "Tên nhóm món thêm",
       width: 250,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.name || ""}</span>,
     },
     {
-      field: "dishes",
-      headerName: "Danh sách món ăn",
+      field: "toppings",
+      headerName: "Danh sách món thêm",
       flex: 1,
       headerAlign: "center",
-      renderCell: (params) => <span>{params.row?.dishes?.map((t) => t.name).join(", ") || "—"}</span>,
+      renderCell: (params) => <span>{params.row?.toppings?.map((t) => t.name).join(", ") || "—"}</span>,
     },
     {
       field: "isActive",
@@ -111,7 +115,7 @@ const page = () => {
       width: 150,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          <Tooltip title='Danh sách món ăn phụ thuộc'>
+          <Tooltip title='Danh sách món thêm phụ thuộc'>
             <IconButton
               size='small'
               color='primary'
@@ -121,7 +125,7 @@ const page = () => {
                 fontSize: "16px",
               }}
               onClick={() => {
-                router.push(`/dish-group/${params.row._id}`);
+                router.push(`/topping-group/${params.row._id}`);
               }}
             >
               🧾
@@ -138,8 +142,8 @@ const page = () => {
                 fontSize: "16px",
               }}
               onClick={() => {
-                setSelectedDishGroupId(params.row._id);
-                setOpenDetailDishGroup(true);
+                setSelectedToppingGroupId(params.row._id);
+                setOpenDetailToppingGroup(true);
               }}
             >
               👁️
@@ -157,8 +161,8 @@ const page = () => {
               }}
               onClick={() => {
                 console.log(params.row._id);
-                setSelectedDishGroupId(params.row._id);
-                setOpenEditDishGroup(true);
+                setSelectedToppingGroupId(params.row._id);
+                setOpenEditToppingGroup(true);
               }}
             >
               ✏️
@@ -188,40 +192,40 @@ const page = () => {
 
   return (
     <>
-      {openCreateDishGroup && (
-        <DishGroupCreateModal
-          open={openCreateDishGroup}
-          onClose={() => setOpenCreateDishGroup(false)}
+      {openCreateToppingGroup && (
+        <ToppingGroupCreateModal
+          open={openCreateToppingGroup}
+          onClose={() => setOpenCreateToppingGroup(false)}
           storeId={storeId}
           onCreated={fetchData}
         />
       )}
 
-      {openDetailDishGroup && (
-        <DishGroupDetailModal
-          open={openDetailDishGroup}
-          onClose={() => setOpenDetailDishGroup(false)}
-          id={selectedDishGroupId}
+      {openDetailToppingGroup && (
+        <ToppingGroupDetailModal
+          open={openDetailToppingGroup}
+          onClose={() => setOpenDetailToppingGroup(false)}
+          id={selectedToppingGroupId}
         />
       )}
 
-      {openEditDishGroup && (
-        <DishGroupEditModal
-          open={openEditDishGroup}
-          onClose={() => setOpenEditDishGroup(false)}
+      {openEditToppingGroup && (
+        <ToppingGroupEditModal
+          open={openEditToppingGroup}
+          onClose={() => setOpenEditToppingGroup(false)}
           storeId={storeId}
-          groupId={selectedDishGroupId}
+          groupId={selectedToppingGroupId}
           onUpdated={fetchData}
         />
       )}
 
       <div className='flex align-center justify-between mb-2'>
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món ăn</span>
+        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món thêm của món {dish.name}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
             <button
-              onClick={() => setOpenCreateDishGroup(true)}
+              onClick={() => setOpenCreateToppingGroup(true)}
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
@@ -233,7 +237,7 @@ const page = () => {
 
       <Box sx={{ height: 525, width: "100%" }}>
         <DataGrid
-          rows={allDishGroups}
+          rows={allToppingGroups}
           columns={columns}
           getRowId={(row) => row._id}
           pagination

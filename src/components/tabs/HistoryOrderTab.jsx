@@ -1,10 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { getAllOrders } from "@/service/order";
-import generateOrderNumber from "../../utils/generateOrderNumber";
-import { ThreeDots } from "react-loader-spinner";
+import { getAllOrders, updateOrder } from "@/service/order";
+import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
+import { Button } from "@mui/material";
+
+const formatVND = (n) =>
+  (n ?? 0).toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  });
 
 const paymentTypes = {
   cash: "Thanh toán khi nhận hàng",
@@ -20,16 +27,11 @@ const statusTypes = {
   taken: "Đã lấy",
   delivering: "Đang giao",
   done: "Đã xong",
+  finished: "Đã thông báo tài xế",
+  confirmed: "Đang chuẩn bị",
 };
 
-const formatVND = (n) =>
-  (n ?? 0).toLocaleString("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  });
-
-export default function HistoryOrderDataGrid({ storeId }) {
+const HistoryTab = ({ storeId }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,12 +41,12 @@ export default function HistoryOrderDataGrid({ storeId }) {
       const res = await getAllOrders({
         storeId,
         status: ["completed", "delivered", "done", "cancelled", "taken"],
-        limit: 1000, // lấy hết đơn để DataGrid pagination tự xử lý
+        limit: 100,
         page: 1,
       });
-      setOrders(res?.data ?? []);
+      setOrders(res?.data || []);
     } catch (error) {
-      console.error("Error loading orders:", error);
+      console.error("Error fetching orders:", error);
     } finally {
       setLoading(false);
     }
@@ -54,55 +56,63 @@ export default function HistoryOrderDataGrid({ storeId }) {
     if (storeId) fetchOrders();
   }, [storeId]);
 
-  const rows = orders.map((order, index) => {
-    const totalQuantity = order.items?.reduce((acc, item) => acc + item.quantity, 0);
-    return {
-      id: order._id,
-      orderNumber: generateOrderNumber(order._id),
-      customer: order.user?.name || "Unknown",
-      totalQuantity,
-      totalPrice: Number(order.finalTotal) || 0,
-      status: statusTypes[order.status] ?? "n/a",
-      payment: paymentTypes[order.paymentMethod] ?? "Thanh toán khi nhận hàng",
-      createdAt: new Date(order.createdAt).toLocaleString(),
-    };
-  });
-
   const columns = [
-    { field: "orderNumber", headerName: "Mã đơn", width: 130 },
-    { field: "customer", headerName: "Khách hàng", width: 180 },
-    { field: "totalQuantity", headerName: "Số món", width: 100, type: "number" },
     {
-      field: "totalPrice",
-      headerName: "Tổng tiền",
-      width: 150,
-      valueFormatter: (params) => formatVND(params.value),
+      field: "id",
+      headerName: "Mã đơn",
+      flex: 1,
+      valueGetter: (_, row) => row?._id || "--",
     },
-    { field: "status", headerName: "Trạng thái", width: 150 },
-    { field: "payment", headerName: "Thanh toán", width: 200 },
-    { field: "createdAt", headerName: "Thời gian", width: 180 },
+    {
+      field: "customer",
+      headerName: "Khách hàng",
+      flex: 1,
+      valueGetter: (_, row) => row?.user?.name || "Ẩn danh",
+    },
+    {
+      field: "items",
+      headerName: "Số món",
+      flex: 0.6,
+      valueGetter: (_, row) =>
+        Array.isArray(row?.items) ? row.items.reduce((sum, i) => sum + (i.quantity || 0), 0) : 0,
+    },
+    {
+      field: "finalTotal",
+      headerName: "Tổng tiền",
+      flex: 1,
+      valueGetter: (_, row) => (typeof row?.finalTotal === "number" ? formatVND(row.finalTotal) : "0 ₫"),
+    },
+    {
+      field: "createdAt",
+      headerName: "Ngày tạo",
+      flex: 1,
+      valueGetter: (_, row) => new Date(row.createdAt).toLocaleString("vi-VN"),
+    },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      flex: 1,
+      valueGetter: (_, row) => statusTypes[row?.status] || "--",
+    },
   ];
 
   return (
-    <div style={{ height: "80vh", width: "100%" }}>
-      {loading ? (
-        <div className='flex justify-center items-center h-full w-full'>
-          <ThreeDots visible={true} height='80' width='80' color='#fc6011' radius='9' />
-        </div>
-      ) : (
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 20]}
-          pagination
-          autoHeight
-          disableSelectionOnClick
-          components={{ Toolbar: GridToolbar }}
-          loading={loading}
-          localeText={viVN}
-        />
-      )}
+    <div style={{ height: 570, width: "100%" }}>
+      <DataGrid
+        rows={orders}
+        columns={columns}
+        getRowId={(row) => row._id}
+        pagination
+        pageSizeOptions={[]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 9 } },
+        }}
+        loading={loading}
+        disableRowSelectionOnClick
+        localeText={viVN}
+      />
     </div>
   );
-}
+};
+
+export default HistoryTab;

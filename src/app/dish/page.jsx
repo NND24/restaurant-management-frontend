@@ -12,8 +12,11 @@ import { viVN } from "@/utils/constants";
 import DishDetailModal from "@/components/dish/DishDetailModal";
 import DishEditModal from "@/components/dish/DishEditModal";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter();
+
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
@@ -291,6 +294,8 @@ const page = () => {
       )}
 
       <div className='flex flex-col justify-between gap-2 border-b pb-2 mb-2'>
+        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món ăn</span>
+
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
             <button

@@ -3,15 +3,17 @@ import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, Tooltip, IconButton } from "@mui/material";
-import { FaPlus } from "react-icons/fa";
+import { FaCog, FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { viVN } from "@/utils/constants";
 import ToppingGroupCreateModal from "@/components/topping-group/ToppingGroupCreateModal";
 import ToppingGroupDetailModal from "@/components/topping-group/ToppingGroupDetailModal";
 import ToppingGroupEditModal from "@/components/topping-group/ToppingGroupEditModal";
-import { getStoreToppingGroups, deleteToppingGroup } from "@/service/topping";
+import { deleteToppingGroup } from "@/service/topping";
 import { getDish } from "@/service/dish";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import DishManageModal from "@/components/dish/DishManageModal";
+import ToppingGroupCreateToDishModal from "@/components/topping-group/ToppingGroupCreateToDishModal";
 
 const page = () => {
   const router = useRouter();
@@ -26,6 +28,7 @@ const page = () => {
   const [dish, setDish] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openManage, setOpenManage] = useState(false);
   const [openCreateToppingGroup, setOpenCreateToppingGroup] = useState(false);
   const [openDetailToppingGroup, setOpenDetailToppingGroup] = useState(false);
   const [openEditToppingGroup, setOpenEditToppingGroup] = useState(false);
@@ -35,8 +38,8 @@ const page = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const unitData = await getDish(storeId);
-      const list = unitData?.data?.data?.toppingGroups || unitData?.data?.toppingGroups || [];
+      const res = await getDish(dishId);
+      const list = res?.data?.data?.toppingGroups || res?.data?.toppingGroups || [];
       setAllToppingGroups(list);
       setDish(res?.data);
     } catch (err) {
@@ -193,10 +196,11 @@ const page = () => {
   return (
     <>
       {openCreateToppingGroup && (
-        <ToppingGroupCreateModal
+        <ToppingGroupCreateToDishModal
           open={openCreateToppingGroup}
           onClose={() => setOpenCreateToppingGroup(false)}
           storeId={storeId}
+          dish={dish}
           onCreated={fetchData}
         />
       )}
@@ -219,10 +223,31 @@ const page = () => {
         />
       )}
 
+      {openManage && (
+        <DishManageModal
+          open={openManage}
+          onClose={() => setOpenManage(false)}
+          dishId={dishId}
+          storeId={storeId}
+          currentToppingGroups={allToppingGroups}
+          onUpdated={fetchData}
+        />
+      )}
+
       <div className='flex align-center justify-between mb-2'>
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món thêm của món {dish.name}</span>
 
-        {!blockEdit && (
+        <div className='flex gap-2'>
+          <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+            <button
+              onClick={() => setOpenManage(true)}
+              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+            >
+              <FaCog className='text-lg' />
+              <span> Quản lý</span>
+            </button>
+          </div>
+
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
             <button
               onClick={() => setOpenCreateToppingGroup(true)}
@@ -232,7 +257,7 @@ const page = () => {
               <span>Thêm</span>
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       <Box sx={{ height: 525, width: "100%" }}>

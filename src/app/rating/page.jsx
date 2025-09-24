@@ -8,35 +8,29 @@ import { viVN } from "@/utils/constants";
 
 const StoreReviewPage = () => {
   const [reviews, setReviews] = useState([]);
-  const [filter, setFilter] = useState("all");
-  const [page, setPage] = useState(0); // DataGrid page index (0-based)
-  const [pageSize, setPageSize] = useState(5);
-  const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [selectedReview, setSelectedReview] = useState(null);
   const [replyText, setReplyText] = useState("");
 
+  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
+  const storeId = storeData ? JSON.parse(storeData)?._id : "";
+
   const fetchReviews = async () => {
-    setLoading(true);
-    const replied = filter === "replied" ? "true" : filter === "not_replied" ? "false" : undefined;
-
-    const res = await getStoreRatings({
-      page: page + 1, // API đang dùng 1-based
-      limit: pageSize,
-      replied,
-    });
-
-    if (res?.success) {
-      setReviews(res.data ?? []);
-      setRowCount(res.totalItems || 0);
+    try {
+      setLoading(true);
+      const res = await getStoreRatings(storeId);
+      setReviews(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchReviews();
-  }, [page, pageSize, filter]);
+  }, [storeId]);
 
   const handleReplyOpen = (review) => {
     setSelectedReview(review);
@@ -69,6 +63,7 @@ const StoreReviewPage = () => {
       field: "avatar",
       headerName: "Khách hàng",
       width: 200,
+      headerAlign: "center",
       renderCell: (params) => (
         <div className='flex items-center gap-2'>
           <img src={params.row.avatar} alt={params.row.customer} className='w-8 h-8 rounded-full object-cover' />
@@ -80,17 +75,20 @@ const StoreReviewPage = () => {
       field: "ratingValue",
       headerName: "Đánh giá",
       width: 120,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => (
         <div className='text-yellow-500'>
           {"★".repeat(params.row.ratingValue) + "☆".repeat(5 - params.row.ratingValue)}
         </div>
       ),
     },
-    { field: "comment", headerName: "Bình luận", width: 250 },
+    { field: "comment", headerName: "Bình luận", headerAlign: "center", width: 220 },
     {
       field: "storeReply",
       headerName: "Phản hồi",
-      width: 250,
+      width: 220,
+      headerAlign: "center",
       renderCell: (params) =>
         params.row.storeReply ? (
           <span className='text-gray-700'>{params.row.storeReply}</span>
@@ -101,7 +99,9 @@ const StoreReviewPage = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 150,
+      width: 120,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => (
         <span className={params.value === "Đã phản hồi" ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
           {params.value}
@@ -111,14 +111,17 @@ const StoreReviewPage = () => {
     {
       field: "action",
       headerName: "Hành động",
-      width: 150,
+      width: 180,
       sortable: false,
+      filterable: false,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => (
         <button
           onClick={() => handleReplyOpen(params.row.raw)}
-          className='px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm'
+          className='px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm'
         >
-          {params.row.storeReply ? "Chỉnh sửa" : "Phản hồi"}
+          {params.row.storeReply ? "Chỉnh sửa phản hồi" : "Phản hồi"}
         </button>
       ),
     },
@@ -126,21 +129,18 @@ const StoreReviewPage = () => {
 
   return (
     <div>
-      <div style={{ height: "70vh", width: "100%" }}>
+      <div style={{ height: "95vh", width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}
-          rowCount={rowCount}
           pagination
-          paginationMode='server'
-          page={page}
-          pageSize={pageSize}
-          onPageChange={(newPage) => setPage(newPage)}
-          onPageSizeChange={(newSize) => setPageSize(newSize)}
-          rowsPerPageOptions={[5, 10, 20]}
+          pageSizeOptions={[]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 12 } },
+          }}
           loading={loading}
           components={{ Toolbar: GridToolbar }}
-          autoHeight={false}
+          disableRowSelectionOnClick
           localeText={viVN}
         />
       </div>
@@ -153,7 +153,7 @@ const StoreReviewPage = () => {
         onConfirm={handleReplySave}
       >
         <textarea
-          className='w-full border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='w-full px-3 py-2 border bg-[#f5f5f5] border-gray-300 rounded-lg shadow-sm h-[100px] resize-none transition'
           rows={4}
           placeholder='Nhập phản hồi của bạn tại đây...'
           value={replyText}

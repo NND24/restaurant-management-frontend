@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import StaffModel from "@/components/popups/Staff";
 import { viVN } from "@/utils/constants";
+import StaffCreateModal from "@/components/staff/StaffCreateModal";
 
 export default function StaffDataGrid() {
   const [staff, setStaff] = useState([]);
@@ -61,11 +62,12 @@ export default function StaffDataGrid() {
   }));
 
   const columns = [
-    { field: "id", headerName: "Mã nhân viên", width: 180 },
+    { field: "id", headerName: "Mã nhân viên", headerAlign: "center", width: 180 },
     {
       field: "name",
       headerName: "Họ và tên",
       width: 250,
+      headerAlign: "center",
       renderCell: (params) => (
         <div className='flex items-center gap-2'>
           <img src={params.row.avatar} className='w-8 h-8 rounded-full' />
@@ -73,12 +75,16 @@ export default function StaffDataGrid() {
         </div>
       ),
     },
-    { field: "phonenumber", headerName: "Số điện thoại", width: 180 },
-    { field: "gender", headerName: "Giới tính", width: 80 },
-    { field: "role", headerName: "Chức vụ", width: 180 },
+    { field: "phonenumber", headerName: "Số điện thoại", headerAlign: "center", align: "center", width: 180 },
+    { field: "gender", headerName: "Giới tính", headerAlign: "center", align: "center", width: 80 },
+    { field: "role", headerName: "Chức vụ", headerAlign: "center", align: "center", width: 180 },
     {
       field: "actions",
       headerName: "Hành động",
+      sortable: false,
+      filterable: false,
+      headerAlign: "center",
+      align: "center",
       width: 150,
       renderCell: (params) => (
         <div className='flex space-x-1'>
@@ -86,9 +92,15 @@ export default function StaffDataGrid() {
             <IconButton
               size='small'
               color='primary'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
               onClick={() => {
-                // Thêm logic xem chi tiết
-                console.log("Xem chi tiết", params.row._id);
+                setViewOnly(true);
+                setStaffBeingEdited(params.row);
+                setShowForm(true);
               }}
             >
               👁️
@@ -99,9 +111,14 @@ export default function StaffDataGrid() {
             <IconButton
               size='small'
               color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
               onClick={() => {
-                // Thêm logic chỉnh sửa
-                console.log("Chỉnh sửa", params.row._id);
+                setStaffBeingEdited(params.row);
+                setShowForm(true);
               }}
             >
               ✏️
@@ -109,7 +126,16 @@ export default function StaffDataGrid() {
           </Tooltip>
 
           <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
-            <IconButton size='small' color='error' onClick={() => handleDeleteStaff(params.row.id)}>
+            <IconButton
+              size='small'
+              color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => handleDeleteStaff(params.row.id)}
+            >
               🗑️
             </IconButton>
           </Tooltip>
@@ -131,20 +157,10 @@ export default function StaffDataGrid() {
           </button>
         </div>
       </div>
-      <Box sx={{ height: 480, width: "100%" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={10}
-          components={{ Toolbar: GridToolbar }}
-          loading={loading}
-          localeText={viVN}
-        />
-      </Box>
 
       {showForm && (
-        <StaffModel
-          isOpen={showForm}
+        <StaffCreateModal
+          open={showForm}
           onClose={() => {
             setShowForm(false);
             setStaffBeingEdited(null);
@@ -156,6 +172,22 @@ export default function StaffDataGrid() {
           readOnly={viewOnly}
         />
       )}
+
+      <Box sx={{ height: 480, width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          components={{ Toolbar: GridToolbar }}
+          pagination
+          pageSizeOptions={[]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 8 } },
+          }}
+          loading={loading}
+          disableRowSelectionOnClick
+          localeText={viVN}
+        />
+      </Box>
     </div>
   );
 }

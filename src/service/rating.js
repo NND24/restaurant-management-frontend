@@ -1,12 +1,9 @@
 import axios from "../libs/axiosInstance";
 
 // Get all ratings for the store (with optional filters)
-export const getStoreRatings = async ({ page = 1, limit = 10, replied, sort = "-createdAt" }) => {
+export const getStoreRatings = async (storeId) => {
   try {
-    const params = { page, limit, sort };
-    if (replied !== undefined) params.replied = replied;
-
-    const res = await axios.get("/rating", { params });
+    const res = await axios.get(`/rating/${storeId}`);
     return res.data;
   } catch (error) {
     console.error("Get store ratings error:", error);

@@ -4,11 +4,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAllOrders, updateOrder } from "@/service/order";
-import localStorageService from "@/utils/localStorageService";
 import generateOrderNumber from "../../utils/generateOrderNumber";
 import { Button } from "@mui/material";
 import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
+import OrderDetailModal from "../orders/OrderDetailModal";
 
 const statusTypes = {
   pending: "Đang chờ",
@@ -32,11 +32,13 @@ const formatVND = (n) =>
 
 export default function VerifyOrderTab({ storeId }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { sendNotification } = useSocket();
 
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDetailOrder, setOpenDetailOrder] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const { sendNotification } = useSocket();
 
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
@@ -44,8 +46,6 @@ export default function VerifyOrderTab({ storeId }) {
       const res = await getAllOrders({
         storeId,
         status: ["confirmed", "finished"],
-        limit: 50, // lấy nhiều để DataGrid tự paginate
-        page: 1,
       });
       setOrders(res.data || []);
     } catch (err) {
@@ -83,19 +83,48 @@ export default function VerifyOrderTab({ storeId }) {
     orderNo: `#${generateOrderNumber(o._id)}`,
     customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
     quantity: o.items?.reduce((sum, i) => sum + (i.quantity || 0), 0),
+    someItems: o.items,
     total: formatVND(o.finalTotal),
-    createdAt: new Date(o.createdAt).toLocaleString("vi-VN"),
+    createdAt: o.createdAt,
     status: statusTypes[o.status] || o.status,
     raw: o,
   }));
 
   const columns = [
-    { field: "orderNo", headerName: "Mã đơn", width: 120 },
-    { field: "customer", headerName: "Khách hàng", width: 150 },
-    { field: "quantity", headerName: "Số món", width: 100 },
-    { field: "total", headerName: "Tổng tiền", width: 130 },
-    { field: "createdAt", headerName: "Ngày tạo", width: 180 },
-    { field: "status", headerName: "Trạng thái", width: 160 },
+    { field: "orderNo", headerName: "Mã đơn", width: 80, headerAlign: "center", align: "center" },
+    { field: "customer", headerName: "Khách hàng", width: 150, headerAlign: "center" },
+    { field: "quantity", headerName: "Số món", width: 80, headerAlign: "center", align: "center" },
+    {
+      field: "someItems",
+      headerName: "Món ăn được đặt",
+      flex: 1,
+      headerAlign: "center",
+      align: "left",
+      renderCell: (params) => {
+        const items = params.row.someItems || [];
+        const preview = items
+          .slice(0, 2)
+          .map((i) => i.dishName || i.dish?.name)
+          .join(", ");
+        const more = items.length > 2 ? ` +${items.length - 2} món khác` : "";
+        return (
+          <span>
+            {preview}
+            {more}
+          </span>
+        );
+      },
+    },
+    { field: "total", headerName: "Tổng tiền", width: 130, headerAlign: "center", align: "center" },
+    {
+      field: "createdAt",
+      headerName: "Ngày tạo",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => <span>{new Date(params.value).toLocaleString("vi-VN") || ""}</span>,
+    },
+    { field: "status", headerName: "Trạng thái", width: 160, headerAlign: "center" },
     {
       field: "actions",
       headerName: "Thao tác",
@@ -121,9 +150,24 @@ export default function VerifyOrderTab({ storeId }) {
 
   return (
     <div style={{ height: 525, width: "100%" }}>
+      {openDetailOrder && (
+        <OrderDetailModal
+          open={openDetailOrder}
+          onClose={() => {
+            setOpenDetailOrder(false);
+            fetchOrders();
+          }}
+          orderId={selectedId}
+        />
+      )}
+
       <DataGrid
         rows={rows}
         columns={columns}
+        onRowClick={(params) => {
+          setSelectedId(params.row.id);
+          setOpenDetailOrder(true);
+        }}
         pagination
         pageSizeOptions={[]}
         initialState={{

@@ -1,22 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import React, { useCallback, useEffect, useState } from "react";
+import { DataGrid } from "@mui/x-data-grid";
 import { getAllOrders, updateOrder } from "@/service/order";
 import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
 import { Button } from "@mui/material";
-
-const formatVND = (n) =>
-  (n ?? 0).toLocaleString("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  });
-
-const paymentTypes = {
-  cash: "Thanh toán khi nhận hàng",
-  vnpay: "Thanh toán qua VNPay",
-};
+import generateOrderNumber from "../../utils/generateOrderNumber";
+import OrderDetailModal from "../orders/OrderDetailModal";
 
 const statusTypes = {
   pending: "Đang chờ",
@@ -31,31 +21,39 @@ const statusTypes = {
   confirmed: "Đang chuẩn bị",
 };
 
+const formatVND = (n) =>
+  (n ?? 0).toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  });
+
 const LatestOrder = ({ storeId }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openDetailOrder, setOpenDetailOrder] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
   const { sendNotification } = useSocket();
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await getAllOrders({
         storeId,
-        status: "pending",
-        limit: 100,
-        page: 1,
+        status: ["pending"],
       });
-      setOrders(res?.data || []);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+      setOrders(res.data || []);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId]);
 
   useEffect(() => {
-    if (storeId) fetchOrders();
-  }, [storeId]);
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleConfirm = async (order) => {
     try {
@@ -74,48 +72,61 @@ const LatestOrder = ({ storeId }) => {
     }
   };
 
+  const rows = orders.map((o, idx) => ({
+    id: o._id,
+    orderNo: `#${generateOrderNumber(o._id)}`,
+    customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
+    quantity: o.items?.reduce((sum, i) => sum + (i.quantity || 0), 0),
+    someItems: o.items,
+    total: formatVND(o.finalTotal),
+    createdAt: o.createdAt,
+    status: statusTypes[o.status] || o.status,
+    raw: o,
+  }));
+
   const columns = [
+    { field: "orderNo", headerName: "Mã đơn", width: 80, headerAlign: "center", align: "center" },
+    { field: "customer", headerName: "Khách hàng", width: 150, headerAlign: "center" },
+    { field: "quantity", headerName: "Số món", width: 80, headerAlign: "center", align: "center" },
     {
-      field: "id",
-      headerName: "Mã đơn",
-      flex: 1,
-      valueGetter: (_, row) => row?._id || "--",
+      field: "someItems",
+      headerName: "Món ăn được đặt",
+      flex: 2,
+      headerAlign: "center",
+      align: "left",
+      renderCell: (params) => {
+        const items = params.row.someItems || [];
+        const preview = items
+          .slice(0, 2)
+          .map((i) => i.dishName || i.dish?.name)
+          .join(", ");
+        const more = items.length > 2 ? ` +${items.length - 2} món khác` : "";
+        return (
+          <span>
+            {preview}
+            {more}
+          </span>
+        );
+      },
     },
-    {
-      field: "customer",
-      headerName: "Khách hàng",
-      flex: 1,
-      valueGetter: (_, row) => row?.user?.name || "Ẩn danh",
-    },
-    {
-      field: "items",
-      headerName: "Số món",
-      flex: 0.6,
-      valueGetter: (_, row) =>
-        Array.isArray(row?.items) ? row.items.reduce((sum, i) => sum + (i.quantity || 0), 0) : 0,
-    },
-    {
-      field: "finalTotal",
-      headerName: "Tổng tiền",
-      flex: 1,
-      valueGetter: (_, row) => (typeof row?.finalTotal === "number" ? formatVND(row.finalTotal) : "0 ₫"),
-    },
+    { field: "total", headerName: "Tổng tiền", width: 100, headerAlign: "center", align: "center" },
     {
       field: "createdAt",
       headerName: "Ngày tạo",
-      flex: 1,
-      valueGetter: (_, row) => new Date(row.createdAt).toLocaleString("vi-VN"),
+      width: 180,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => <span>{new Date(params.value).toLocaleString("vi-VN") || ""}</span>,
     },
-    {
-      field: "status",
-      headerName: "Trạng thái",
-      flex: 1,
-      valueGetter: (_, row) => statusTypes[row?.status] || "--",
-    },
+    { field: "status", headerName: "Trạng thái", width: 100, headerAlign: "center", align: "center" },
     {
       field: "action",
       headerName: "Hành động",
       flex: 1,
+      sortable: false,
+      filterable: false,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => (
         <Button
           variant='contained'
@@ -133,10 +144,24 @@ const LatestOrder = ({ storeId }) => {
 
   return (
     <div style={{ height: 525, width: "100%" }}>
+      {openDetailOrder && (
+        <OrderDetailModal
+          open={openDetailOrder}
+          onClose={() => {
+            setOpenDetailOrder(false);
+            fetchOrders();
+          }}
+          orderId={selectedId}
+        />
+      )}
+
       <DataGrid
-        rows={orders}
+        rows={rows}
         columns={columns}
-        getRowId={(row) => row._id}
+        onRowClick={(params) => {
+          setSelectedId(params.row.id);
+          setOpenDetailOrder(true);
+        }}
         pagination
         pageSizeOptions={[]}
         initialState={{

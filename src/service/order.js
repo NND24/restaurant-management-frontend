@@ -1,6 +1,6 @@
 import axios from "../libs/axiosInstance";
 
-export const getAllOrders = async ({ storeId, status, limit, page }) => {
+export const getAllOrders = async ({ storeId, status }) => {
   try {
     const params = new URLSearchParams();
     if (Array.isArray(status)) {
@@ -8,8 +8,6 @@ export const getAllOrders = async ({ storeId, status, limit, page }) => {
     } else if (status) {
       params.append("status", status);
     }
-    if (limit) params.append("limit", limit);
-    if (page) params.append("page", page);
 
     const res = await axios.get(`/order/store/${storeId}?${params.toString()}`);
     return res.data;

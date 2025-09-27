@@ -28,7 +28,18 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
   useEffect(() => {
     if (open) {
       if (isUpdate && initialData) {
-        setFormData({ ...initialData });
+        setFormData({
+          name: initialData.name || "",
+          email: initialData.email || "",
+          phonenumber: initialData.phonenumber || "",
+          gender: initialData.gender || "male",
+          // nếu role là array thì lấy phần tử ưu tiên, ví dụ phần tử cuối
+          role: Array.isArray(initialData.role)
+            ? initialData.role.includes("manager")
+              ? "manager"
+              : "staff"
+            : initialData.role || "staff",
+        });
       } else {
         setFormData({
           name: "",

@@ -87,7 +87,7 @@ export default function StaffDataGrid() {
       align: "center",
       width: 150,
       renderCell: (params) => (
-        <div className='flex space-x-1'>
+        <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
             <IconButton
               size='small'
@@ -98,8 +98,9 @@ export default function StaffDataGrid() {
                 fontSize: "16px",
               }}
               onClick={() => {
+                const staffRaw = staff.find((s) => s._id === params.row.id);
                 setViewOnly(true);
-                setStaffBeingEdited(params.row);
+                setStaffBeingEdited(staffRaw);
                 setShowForm(true);
               }}
             >
@@ -117,7 +118,8 @@ export default function StaffDataGrid() {
                 fontSize: "16px",
               }}
               onClick={() => {
-                setStaffBeingEdited(params.row);
+                const staffRaw = staff.find((s) => s._id === params.row.id);
+                setStaffBeingEdited(staffRaw);
                 setShowForm(true);
               }}
             >
@@ -167,14 +169,39 @@ export default function StaffDataGrid() {
             setStaffBeingEdited(null);
             setViewOnly(false);
           }}
-          onSubmit={staffBeingEdited ? updateStaff : createStaff}
+          onSubmit={async (formData) => {
+            try {
+              if (staffBeingEdited) {
+                // Update
+                const res = await updateStaff({ userId: staffBeingEdited._id, staffData: formData });
+                if (res.success) {
+                  toast.success("Cập nhật nhân viên thành công!");
+                } else {
+                  toast.error("Có lỗi xảy ra!");
+                }
+              } else {
+                // Create
+                const res = await createStaff({ storeId, staffData: formData });
+                if (res.success) {
+                  toast.success("Thêm nhân viên thành công!");
+                } else {
+                  toast.error("Có lỗi xảy ra!");
+                }
+              }
+              fetchStaff();
+              setShowForm(false);
+              setStaffBeingEdited(null);
+            } catch (err) {
+              toast.error("Có lỗi xảy ra!");
+            }
+          }}
           initialData={staffBeingEdited}
           isUpdate={!!staffBeingEdited}
           readOnly={viewOnly}
         />
       )}
 
-      <Box sx={{ height: 480, width: "100%" }}>
+      <Box sx={{ height: 525, width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}

@@ -24,9 +24,9 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
-    isActive: true,
     ingredients: [],
     toppingGroups: [],
+    status: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
   });
   const [allCategories, setAllCategories] = useState([]);
   const [allToppingGroups, setAllToppingGroups] = useState([]);
@@ -38,7 +38,7 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
   // Lấy danh sách loại nguyên liệu
   useEffect(() => {
     if (open) {
-      setFormData({ name: "", price: 0, isActive: true, ingredients: [], toppingGroups: [] });
+      setFormData({ name: "", price: 0, status: "ACTIVE", ingredients: [], toppingGroups: [] });
       const fetchCategories = async () => {
         const res = await getActiveIngredientCategoriesByStore(storeId);
         setAllCategories(res?.data || []);
@@ -110,7 +110,7 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
       const payload = {
         name: formData.name,
         price: formData.price,
-        isActive: formData.isActive,
+        status: formData.status,
         ingredients: formData.ingredients.map((i) => ({
           ingredient: i.ingredient._id,
           quantity: i.quantity,
@@ -348,12 +348,13 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
           <TextField
             select
             label='Trạng thái'
-            value={formData.isActive}
-            onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.value === "true" }))}
+            value={formData.status}
+            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
             fullWidth
           >
-            <MenuItem value='true'>Hoạt động</MenuItem>
-            <MenuItem value='false'>Ngưng</MenuItem>
+            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
+            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

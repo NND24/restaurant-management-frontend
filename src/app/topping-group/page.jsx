@@ -108,7 +108,7 @@ const page = () => {
       filterable: false,
       headerAlign: "center",
       align: "center",
-      width: 150,
+      width: 180,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <Tooltip title='Danh sách món thêm phụ thuộc'>
@@ -156,7 +156,6 @@ const page = () => {
                 fontSize: "16px",
               }}
               onClick={() => {
-                console.log(params.row._id);
                 setSelectedToppingGroupId(params.row._id);
                 setOpenEditToppingGroup(true);
               }}

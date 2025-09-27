@@ -47,7 +47,7 @@ const DishMenuTab = () => {
           item._id === id
             ? {
                 ...item,
-                stockStatus: item.stockStatus === "AVAILABLE" ? "OUT_OF_STOCK" : "AVAILABLE",
+                status: item.status === "ACTIVE" ? "OUT_OF_STOCK" : "ACTIVE",
               }
             : item
         )
@@ -114,12 +114,12 @@ const DishMenuTab = () => {
       valueGetter: (params) => (params.row?.price ? params.row?.price.toLocaleString() + "₫" : "0₫"),
     },
     {
-      field: "stockStatus",
+      field: "status",
       headerName: "Trạng thái",
       width: 130,
       renderCell: (params) => (
         <Switch
-          checked={params.row?.stockStatus === "AVAILABLE"}
+          checked={params.row?.status === "ACTIVE"}
           onChange={() => toggleItemEnabled(params.row?._id)}
           disabled={blockEdit}
         />

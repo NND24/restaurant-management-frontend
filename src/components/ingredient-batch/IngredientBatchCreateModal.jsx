@@ -165,6 +165,9 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               onChange={handleChange}
               fullWidth
               InputLabelProps={{ shrink: true }}
+              inputProps={{
+                min: new Date().toISOString().slice(0, 10), // chỉ cho chọn >= hôm nay
+              }}
             />
           </Box>
 

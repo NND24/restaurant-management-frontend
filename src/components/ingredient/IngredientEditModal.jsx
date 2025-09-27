@@ -25,7 +25,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     unit: "",
     category: "",
     reorderLevel: 0,
-    isActive: true,
+    status: "ACTIVE", // thay vì isActive
   });
 
   const [allUnits, setAllUnits] = useState([]);
@@ -42,7 +42,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
         if (res?.success) setAllCategories(res.data);
       });
     }
-  }, [open]);
+  }, [open, storeId]);
 
   // Load Ingredient by id
   useEffect(() => {
@@ -59,7 +59,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
               unit: ing.unit?._id || "",
               category: ing.category?._id || "",
               reorderLevel: ing.reorderLevel || 0,
-              isActive: ing.isActive,
+              status: ing.status || "ACTIVE",
             });
           }
         } catch (err) {
@@ -74,7 +74,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "isActive" ? value === "true" : value,
+      [name]: value,
     }));
   };
 
@@ -95,7 +95,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       setLoading(true);
       await updateIngredient({ id, data: formData });
       toast.success("Cập nhật nguyên liệu thành công");
-      onUpdated();
+      onUpdated?.();
       onClose();
     } catch (err) {
       console.error("Lỗi khi cập nhật nguyên liệu:", err);
@@ -210,16 +210,10 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             inputProps={{ min: 0 }}
           />
 
-          <TextField
-            select
-            label='Trạng thái'
-            name='isActive'
-            value={formData.isActive}
-            onChange={handleChange}
-            fullWidth
-          >
-            <MenuItem value={true}>Hoạt động</MenuItem>
-            <MenuItem value={false}>Ngưng</MenuItem>
+          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
+            <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
+            <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

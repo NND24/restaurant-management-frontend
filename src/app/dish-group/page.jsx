@@ -156,7 +156,6 @@ const page = () => {
                 fontSize: "16px",
               }}
               onClick={() => {
-                console.log(params.row._id);
                 setSelectedDishGroupId(params.row._id);
                 setOpenEditDishGroup(true);
               }}

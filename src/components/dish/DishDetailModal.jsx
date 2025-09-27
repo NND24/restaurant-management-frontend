@@ -39,6 +39,19 @@ const DishDetailModal = ({ open, onClose, id }) => {
 
   if (!dish) return null;
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return "Hoạt động";
+      case "OUT_OF_STOCK":
+        return "Hết hàng";
+      case "INACTIVE":
+        return "Ngưng";
+      default:
+        return "Không xác định";
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle
@@ -125,13 +138,7 @@ const DishDetailModal = ({ open, onClose, id }) => {
             </Box>
           )}
 
-          {/* Trạng thái */}
-          <TextField
-            label='Trạng thái'
-            value={dish.isActive ? "Hoạt động" : "Ngưng"}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+          <TextField label='Trạng thái' value={getStatusLabel(dish.status)} fullWidth InputProps={{ readOnly: true }} />
         </Box>
       </DialogContent>
 

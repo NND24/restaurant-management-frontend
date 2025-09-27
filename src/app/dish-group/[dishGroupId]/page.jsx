@@ -135,7 +135,7 @@ const page = () => {
       ),
     },
     {
-      field: "stockStatus",
+      field: "status",
       headerName: "Trạng thái",
       headerAlign: "center",
       align: "center",
@@ -145,7 +145,7 @@ const page = () => {
         let className = "";
 
         switch (params.value) {
-          case "AVAILABLE":
+          case "ACTIVE":
             label = "Còn hàng";
             className = "bg-green-100 text-green-800";
             break;

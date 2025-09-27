@@ -23,7 +23,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
     unit: "",
     category: "",
     reorderLevel: 0,
-    isActive: true,
+    status: "ACTIVE",
   });
   const [loading, setLoading] = useState(false);
   const [allUnits, setAllUnits] = useState([]);
@@ -47,7 +47,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
         unit: "",
         category: "",
         reorderLevel: 0,
-        isActive: true,
+        status: "ACTIVE",
       });
     }
   }, [open]);
@@ -178,16 +178,10 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             inputProps={{ min: 0 }}
           />
 
-          <TextField
-            select
-            label='Trạng thái'
-            name='isActive'
-            value={formData.isActive}
-            onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.value === "true" }))}
-            fullWidth
-          >
-            <MenuItem value='true'>Hoạt động</MenuItem>
-            <MenuItem value='false'>Ngưng</MenuItem>
+          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
+            <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
+            <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

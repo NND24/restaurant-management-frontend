@@ -38,6 +38,19 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
 
   if (!topping) return null;
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return "Hoạt động";
+      case "OUT_OF_STOCK":
+        return "Hết hàng";
+      case "INACTIVE":
+        return "Ngưng";
+      default:
+        return "Không xác định";
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle
@@ -62,26 +75,28 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
 
           <TextField label='Giá' value={topping.price} fullWidth InputProps={{ readOnly: true }} />
 
-          <Box>
-            <Typography variant='subtitle1' sx={{ mb: 0, fontWeight: "bold" }}>
-              Nguyên liệu
-            </Typography>
-            <List dense>
-              {topping.ingredients?.map((ing) => (
-                <ListItem key={ing._id} sx={{ p: 0 }}>
-                  <ListItemText
-                    primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
-                      ing.ingredient?.unit?.name || ""
-                    }`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
+          {topping.ingredients.length > 0 && (
+            <Box>
+              <Typography variant='subtitle1' sx={{ mb: 0, fontWeight: "bold" }}>
+                Nguyên liệu
+              </Typography>
+              <List dense>
+                {topping.ingredients?.map((ing) => (
+                  <ListItem key={ing._id} sx={{ p: 0 }}>
+                    <ListItemText
+                      primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
+                        ing.ingredient?.unit?.name || ""
+                      }`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
 
           <TextField
             label='Trạng thái'
-            value={topping.isActive ? "Hoạt động" : "Ngưng"}
+            value={getStatusLabel(topping.status)}
             fullWidth
             InputProps={{ readOnly: true }}
           />

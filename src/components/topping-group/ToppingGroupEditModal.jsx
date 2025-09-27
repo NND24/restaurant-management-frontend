@@ -13,6 +13,7 @@ import {
   FormControlLabel,
   Chip,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { Autocomplete } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
@@ -28,10 +29,12 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
   });
   const [allToppings, setAllToppings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // load data khi mở modal
   useEffect(() => {
     if (open) {
+      setIsLoadingData(true);
       const fetchData = async () => {
         try {
           // load danh sách topping của store
@@ -50,6 +53,8 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
           }
         } catch (err) {
           console.error("Failed to load data", err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -86,6 +91,10 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
     }
   };
 
+  useEffect(() => {
+    console.log(isLoadingData);
+  }, [isLoadingData]);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
@@ -96,113 +105,125 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField
-            label='Tên nhóm món thêm'
-            value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            fullWidth
-            required
-          />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField
+              label='Tên nhóm món thêm'
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              fullWidth
+              required
+            />
 
-          {/* Autocomplete chọn topping */}
-          <Autocomplete
-            multiple
-            options={allToppings}
-            getOptionLabel={(option) => option.name}
-            value={formData.toppings}
-            isOptionEqualToValue={(option, value) => option._id === value._id} // 👈 thêm dòng này
-            onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppings: newValue }))}
-            disableCloseOnSelect
-            renderOption={(props, option, { selected }) => (
-              <li
-                {...props}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 12px",
-                  backgroundColor: selected ? "#fcf0e8" : "white",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type='checkbox'
-                  checked={selected}
-                  readOnly
-                  style={{ width: 16, height: 16, accentColor: "#fc6011" }}
-                />
-                {option.name}
-              </li>
-            )}
-            renderTags={() => null}
-            renderInput={(params) => (
-              <TextField {...params} variant='outlined' label='Chọn món thêm' placeholder='Chọn topping...' fullWidth />
-            )}
-            PaperComponent={({ children }) => (
-              <Paper
-                elevation={3}
-                sx={{
-                  maxHeight: 240,
-                  overflowY: "auto",
-                  "&::-webkit-scrollbar": { width: 6 },
-                  "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
-                }}
-              >
-                {children}
-              </Paper>
-            )}
-            fullWidth
-          />
-
-          {/* Chip list hiển thị riêng dưới input */}
-          {formData.toppings.length > 0 && (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-              {formData.toppings.map((option) => (
-                <Chip
-                  key={option._id}
-                  label={option.name}
-                  onDelete={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      toppings: prev.toppings.filter((t) => t._id !== option._id),
-                    }))
-                  }
-                  size='medium'
-                  sx={{
-                    backgroundColor: "#fc6011",
-                    color: "#fff",
-                    fontWeight: 500,
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+            {/* Autocomplete chọn topping */}
+            <Autocomplete
+              multiple
+              options={allToppings}
+              getOptionLabel={(option) => option.name}
+              value={formData.toppings}
+              isOptionEqualToValue={(option, value) => option._id === value._id} // 👈 thêm dòng này
+              onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppings: newValue }))}
+              disableCloseOnSelect
+              renderOption={(props, option, { selected }) => (
+                <li
+                  {...props}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 12px",
+                    backgroundColor: selected ? "#fcf0e8" : "white",
+                    cursor: "pointer",
                   }}
+                >
+                  <input
+                    type='checkbox'
+                    checked={selected}
+                    readOnly
+                    style={{ width: 16, height: 16, accentColor: "#fc6011" }}
+                  />
+                  {option.name}
+                </li>
+              )}
+              renderTags={() => null}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant='outlined'
+                  label='Chọn món thêm'
+                  placeholder='Chọn topping...'
+                  fullWidth
                 />
-              ))}
-            </Box>
-          )}
+              )}
+              PaperComponent={({ children }) => (
+                <Paper
+                  elevation={3}
+                  sx={{
+                    maxHeight: 240,
+                    overflowY: "auto",
+                    "&::-webkit-scrollbar": { width: 6 },
+                    "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
+                  }}
+                >
+                  {children}
+                </Paper>
+              )}
+              fullWidth
+            />
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.onlyOnce}
-                onChange={(e) => setFormData((prev) => ({ ...prev, onlyOnce: e.target.checked }))}
-              />
-            }
-            label='Chỉ chọn được 1 món thêm trong nhóm'
-          />
+            {/* Chip list hiển thị riêng dưới input */}
+            {formData.toppings.length > 0 && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+                {formData.toppings.map((option) => (
+                  <Chip
+                    key={option._id}
+                    label={option.name}
+                    onDelete={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        toppings: prev.toppings.filter((t) => t._id !== option._id),
+                      }))
+                    }
+                    size='medium'
+                    sx={{
+                      backgroundColor: "#fc6011",
+                      color: "#fff",
+                      fontWeight: 500,
+                      borderRadius: "16px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
 
-          <TextField
-            select
-            label='Trạng thái'
-            value={formData.isActive}
-            onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.value === "true" }))}
-            fullWidth
-            SelectProps={{ native: true }}
-          >
-            <option value='true'>Hoạt động</option>
-            <option value='false'>Ngưng</option>
-          </TextField>
-        </Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.onlyOnce}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, onlyOnce: e.target.checked }))}
+                />
+              }
+              label='Chỉ chọn được 1 món thêm trong nhóm'
+            />
+
+            <TextField
+              select
+              label='Trạng thái'
+              value={formData.isActive}
+              onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.value === "true" }))}
+              fullWidth
+              SelectProps={{ native: true }}
+            >
+              <option value='true'>Hoạt động</option>
+              <option value='false'>Ngưng</option>
+            </TextField>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

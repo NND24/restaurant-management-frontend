@@ -11,7 +11,7 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
     unit: { _id: "", name: "" },
     category: { _id: "", name: "" },
     reorderLevel: 0,
-    isActive: true,
+    status: "ACTIVE", // mặc định
   });
 
   useEffect(() => {
@@ -29,6 +29,20 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
       fetchData();
     }
   }, [open, id]);
+
+  // Map status -> label
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return "Đang sử dụng";
+      case "OUT_OF_STOCK":
+        return "Hết hàng";
+      case "INACTIVE":
+        return "Ngưng sử dụng";
+      default:
+        return "Không xác định";
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
@@ -86,7 +100,7 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
 
           <TextField
             label='Trạng thái'
-            value={formData.isActive ? "Hoạt động" : "Ngưng"}
+            value={getStatusLabel(formData.status)}
             fullWidth
             InputProps={{ readOnly: true }}
           />

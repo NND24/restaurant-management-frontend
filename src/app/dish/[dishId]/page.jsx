@@ -163,7 +163,6 @@ const page = () => {
                 fontSize: "16px",
               }}
               onClick={() => {
-                console.log(params.row._id);
                 setSelectedToppingGroupId(params.row._id);
                 setOpenEditToppingGroup(true);
               }}

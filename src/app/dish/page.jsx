@@ -5,7 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { deleteDish, getAllDish, toggleSaleStatus } from "@/service/dish";
 import Image from "next/image";
 import localStorageService from "@/utils/localStorageService";
-import { Box, Typography, Tooltip, IconButton } from "@mui/material";
+import { Box, Tooltip, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import DishCreateModal from "@/components/dish/DishCreateModal";
 import { viVN } from "@/utils/constants";
@@ -48,24 +48,6 @@ const page = () => {
   useEffect(() => {
     fetchData();
   }, [storeId]);
-
-  const toggleItemEnabled = async (id) => {
-    try {
-      await toggleSaleStatus({ dishId: id });
-      setAllDishes((prev) =>
-        prev.map((item) =>
-          item._id === id
-            ? {
-                ...item,
-                stockStatus: item.stockStatus === "AVAILABLE" ? "OUT_OF_STOCK" : "AVAILABLE",
-              }
-            : item
-        )
-      );
-    } catch (err) {
-      console.error("Failed to toggle sale status", err);
-    }
-  };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -149,7 +131,7 @@ const page = () => {
       ),
     },
     {
-      field: "stockStatus",
+      field: "status",
       headerName: "Trạng thái",
       headerAlign: "center",
       align: "center",
@@ -159,7 +141,7 @@ const page = () => {
         let className = "";
 
         switch (params.value) {
-          case "AVAILABLE":
+          case "ACTIVE":
             label = "Còn hàng";
             className = "bg-green-100 text-green-800";
             break;
@@ -167,7 +149,7 @@ const page = () => {
             label = "Hết hàng";
             className = "bg-red-100 text-red-600";
             break;
-          case "INACTIVE": // hoặc DISABLED tùy backend
+          case "INACTIVE":
             label = "Ngừng bán";
             className = "bg-gray-200 text-gray-700";
             break;
@@ -177,10 +159,7 @@ const page = () => {
         }
 
         return (
-          <span
-            className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${className}`}
-            onClick={() => toggleItemEnabled(params.row?._id, params.value)}
-          >
+          <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${className}`}>
             {label}
           </span>
         );

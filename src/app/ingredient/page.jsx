@@ -107,20 +107,42 @@ const page = () => {
       renderCell: (params) => <span>{params.row?.description || ""}</span>,
     },
     {
-      field: "isActive",
+      field: "status",
       headerName: "Trạng thái",
       headerAlign: "center",
       align: "center",
       width: 130,
-      renderCell: (params) => (
-        <span
-          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-            params.row?.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
-          }`}
-        >
-          {params.row?.isActive ? "Hoạt động" : "Ngưng"}
-        </span>
-      ),
+      renderCell: (params) => {
+        let label = "";
+        let className = "";
+
+        switch (params.value) {
+          case "ACTIVE":
+            label = "Đang sử dụng";
+            className = "bg-green-100 text-green-800";
+            break;
+          case "OUT_OF_STOCK":
+            label = "Hết hàng";
+            className = "bg-red-100 text-red-600";
+            break;
+          case "INACTIVE":
+            label = "Ngưng sử dụng";
+            className = "bg-gray-200 text-gray-700";
+            break;
+          default:
+            label = "Không xác định";
+            className = "bg-gray-100 text-gray-500";
+        }
+
+        return (
+          <span
+            className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${className}`}
+            onClick={() => toggleItemEnabled(params.row?._id, params.value)}
+          >
+            {label}
+          </span>
+        );
+      },
     },
     {
       field: "actions",

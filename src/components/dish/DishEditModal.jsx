@@ -30,7 +30,7 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     description: "",
     ingredients: [],
     toppingGroups: [],
-    stockStatus: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
+    status: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
   });
   const [allCategories, setAllCategories] = useState([]);
   const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
@@ -68,7 +68,7 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
               name: d.name,
               price: d.price,
               description: d.description || "",
-              stockStatus: d.stockStatus || "ACTIVE",
+              status: d.status || "ACTIVE",
               ingredients:
                 d.ingredients?.map((i) => ({
                   ingredient: i.ingredient,
@@ -154,7 +154,7 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
         name: formData.name,
         price: Number(formData.price),
         description: formData.description,
-        stockStatus: formData.stockStatus,
+        status: formData.status,
         image: uploadedImage,
         ingredients: formData.ingredients.map((i) => ({
           ingredient: i.ingredient._id,
@@ -411,8 +411,8 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           <TextField
             select
             label='Trạng thái'
-            value={formData.stockStatus}
-            onChange={(e) => setFormData((prev) => ({ ...prev, stockStatus: e.target.value }))}
+            value={formData.status}
+            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
             fullWidth
           >
             <MenuItem value='ACTIVE'>Hoạt động</MenuItem>

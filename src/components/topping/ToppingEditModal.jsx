@@ -21,8 +21,8 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
-    isActive: true,
     ingredients: [],
+    status: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
   });
 
   const [allCategories, setAllCategories] = useState([]);
@@ -52,7 +52,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             setFormData({
               name: res.data.name,
               price: res.data.price,
-              isActive: res.data.isActive,
+              status: res.data.status || "ACTIVE",
               ingredients:
                 res.data.ingredients?.map((i) => ({
                   ingredient: i.ingredient, // đã populate ingredient
@@ -105,7 +105,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      toast.error("Tên Món thêm là bắt buộc");
+      toast.error("Tên món thêm là bắt buộc");
       return;
     }
     if (formData.ingredients.length === 0) {
@@ -118,7 +118,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       const payload = {
         name: formData.name,
         price: formData.price,
-        isActive: formData.isActive,
+        status: formData.status,
         ingredients: formData.ingredients.map((i) => ({
           ingredient: i.ingredient._id,
           quantity: i.quantity,
@@ -139,7 +139,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Chỉnh sửa Món thêm
+        Chỉnh sửa món thêm
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -148,7 +148,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       <DialogContent dividers>
         <Box className='space-y-4'>
           <TextField
-            label='Tên Món thêm'
+            label='Tên món thêm'
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             fullWidth
@@ -268,12 +268,13 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           <TextField
             select
             label='Trạng thái'
-            value={formData.isActive}
-            onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.value === "true" }))}
+            value={formData.status}
+            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
             fullWidth
           >
-            <MenuItem value='true'>Hoạt động</MenuItem>
-            <MenuItem value='false'>Ngưng</MenuItem>
+            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
+            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

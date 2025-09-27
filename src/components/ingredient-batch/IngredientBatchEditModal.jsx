@@ -128,6 +128,9 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               value={formData.expiryDate ? formData.expiryDate.split("T")[0] : ""}
               onChange={handleChange}
               fullWidth
+              inputProps={{
+                min: new Date().toISOString().slice(0, 10), // chỉ cho chọn >= hôm nay
+              }}
             />
           </Box>
 

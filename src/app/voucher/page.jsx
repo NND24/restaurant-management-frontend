@@ -16,6 +16,7 @@ const VoucherPage = () => {
   const [voucherBeingEdited, setVoucherBeingEdited] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   // load data
   const fetchVouchers = async () => {
@@ -119,24 +120,30 @@ const VoucherPage = () => {
       field: "code",
       headerName: "Mã giảm giá",
       flex: 1,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => <span className='text-blue-600'>{params.value}</span>,
     },
     {
       field: "discountType",
       headerName: "Loại giảm",
-      flex: 1,
-      valueGetter: (params) => (params.row?.discountType === "percentage" ? "Phần trăm" : "Tiền mặt"),
+      headerAlign: "center",
+      align: "center",
+      width: 140,
+      renderCell: (params) => <span>{params.row?.discountType === "PERCENTAGE" ? "Phần trăm" : "Tiền mặt"}</span>,
     },
     {
       field: "discountValue",
       headerName: "Giá trị",
-      flex: 1,
+      width: 140,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         const row = params.row;
         if (!row) return null;
         return (
           <span>
-            {row.discountType === "percentage" ? `${row.discountValue}%` : `${row.discountValue?.toLocaleString()} đ`}
+            {row.discountType === "PERCENTAGE" ? `${row.discountValue}%` : `${row.discountValue?.toLocaleString()} đ`}
           </span>
         );
       },
@@ -144,13 +151,17 @@ const VoucherPage = () => {
     {
       field: "usageLimit",
       headerName: "Số lượng",
-      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      width: 140,
     },
-    { field: "usedCount", headerName: "Đã dùng", flex: 1 },
+    { field: "usedCount", headerName: "Đã dùng", headerAlign: "center", align: "center", width: 140 },
     {
       field: "isActive",
       headerName: "Trạng thái",
-      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      width: 140,
       renderCell: (params) => (
         <span
           className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
@@ -165,24 +176,64 @@ const VoucherPage = () => {
     {
       field: "actions",
       headerName: "Hành động",
-      flex: 1.5,
       sortable: false,
+      filterable: false,
+      headerAlign: "center",
+      align: "center",
+      width: 150,
       renderCell: (params) => (
-        <div className='flex space-x-1'>
+        <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
-            <IconButton size='small' color='primary' onClick={() => handleViewVoucher(params.row)}>
+            <IconButton
+              size='small'
+              color='primary'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedId(params.row._id);
+                setShowForm(true);
+                setViewOnly(true);
+                handleViewVoucher(params.row);
+              }}
+            >
               👁️
             </IconButton>
           </Tooltip>
 
           <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
-            <IconButton size='small' color='info' onClick={() => handleEditVoucher(params.row)}>
+            <IconButton
+              size='small'
+              color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedId(params.row._id);
+                setShowForm(true);
+                setViewOnly(false);
+                handleEditVoucher(params.row);
+              }}
+            >
               ✏️
             </IconButton>
           </Tooltip>
 
           <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
-            <IconButton size='small' color='error' onClick={() => handleDeleteVoucher(params.row?._id)}>
+            <IconButton
+              size='small'
+              color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => handleDeleteVoucher(params.row?._id)}
+            >
               🗑️
             </IconButton>
           </Tooltip>
@@ -193,7 +244,8 @@ const VoucherPage = () => {
 
   return (
     <>
-      <div className='flex flex-col justify-between gap-2 border-b pb-2 mb-2'>
+      <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
+        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Voucher</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
             onClick={() => setShowForm(true)}
@@ -204,30 +256,34 @@ const VoucherPage = () => {
           </button>
         </div>
       </div>
-      <Box sx={{ height: 500, width: "100%" }}>
+      <Box sx={{ height: 525, width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}
           getRowId={(row) => row?._id}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 20]}
-          disableSelectionOnClick
           components={{ Toolbar: GridToolbar }}
+          pagination
+          pageSizeOptions={[]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 8 } },
+          }}
           loading={loading}
+          disableRowSelectionOnClick
           localeText={viVN}
         />
       </Box>
 
       {showForm && (
         <VoucherModal
-          isOpen={showForm}
+          open={showForm}
           onClose={() => {
             setShowForm(false);
             setVoucherBeingEdited(null);
             setViewOnly(false);
           }}
           onSubmit={voucherBeingEdited ? handleUpdateVoucher : handleCreateVoucher}
-          initialData={voucherBeingEdited}
+          voucherId={selectedId}
+          storeId={storeId}
           isUpdate={!!voucherBeingEdited}
           readOnly={viewOnly}
         />

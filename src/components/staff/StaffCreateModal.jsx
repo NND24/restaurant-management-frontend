@@ -108,7 +108,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             value={formData.name}
             onChange={handleChange}
             fullWidth
-            disabled={readOnly}
+            InputProps={{ readOnly: readOnly ? true : false }}
           />
           <TextField
             label='Email'
@@ -116,7 +116,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             value={formData.email}
             onChange={handleChange}
             fullWidth
-            disabled={readOnly}
+            InputProps={{ readOnly: readOnly ? true : false }}
           />
           <TextField
             label='Số điện thoại'
@@ -124,7 +124,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             value={formData.phonenumber}
             onChange={handleChange}
             fullWidth
-            disabled={readOnly}
+            InputProps={{ readOnly: readOnly ? true : false }}
           />
           <TextField
             select
@@ -133,7 +133,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             value={formData.gender}
             onChange={handleChange}
             fullWidth
-            disabled={readOnly}
+            InputProps={{ readOnly: readOnly ? true : false }}
           >
             <MenuItem value='male'>Nam</MenuItem>
             <MenuItem value='female'>Nữ</MenuItem>
@@ -146,7 +146,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             value={formData.role}
             onChange={handleChange}
             fullWidth
-            disabled={readOnly}
+            InputProps={{ readOnly: readOnly ? true : false }}
           >
             <MenuItem value='staff'>Nhân viên</MenuItem>
             <MenuItem value='manager'>Quản lý</MenuItem>

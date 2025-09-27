@@ -1,15 +1,24 @@
-import React, { useState, useEffect } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+  IconButton,
+  Box,
+} from "@mui/material";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { FaTimes } from "react-icons/fa";
+import { getVoucherById } from "@/service/voucher";
 
-const VoucherModal = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialData = {},
-  isUpdate = false,
-  readOnly = false,
-}) => {
+const VoucherModal = ({ open, onClose, storeId, voucherId, isUpdate = false, readOnly = false, onSubmit }) => {
+  const [initialData, setInitialData] = useState(null);
+
   const [formData, setFormData] = useState({
     code: "",
     description: "",
@@ -20,345 +29,280 @@ const VoucherModal = ({
     startDate: "",
     endDate: "",
     usageLimit: "",
-    usedCount: 0,
     userLimit: "",
     isActive: true,
     isStackable: false,
     type: "FOOD",
   });
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && isUpdate && initialData) {
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-        startDate: initialData.startDate
-          ? new Date(initialData.startDate).toISOString().slice(0, 16)
-          : "",
-        endDate: initialData.endDate
-          ? new Date(initialData.endDate).toISOString().slice(0, 16)
-          : "",
-      }));
-    } else if (isOpen && !isUpdate) {
-      // reset khi mở modal mới
-      setFormData({
-        code: "",
-        description: "",
-        discountType: "PERCENTAGE",
-        discountValue: 0,
-        maxDiscount: "",
-        minOrderAmount: "",
-        startDate: "",
-        endDate: "",
-        usageLimit: "",
-        usedCount: 0,
-        userLimit: "",
-        isActive: true,
-        isStackable: false,
-        type: "FOOD",
-      });
-    }
-  }, [isOpen]);
+  const formatDateTimeLocal = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return ""; // tránh lỗi Invalid Date
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-    setFormData((prev) => ({ ...prev, [name]: newValue }));
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const errors = [];
-
-    // Validate các trường bắt buộc
-    if (!formData.code.trim()) errors.push("Mã code là bắt buộc.");
-    if (!formData.discountValue) errors.push("Giá trị giảm là bắt buộc.");
-    if (!formData.startDate) errors.push("Ngày bắt đầu là bắt buộc.");
-    if (!formData.endDate) errors.push("Ngày kết thúc là bắt buộc.");
-
-    if (formData.discountValue < 0) errors.push("Giá trị giảm không được âm.");
-    if (formData.maxDiscount < 0) errors.push("Giảm tối đa không được âm.");
-    if (formData.minOrderAmount < 0)
-      errors.push("Đơn tối thiểu không được âm.");
-    if (formData.usageLimit < 0) errors.push("Số lượt tối đa không được âm.");
-    if (formData.userLimit < 0)
-      errors.push("Giới hạn mỗi người không được âm.");
-
-    if (
-      formData.discountType === "PERCENTAGE" &&
-      Number(formData.discountValue) > 100
-    ) {
-      errors.push("Giá trị phần trăm không được vượt quá 100.");
+  // load API
+  useEffect(() => {
+    if (open && voucherId) {
+      const fetchData = async () => {
+        try {
+          const res = await getVoucherById(storeId, voucherId);
+          setInitialData(res);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchData();
     }
+  }, [open, voucherId, storeId]);
 
-    const now = new Date();
-    const start = new Date(formData.startDate);
-    const end = new Date(formData.endDate);
+  useEffect(() => {
+    if (initialData) {
+      console.log("InitialData:", initialData);
 
-    if (!isUpdate && start < now.setHours(0, 0, 0, 0)) {
-      errors.push("Ngày bắt đầu phải là hôm nay hoặc sau.");
+      setFormData({
+        code: initialData.code || "",
+        description: initialData.description || "",
+        discountType: initialData.discountType || "PERCENTAGE",
+        discountValue: initialData.discountValue ?? 0,
+        maxDiscount: initialData.maxDiscount ?? "",
+        minOrderAmount: initialData.minOrderAmount ?? "",
+        startDate: formatDateTimeLocal(initialData.startDate),
+        endDate: formatDateTimeLocal(initialData.endDate),
+        usageLimit: initialData.usageLimit ?? "",
+        userLimit: initialData.userLimit ?? "",
+        isActive: Boolean(initialData.isActive),
+        isStackable: Boolean(initialData.isStackable),
+        type: initialData.type || "FOOD",
+      });
     }
+  }, [isUpdate, initialData]);
 
-    if (end <= start) {
-      errors.push("Ngày kết thúc phải sau ngày bắt đầu.");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "isActive" || name === "isStackable" ? value === "true" : value,
+    }));
+  };
+
+  const validate = () => {
+    if (!formData.code.trim()) {
+      toast.error("Mã code là bắt buộc.");
+      return false;
     }
-
-    if (errors.length > 0) {
-      errors.forEach((err) => toast.error(err));
-      return;
+    if (!formData.discountValue) {
+      toast.error("Giá trị giảm là bắt buộc.");
+      return false;
     }
+    if (!formData.startDate || !formData.endDate) {
+      toast.error("Ngày bắt đầu/kết thúc là bắt buộc.");
+      return false;
+    }
+    if (formData.discountValue < 0) {
+      toast.error("Giá trị giảm không được âm.");
+      return false;
+    }
+    if (formData.discountType === "PERCENTAGE" && Number(formData.discountValue) > 100) {
+      toast.error("Giá trị phần trăm không được vượt quá 100.");
+      return false;
+    }
+    if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+      toast.error("Ngày kết thúc phải sau ngày bắt đầu.");
+      return false;
+    }
+    return true;
+  };
 
-    // ✅ Hiện swal để xác nhận hành động
-    const confirmResult = await Swal.fire({
-      title: isUpdate ? "Xác nhận cập nhật?" : "Xác nhận thêm mới?",
-      text: isUpdate
-        ? "Bạn có chắc muốn cập nhật voucher này không?"
-        : "Bạn có chắc muốn thêm voucher này không?",
+  const handleSave = async () => {
+    if (!validate()) return;
+
+    const confirm = await Swal.fire({
+      title: isUpdate ? "Xác nhận cập nhật voucher?" : "Xác nhận thêm voucher?",
       icon: "question",
       showCancelButton: true,
       confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
       cancelButtonText: "Hủy",
     });
 
-    if (confirmResult.isConfirmed) {
-      onSubmit(formData);
+    if (!confirm.isConfirmed) return;
+
+    try {
+      setLoading(true);
+      await onSubmit?.(formData);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error(isUpdate ? "Cập nhật thất bại" : "Thêm voucher thất bại");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black bg-opacity-50"
-        onClick={onClose}
-      ></div>
+    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
+      <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
+        {readOnly ? "Chi tiết Voucher" : isUpdate ? "Cập nhật Voucher" : "Thêm Voucher mới"}
+        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+          <FaTimes />
+        </IconButton>
+      </DialogTitle>
 
-      <div className="fixed top-1/2 left-1/2 z-50 w-full max-w-5xl -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto max-h-[90vh] rounded-lg bg-white p-6 shadow-[0_3px_8px_rgba(0,0,0,0.24)]">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">
-            {readOnly
-              ? "Chi tiết Voucher"
-              : isUpdate
-              ? "Cập nhật Voucher"
-              : "Tạo Voucher"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 text-xl font-bold"
+      <DialogContent dividers>
+        <Box className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <TextField
+            label='Mã Code'
+            name='code'
+            value={formData.code}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            label='Mô tả'
+            name='description'
+            value={formData.description}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            select
+            label='Loại giảm'
+            name='discountType'
+            value={formData.discountType}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
           >
-            &times;
-          </button>
-        </div>
+            <MenuItem value='PERCENTAGE'>Phần trăm (%)</MenuItem>
+            <MenuItem value='FIXED'>Giảm số tiền</MenuItem>
+          </TextField>
+          <TextField
+            label='Giá trị giảm'
+            name='discountValue'
+            type='number'
+            value={formData.discountValue}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            label='Giảm tối đa'
+            name='maxDiscount'
+            type='number'
+            value={formData.maxDiscount}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            label='Đơn tối thiểu'
+            name='minOrderAmount'
+            type='number'
+            value={formData.minOrderAmount}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            label='Ngày bắt đầu'
+            name='startDate'
+            type='datetime-local'
+            value={formData.startDate}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label='Ngày kết thúc'
+            name='endDate'
+            type='datetime-local'
+            value={formData.endDate}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label='Số lượt tối đa'
+            name='usageLimit'
+            type='number'
+            value={formData.usageLimit}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            label='Giới hạn mỗi người'
+            name='userLimit'
+            type='number'
+            value={formData.userLimit}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          />
+          <TextField
+            select
+            label='Có thể cộng dồn'
+            name='isStackable'
+            value={formData?.isStackable?.toString()}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          >
+            <MenuItem value='false'>Không</MenuItem>
+            <MenuItem value='true'>Có</MenuItem>
+          </TextField>
+          <TextField
+            select
+            label='Trạng thái'
+            name='isActive'
+            value={formData.isActive.toString()}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          >
+            <MenuItem value='true'>Hoạt động</MenuItem>
+            <MenuItem value='false'>Ngưng</MenuItem>
+          </TextField>
+          <TextField
+            select
+            label='Áp dụng cho'
+            name='type'
+            value={formData.type}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ readOnly: readOnly ? true : false }}
+          >
+            <MenuItem value='FOOD'>Đồ ăn</MenuItem>
+            <MenuItem value='DELIVERY'>Giao hàng</MenuItem>
+          </TextField>
+        </Box>
+      </DialogContent>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input
-              label="Mã Code"
-              name="code"
-              value={formData.code}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Mô tả"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-
-            <Select
-              label="Loại giảm"
-              name="discountType"
-              value={formData.discountType}
-              onChange={handleChange}
-              options={[
-                { label: "Phần trăm (%)", value: "PERCENTAGE" },
-                { label: "Giảm số tiền", value: "FIXED" },
-              ]}
-              disabled={readOnly}
-            />
-
-            <Input
-              label="Giá trị giảm"
-              name="discountValue"
-              type="number"
-              value={formData.discountValue}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Giảm tối đa"
-              name="maxDiscount"
-              type="number"
-              value={formData.maxDiscount}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Đơn tối thiểu"
-              name="minOrderAmount"
-              type="number"
-              value={formData.minOrderAmount}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Ngày bắt đầu"
-              name="startDate"
-              type="datetime-local"
-              value={formData.startDate}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Ngày kết thúc"
-              name="endDate"
-              type="datetime-local"
-              value={formData.endDate}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Số lượt tối đa"
-              name="usageLimit"
-              type="number"
-              value={formData.usageLimit}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-            <Input
-              label="Giới hạn mỗi người"
-              name="userLimit"
-              type="number"
-              value={formData.userLimit}
-              onChange={handleChange}
-              disabled={readOnly}
-            />
-
-            <Select
-              label="Có thể cộng dồn"
-              name="isStackable"
-              value={formData.isStackable.toString()}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  isStackable: e.target.value === "true",
-                }))
-              }
-              options={[
-                { label: "Không", value: "false" },
-                { label: "Có", value: "true" },
-              ]}
-              disabled={readOnly}
-            />
-
-            <Select
-              label="Trạng thái"
-              name="isActive"
-              value={formData.isActive.toString()}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  isActive: e.target.value === "true",
-                }))
-              }
-              options={[
-                { label: "Hoạt động", value: "true" },
-                { label: "Ngưng", value: "false" },
-              ]}
-              disabled={readOnly}
-            />
-
-            <Select
-              label="Áp dụng cho"
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              options={[
-                { label: "Đồ ăn", value: "FOOD" },
-                { label: "Giao hàng", value: "DELIVERY" },
-              ]}
-              disabled={readOnly}
-            />
-          </div>
-
-          {!readOnly && (
-            <div className="mt-6 flex justify-end">
-              <button
-                type="submit"
-                className="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
-              >
-                {isUpdate ? "Cập nhật" : "Lưu"}
-              </button>
-            </div>
-          )}
-        </form>
-      </div>
-    </>
+      {!readOnly && (
+        <DialogActions sx={{ px: 3 }}>
+          <Button onClick={onClose} color='error' variant='outlined'>
+            Hủy
+          </Button>
+          <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
+            {loading ? "Đang lưu..." : isUpdate ? "Cập nhật" : "Lưu"}
+          </Button>
+        </DialogActions>
+      )}
+    </Dialog>
   );
 };
-
-// Subcomponent Input
-const Input = ({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  disabled = false,
-  readOnly = false, // ✅ thêm prop
-}) => (
-  <div className={`${readOnly ? "hidden" : ""}`}>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      className={`w-full rounded border-solid border-gray-300 border-[1px] px-3 py-2 ${
-        disabled ? "bg-gray-100" : ""
-      }`}
-    />
-  </div>
-);
-
-// Subcomponent Select
-const Select = ({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-  disabled = false,
-}) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-    </label>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled} // ✅ THÊM VÀO ĐÂY
-      className={`w-full rounded border-solid border-gray-300 border-[1px] px-3 py-2 ${
-        disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-      }`}
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
 
 export default VoucherModal;

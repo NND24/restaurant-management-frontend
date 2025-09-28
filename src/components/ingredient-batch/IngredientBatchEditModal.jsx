@@ -17,8 +17,10 @@ import { toast } from "react-toastify";
 
 const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
   const [formData, setFormData] = useState({
-    ingredient: { _id: "", name: "" },
+    batchCode: "",
+    ingredient: { _id: "", name: "", unit: { name: "" } },
     quantity: 0,
+    remainingQuantity: 0,
     costPerUnit: 0,
     receivedDate: "",
     expiryDate: "",
@@ -59,7 +61,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
       setLoading(true);
       await updateBatch({ id, data: formData });
       toast.success("Cập nhật lô nguyên liệu thành công");
-      onUpdated();
+      onUpdated?.();
       onClose();
     } catch (err) {
       console.error("Lỗi khi cập nhật batch:", err);
@@ -89,6 +91,9 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
+          {/* batchCode */}
+          <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
+
           <TextField
             label='Nguyên liệu'
             value={formData.ingredient?.name || ""}
@@ -105,9 +110,26 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               InputProps={{ readOnly: true }}
             />
             <TextField
+              label='Số lượng còn lại'
+              type='number'
+              value={formData.remainingQuantity}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
               label='Giá / đơn vị'
               type='number'
               value={formData.costPerUnit}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+            <TextField
+              label='Tổng giá'
+              type='number'
+              value={formData.quantity * formData.costPerUnit}
               fullWidth
               InputProps={{ readOnly: true }}
             />
@@ -129,7 +151,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               onChange={handleChange}
               fullWidth
               inputProps={{
-                min: new Date().toISOString().slice(0, 10), // chỉ cho chọn >= hôm nay
+                min: new Date().toISOString().slice(0, 10),
               }}
             />
           </Box>
@@ -153,7 +175,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
           <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
             <MenuItem value='active'>Hoạt động</MenuItem>
             <MenuItem value='expired'>Hết hạn</MenuItem>
-            <MenuItem value='finished'>Đã kết thúc</MenuItem>
+            <MenuItem value='finished'>Đã dùng hết</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

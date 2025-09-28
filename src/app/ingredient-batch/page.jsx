@@ -70,6 +70,14 @@ const page = () => {
 
   const columns = [
     {
+      field: "batchCode",
+      headerName: "Mã lô",
+      width: 160,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => <span>{params.row?.batchCode || "-"}</span>,
+    },
+    {
       field: "ingredient",
       headerName: "Lô nguyên liệu",
       width: 200,
@@ -82,14 +90,6 @@ const page = () => {
       width: 120,
       headerAlign: "center",
       align: "center",
-    },
-    {
-      field: "costPerUnit",
-      headerName: "Giá/đơn vị",
-      width: 140,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => <span>{params.row?.costPerUnit?.toLocaleString()} ₫</span>,
     },
     {
       field: "totalCost",

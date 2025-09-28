@@ -6,6 +6,7 @@ import { getBatchById } from "@/service/ingredientBatch";
 
 const IngredientBatchDetailModal = ({ open, onClose, id }) => {
   const [formData, setFormData] = useState({
+    batchCode: "",
     ingredient: { _id: "", name: "" },
     quantity: 0,
     costPerUnit: 0,
@@ -53,6 +54,9 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
+          {/* batchCode */}
+          <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
+
           <TextField
             label='Nguyên liệu'
             value={formData.ingredient?.name || ""}

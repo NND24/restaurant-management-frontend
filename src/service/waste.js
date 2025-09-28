@@ -1,8 +1,7 @@
 import axios from "../libs/axiosInstance";
 
-export const createWaste = async ({ ingredientBatch, quantity, reason, otherReason, staff }) => {
+export const createWaste = async ({ data }) => {
   try {
-    let data = { ingredientBatch, quantity, reason, otherReason, staff };
     const res = await axios.post(`/waste/`, data);
     return res.data;
   } catch (error) {
@@ -11,10 +10,9 @@ export const createWaste = async ({ ingredientBatch, quantity, reason, otherReas
   }
 };
 
-export const getWasteList = async ({ storeId, from, to, reason, staff }) => {
+export const getWasteList = async (storeId) => {
   try {
-    let data = { from, to, reason, staff };
-    const res = await axios.get(`/waste/store/${storeId}`, data);
+    const res = await axios.get(`/waste/store/${storeId}`);
     return res.data;
   } catch (error) {
     console.error(error);
@@ -32,7 +30,17 @@ export const getWasteById = async (id) => {
   }
 };
 
-export const deleteWaste = async ({ id }) => {
+export const updateWaste = async ({ id, data }) => {
+  try {
+    const res = await axios.put(`/waste/${id}`, data);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const deleteWaste = async (id) => {
   try {
     const res = await axios.delete(`/waste/${id}`);
     return res.data;

@@ -41,9 +41,8 @@ export const getIngredientById = async (id) => {
   }
 };
 
-export const updateIngredient = async ({ id, name, unit, description, category, reorderLevel }) => {
+export const updateIngredient = async ({ id, data }) => {
   try {
-    let data = { name, unit, description, category, reorderLevel };
     const res = await axios.put(`/ingredient/${id}`, data);
     return res.data;
   } catch (error) {

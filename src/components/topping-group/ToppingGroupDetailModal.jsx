@@ -58,7 +58,7 @@ const ToppingGroupDetailModal = ({ open, onClose, id }) => {
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        Chi tiết nhóm Món thêm
+        Chi tiết nhóm món thêm
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>

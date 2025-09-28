@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { createBatch } from "@/service/ingredientBatch";
-import { getIngredientsByStore } from "@/service/ingredient";
+import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
+import { getIngredientsByCategory } from "@/service/ingredient";
 
 const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
@@ -27,22 +28,22 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
     storageLocation: "",
     status: "active",
   });
+
   const [loading, setLoading] = useState(false);
-  const [allIngredients, setAllIngredients] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await getIngredientsByStore(storeId);
-      setAllIngredients(res?.data || []);
-    };
-    if (open) {
-      fetchData();
-    }
-  }, [open, storeId]);
-
-  // reset form khi mở
+  // Lấy danh sách category khi mở modal
   useEffect(() => {
     if (open) {
+      const fetchCategories = async () => {
+        const res = await getActiveIngredientCategoriesByStore(storeId);
+        setAllCategories(res?.data || []);
+      };
+      fetchCategories();
+
+      // reset form
       setFormData({
         ingredient: "",
         quantity: 0,
@@ -54,8 +55,20 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
         storageLocation: "",
         status: "active",
       });
+      setSelectedCategory("");
+      setIngredientsByCategory([]);
     }
-  }, [open]);
+  }, [open, storeId]);
+
+  // Khi chọn category thì load nguyên liệu
+  useEffect(() => {
+    if (!selectedCategory) return setIngredientsByCategory([]);
+    const fetchIngredients = async () => {
+      const res = await getIngredientsByCategory({ storeId, categoryId: selectedCategory });
+      setIngredientsByCategory(res?.data || []);
+    };
+    fetchIngredients();
+  }, [selectedCategory, storeId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -99,21 +112,43 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
       <DialogContent dividers>
         <Box className='space-y-4'>
-          <TextField
-            select
-            label='Nguyên liệu'
-            name='ingredient'
-            value={formData.ingredient}
-            onChange={handleChange}
-            fullWidth
-            required
-          >
-            {allIngredients.map((ing) => (
-              <MenuItem key={ing._id} value={ing._id}>
-                {ing.name}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            {/* chọn loại nguyên liệu */}
+            <TextField
+              select
+              label='Loại nguyên liệu'
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setFormData((prev) => ({ ...prev, ingredient: "" }));
+              }}
+              fullWidth
+            >
+              {allCategories.map((c) => (
+                <MenuItem key={c._id} value={c._id}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            {/* chọn nguyên liệu theo loại */}
+            <TextField
+              select
+              label='Nguyên liệu'
+              name='ingredient'
+              value={formData.ingredient}
+              onChange={handleChange}
+              fullWidth
+              required
+              disabled={!selectedCategory}
+            >
+              {ingredientsByCategory.map((ing) => (
+                <MenuItem key={ing._id} value={ing._id}>
+                  {ing.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
@@ -166,7 +201,7 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               fullWidth
               InputLabelProps={{ shrink: true }}
               inputProps={{
-                min: new Date().toISOString().slice(0, 10), // chỉ cho chọn >= hôm nay
+                min: new Date().toISOString().slice(0, 10),
               }}
             />
           </Box>
@@ -190,7 +225,7 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
           <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
             <MenuItem value='active'>Hoạt động</MenuItem>
             <MenuItem value='expired'>Hết hạn</MenuItem>
-            <MenuItem value='inactive'>Ngưng</MenuItem>
+            <MenuItem value='finished'>Đã dùng hết</MenuItem>
           </TextField>
         </Box>
       </DialogContent>

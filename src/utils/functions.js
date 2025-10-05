@@ -36,7 +36,7 @@ export const groupStoresByCategory = (stores) => {
 
   stores.forEach((store) => {
     store.storeCategory.forEach((category) => {
-      const categoryId = category._id;
+      const categoryId = category?._id;
 
       if (!groupedStores[categoryId]) {
         groupedStores[categoryId] = {
@@ -57,7 +57,7 @@ export const groupDishesByCategory = (dishes) => {
 
   dishes.forEach((dish) => {
     const category = dish.category;
-    const categoryId = category._id;
+    const categoryId = category?._id;
 
     if (!groupedDishes[categoryId]) {
       groupedDishes[categoryId] = {

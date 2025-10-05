@@ -1,10 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
 import { ThreeDots } from "react-loader-spinner";
-
 import Tabs from "@/components/Tabs";
-
 import LatestTab from "@/components/tabs/LatestOrderTab";
 import VerifyTab from "@/components/tabs/VerifyOrderTab";
 import localStorageService from "@/utils/localStorageService";
@@ -40,12 +37,9 @@ const page = () => {
   }
 
   return (
-    <Tabs
-      key={activeTab} // 👈 force re-render when either changes
-      tabs={tabData}
-      defaultActiveTab={activeTab}
-      onTabChange={handleTabChange}
-    />
+    <div className='p-5'>
+      <Tabs key={activeTab} tabs={tabData} defaultActiveTab={activeTab} onTabChange={handleTabChange} />
+    </div>
   );
 };
 

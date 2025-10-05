@@ -152,7 +152,7 @@ const WastePage = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateWaste && (
         <WasteCreateModal
           open={openCreateWaste}
@@ -207,7 +207,7 @@ const WastePage = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

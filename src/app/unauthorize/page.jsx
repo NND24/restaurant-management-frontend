@@ -26,7 +26,7 @@ const UnauthorizedPage = () => {
         {/* Actions */}
         <div className='flex flex-col gap-4'>
           <button
-            onClick={() => router.push("/statistics")}
+            onClick={() => router.push("/statistic/revenue")}
             className='px-6 py-2 rounded-lg bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-300 text-white font-semibold transition'
           >
             Về trang chủ

@@ -11,22 +11,22 @@ export const getRevenueSummary = async () => {
   }
 };
 
-export const getRevenueByDay = async (from, to) => {
+export const revenueByPeriod = async ({ period, month, year }) => {
   try {
-    const res = await axios.get("/statistics/revenue/by-day", {
-      params: { from, to },
+    const res = await axios.get("/statistics/revenue/by-period", {
+      params: { period, month, year },
     });
     return res.data;
   } catch (error) {
-    console.error("Get revenue by day error:", error);
+    console.error("Get revenue by period error:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
-}
+};
 
-export const getRevenueByItem = async (limit) => {
+export const getRevenueByItem = async ({ limit = 5, period = "day", month, year }) => {
   try {
-    const res = await axios.get("/statistics/revenue/by-item",{
-      params: { limit }
+    const res = await axios.get("/statistics/revenue/by-item", {
+      params: { limit, period, month, year },
     });
     return res.data;
   } catch (error) {
@@ -35,12 +35,26 @@ export const getRevenueByItem = async (limit) => {
   }
 };
 
-export const getRevenueByCategory = async () => {
+export const getRevenueByDishGroup = async ({ limit = 5, period = "day", month, year }) => {
   try {
-    const res = await axios.get("/statistics/revenue/by-category");
+    const res = await axios.get("/statistics/revenue/by-dish-group", {
+      params: { period, month, year },
+    });
     return res.data;
   } catch (error) {
-    console.error("Get revenue by category error:", error);
+    console.error("Get revenue by dish group error:", error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const analyzeBusinessResult = async ({ period = "day", month, year }) => {
+  try {
+    const res = await axios.get("/statistics/revenue/analyze-business", {
+      params: { period, month, year },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Get revenue by dish group error:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
@@ -156,7 +170,6 @@ export const getAverageSpendingPerOrder = async () => {
   }
 };
 
-
 export const getVoucherUsageSummary = async (from, to) => {
   try {
     const res = await axios.get("/statistics/vouchers/usage-summary", {
@@ -183,7 +196,7 @@ export const getTopUsedVouchers = async (limit, from, to) => {
 
 export const getVoucherRevenueImpact = async (from, to) => {
   try {
-    const res = await axios.get("/statistics/vouchers/revenue-impact",{
+    const res = await axios.get("/statistics/vouchers/revenue-impact", {
       params: { from, to },
     });
     return res.data;

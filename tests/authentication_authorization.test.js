@@ -7,7 +7,7 @@ test("TC01 - Đăng nhập với tài khoản hợp lệ", async ({ page }) => {
   await login(page, "buianh120403@gmail.com", "123");
   await expect(page.getByText("Đăng nhập thành công!")).toBeVisible();
   await page.waitForTimeout(1000);
-  await expect(page.url()).toContain("/statistics");
+  await expect(page.url()).toContain("/statistic/revenue");
 });
 
 // Login with wrong credentials

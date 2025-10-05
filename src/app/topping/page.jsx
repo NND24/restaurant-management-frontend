@@ -199,7 +199,7 @@ const page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateTopping && (
         <ToppingCreateModal
           open={openCreateTopping}
@@ -254,7 +254,7 @@ const page = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

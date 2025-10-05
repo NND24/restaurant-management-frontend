@@ -68,13 +68,29 @@ export default function SidebarLayout({ children }) {
             }),
           }}
         >
-          <MenuItem
-            icon={<FaChartBar />}
-            active={pathname.startsWith("/statistics")}
-            onClick={() => handleMenuClick("/statistics")}
-          >
-            Thống kê
-          </MenuItem>
+          <SubMenu icon={<FaChartBar />} label='Thống kê' defaultOpen={pathname.startsWith("/statistic")}>
+            <MenuItem active={pathname === "/statistic/revenue"} onClick={() => handleMenuClick("/statistic/revenue")}>
+              Doanh thu
+            </MenuItem>
+            <MenuItem active={pathname === "/statistic/orders"} onClick={() => handleMenuClick("/statistic/orders")}>
+              Đơn hàng
+            </MenuItem>
+            <MenuItem active={pathname === "/statistic/items"} onClick={() => handleMenuClick("/statistic/items")}>
+              Món ăn
+            </MenuItem>
+            <MenuItem
+              active={pathname === "/statistic/customers"}
+              onClick={() => handleMenuClick("/statistic/customers")}
+            >
+              Khách hàng
+            </MenuItem>
+            <MenuItem
+              active={pathname === "/statistic/vouchers"}
+              onClick={() => handleMenuClick("/statistic/vouchers")}
+            >
+              Giảm giá
+            </MenuItem>
+          </SubMenu>
 
           <SubMenu
             icon={<FaUtensils />}
@@ -163,7 +179,7 @@ export default function SidebarLayout({ children }) {
       </Sidebar>
 
       {/* Content */}
-      <main className='flex-1 bg-gray-50 p-5 overflow-y-hidden'>{children}</main>
+      <main className='flex-1 bg-gray-50 overflow-y-hidden'>{children}</main>
     </div>
   );
 }

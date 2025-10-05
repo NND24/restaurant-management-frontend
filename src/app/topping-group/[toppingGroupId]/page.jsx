@@ -185,7 +185,7 @@ const page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateTopping && (
         <ToppingCreateToGroupModal
           open={openCreateTopping}
@@ -262,7 +262,7 @@ const page = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

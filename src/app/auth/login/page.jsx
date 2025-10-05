@@ -45,7 +45,7 @@ const Page = () => {
       const status = await checkStoreStatus();
       switch (status) {
         case "APPROVED":
-          router.push("/statistics");
+          router.push("/statistic/revenue");
           break;
         case "PENDING":
           router.push("/auth/verification-pending");
@@ -86,7 +86,7 @@ const Page = () => {
         switch (status) {
           case "APPROVED":
             toast.success("Đăng nhập thành công!");
-            router.push("/statistics");
+            router.push("/statistic/revenue");
             break;
           case "PENDING":
             toast.success("Đăng nhập thành công!");

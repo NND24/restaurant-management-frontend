@@ -238,7 +238,7 @@ const page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateDishModal && (
         <DishCreateToGroupModal
           open={openCreateDishModal}
@@ -315,7 +315,7 @@ const page = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

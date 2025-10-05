@@ -128,7 +128,7 @@ const StoreReviewPage = () => {
   ];
 
   return (
-    <div>
+    <div className='p-5'>
       <div style={{ height: "95vh", width: "100%" }}>
         <DataGrid
           rows={rows}

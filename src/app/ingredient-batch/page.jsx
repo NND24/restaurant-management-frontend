@@ -195,7 +195,7 @@ const page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateIngredient && (
         <IngredientBatchCreateModal
           open={openCreateIngredient}
@@ -254,7 +254,7 @@ const page = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

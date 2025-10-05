@@ -168,7 +168,7 @@ const page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       {openCreateIngredientCategory && (
         <IngredientCategoryCreateModal
           open={openCreateIngredientCategory}
@@ -226,7 +226,7 @@ const page = () => {
           localeText={viVN}
         />
       </Box>
-    </>
+    </div>
   );
 };
 

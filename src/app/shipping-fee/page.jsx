@@ -154,7 +154,7 @@ const Page = () => {
   ];
 
   return (
-    <>
+    <div className='p-5'>
       <FloatingButton onClick={() => setShowForm(true)} />
 
       <DataGrid
@@ -183,7 +183,7 @@ const Page = () => {
           readOnly={viewOnly}
         />
       )}
-    </>
+    </div>
   );
 };
 

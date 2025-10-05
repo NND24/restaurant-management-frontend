@@ -151,12 +151,10 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             fullWidth
             required
             SelectProps={{
-              MenuProps: {
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                    overflowY: "auto",
-                  },
+              PaperProps: {
+                sx: {
+                  maxHeight: "200px !important", // override cứng
+                  overflowY: "auto",
                 },
               },
             }}

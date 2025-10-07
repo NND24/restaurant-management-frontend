@@ -16,9 +16,10 @@ import {
   TableRow,
   TableContainer,
   Tooltip,
+  Grid,
 } from "@mui/material";
 import { PieChart, Pie, Tooltip as RechartsTooltip, Cell, Legend, ResponsiveContainer } from "recharts";
-import { getRevenueByItem, getRevenueByDishGroup } from "@/service/statistic";
+import { getRevenueByItem, getRevenueByDishGroup, getRecommendedDishes } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 
@@ -39,6 +40,7 @@ const DashboardPage = () => {
   dayjs.extend(isoWeek);
 
   const [byItem, setByItem] = useState([]);
+  const [byGroup, setByGroup] = useState([]);
   const [itemLimit, setItemLimit] = useState(10);
   const [groupLimit, setGroupLimit] = useState(10);
   const [viewType, setViewType] = useState("day");
@@ -46,9 +48,11 @@ const DashboardPage = () => {
   const [month, setMonth] = useState(dayjs().month() + 1);
   const [year, setYear] = useState(dayjs().year());
   const [pieType, setPieType] = useState("revenue");
-  const [byGroup, setByGroup] = useState([]);
   const [pieGroupType, setPieGroupType] = useState("revenue");
 
+  const [recommendedDishes, setRecommendedDishes] = useState([]);
+
+  // ===== Fetch data =====
   const fetchItem = async () => {
     const resItem = await getRevenueByItem({ limit: itemLimit, period: viewType, month, year });
     setByItem(resItem.data);
@@ -59,6 +63,15 @@ const DashboardPage = () => {
     setByGroup(resGroup.data);
   };
 
+  const fetchRecommended = async () => {
+    try {
+      const res = await getRecommendedDishes();
+      if (res.success) setRecommendedDishes(res.data || []);
+    } catch (err) {
+      console.error("❌ Lỗi fetch gợi ý món:", err);
+    }
+  };
+
   useEffect(() => {
     fetchItem();
   }, [viewType, week, month, year, itemLimit]);
@@ -67,6 +80,11 @@ const DashboardPage = () => {
     fetchGroup();
   }, [viewType, week, month, year, groupLimit]);
 
+  useEffect(() => {
+    fetchRecommended();
+  }, []);
+
+  // ===== Tính margin =====
   const byItemWithMargin = byItem.map((item) => ({
     ...item,
     margin: item.totalRevenue > 0 ? (item.totalProfit / item.totalRevenue) * 100 : 0,
@@ -99,7 +117,7 @@ const DashboardPage = () => {
           Thống kê món ăn
         </Typography>
 
-        {/* Bộ lọc */}
+        {/* ===== Bộ lọc ===== */}
         <Card sx={{ borderRadius: 3, mb: 4, boxShadow: 3, backgroundColor: "#fff" }}>
           <CardContent>
             <Box display='flex' gap={3} flexWrap='wrap' alignItems='center'>
@@ -343,6 +361,52 @@ const DashboardPage = () => {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* ===== Gợi ý món ăn mới ===== */}
+        <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
+          <CardContent>
+            <Typography variant='h6' gutterBottom>
+              🍽️ Gợi ý món ăn mới
+            </Typography>
+
+            {recommendedDishes.length > 0 ? (
+              <Grid container spacing={2}>
+                {recommendedDishes.map((dish, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card
+                      sx={{
+                        borderRadius: 2,
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        boxShadow: 2,
+                        backgroundColor: "#fafafa",
+                        transition: "0.3s",
+                        "&:hover": { boxShadow: 6, transform: "translateY(-5px)" },
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant='h6' fontWeight='bold' color='primary' gutterBottom>
+                          {dish.name}
+                        </Typography>
+                        <Typography variant='body2' color='text.secondary' sx={{ mb: 1.5 }}>
+                          {dish.description}
+                        </Typography>
+                        <Typography variant='subtitle2' fontWeight='bold' color='text.primary'>
+                          Nguyên liệu chính:
+                        </Typography>
+                        <Typography variant='body2'>{dish.mainIngredients.join(", ")}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Typography>Đang phân tích dữ liệu & gợi ý món ăn...</Typography>
+            )}
           </CardContent>
         </Card>
       </Box>

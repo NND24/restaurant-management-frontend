@@ -59,6 +59,15 @@ export const analyzeBusinessResult = async ({ period = "day", month, year }) => 
   }
 };
 
+export const getRecommendedDishes = async () => {
+  try {
+    const res = await axios.get("/statistics/revenue/recommend-dish");
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
 // Orders
 export const getOrderStatusRate = async () => {
   try {

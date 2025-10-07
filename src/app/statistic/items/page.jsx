@@ -328,7 +328,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* ===== Biểu đồ Món Ăn (PieChart - Recharts) ===== */}
-        <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+        <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
               <Typography variant='h6'>📊 Tỷ lệ Theo Món</Typography>
@@ -365,7 +365,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* ===== Gợi ý món ăn mới ===== */}
-        <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
+        <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
               🍽️ Gợi ý món ăn mới
@@ -374,9 +374,10 @@ const DashboardPage = () => {
             {recommendedDishes.length > 0 ? (
               <Grid container spacing={2}>
                 {recommendedDishes.map((dish, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid item xs={12} key={index}>
                     <Card
                       sx={{
+                        width: "100%",
                         borderRadius: 2,
                         height: "100%",
                         display: "flex",

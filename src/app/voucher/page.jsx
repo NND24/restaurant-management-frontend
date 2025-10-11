@@ -183,60 +183,60 @@ const VoucherPage = () => {
       width: 150,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='primary'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                setSelectedId(params.row._id);
-                setShowForm(true);
-                setViewOnly(true);
-                handleViewVoucher(params.row);
-              }}
-            >
-              👁️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Xem chi tiết'
+            size='small'
+            color='primary'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              setSelectedId(params.row._id);
+              setShowForm(true);
+              setViewOnly(true);
+              handleViewVoucher(params.row);
+            }}
+          >
+            👁️
+          </IconButton>
 
-          <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='info'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                setSelectedId(params.row._id);
-                setShowForm(true);
-                setViewOnly(false);
-                handleEditVoucher(params.row);
-              }}
-            >
-              ✏️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Chỉnh sửa'
+            size='small'
+            color='info'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              setSelectedId(params.row._id);
+              setShowForm(true);
+              setViewOnly(false);
+              handleEditVoucher(params.row);
+            }}
+          >
+            ✏️
+          </IconButton>
 
-          <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='error'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => handleDeleteVoucher(params.row?._id)}
-            >
-              🗑️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Xoá'
+            size='small'
+            color='error'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => handleDeleteVoucher(params.row?._id)}
+          >
+            🗑️
+          </IconButton>
         </div>
       ),
     },

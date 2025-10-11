@@ -207,19 +207,19 @@ const DashboardPage = () => {
                   {byGroupWithMargin.map((g, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Tooltip title={g.groupName}>
-                          <Typography
-                            sx={{
-                              minWidth: 85,
-                              maxWidth: 150,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {g.groupName}
-                          </Typography>
-                        </Tooltip>
+                        <Typography
+                          data-tooltip-id='dish-tooltip'
+                          data-tooltip-content={g.groupName}
+                          sx={{
+                            minWidth: 85,
+                            maxWidth: 150,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {g.groupName}
+                        </Typography>
                       </TableCell>
                       <TableCell align='center'>{g.totalQuantity}</TableCell>
                       <TableCell align='center'>{g.totalRevenue.toLocaleString("vi-VN")}</TableCell>
@@ -302,18 +302,18 @@ const DashboardPage = () => {
                   {byItemWithMargin.map((item, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Tooltip title={item.dishName}>
-                          <Typography
-                            sx={{
-                              maxWidth: 150,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {item.dishName}
-                          </Typography>
-                        </Tooltip>
+                        <Typography
+                          data-tooltip-id='dish-tooltip'
+                          data-tooltip-content={item.dishName}
+                          sx={{
+                            maxWidth: 150,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.dishName}
+                        </Typography>
                       </TableCell>
                       <TableCell align='center'>{item.totalQuantity}</TableCell>
                       <TableCell align='center'>{item.totalRevenue.toLocaleString("vi-VN")}</TableCell>

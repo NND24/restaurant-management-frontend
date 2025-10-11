@@ -1,13 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { getAllStaff, deleteStaff, createStaff, updateStaff } from "@/service/staff";
 import localStorageService from "@/utils/localStorageService";
 import { FaPlus } from "react-icons/fa";
-import { IconButton, Box, Tooltip } from "@mui/material";
+import { IconButton, Box } from "@mui/material";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import StaffModel from "@/components/popups/Staff";
 import { viVN } from "@/utils/constants";
 import StaffCreateModal from "@/components/staff/StaffCreateModal";
 
@@ -88,59 +86,59 @@ export default function StaffDataGrid() {
       width: 150,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          <Tooltip title='Xem chi tiết' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='primary'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                const staffRaw = staff.find((s) => s._id === params.row.id);
-                setViewOnly(true);
-                setStaffBeingEdited(staffRaw);
-                setShowForm(true);
-              }}
-            >
-              👁️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Xem chi tiết'
+            size='small'
+            color='primary'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              const staffRaw = staff.find((s) => s._id === params.row.id);
+              setViewOnly(true);
+              setStaffBeingEdited(staffRaw);
+              setShowForm(true);
+            }}
+          >
+            👁️
+          </IconButton>
 
-          <Tooltip title='Chỉnh sửa' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='info'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                const staffRaw = staff.find((s) => s._id === params.row.id);
-                setStaffBeingEdited(staffRaw);
-                setShowForm(true);
-              }}
-            >
-              ✏️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Chỉnh sửa'
+            size='small'
+            color='info'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              const staffRaw = staff.find((s) => s._id === params.row.id);
+              setStaffBeingEdited(staffRaw);
+              setShowForm(true);
+            }}
+          >
+            ✏️
+          </IconButton>
 
-          <Tooltip title='Xoá' PopperProps={{ strategy: "fixed" }}>
-            <IconButton
-              size='small'
-              color='error'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => handleDeleteStaff(params.row.id)}
-            >
-              🗑️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Xoá'
+            size='small'
+            color='error'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => handleDeleteStaff(params.row.id)}
+          >
+            🗑️
+          </IconButton>
         </div>
       ),
     },

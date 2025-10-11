@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
-import { Box, Tooltip, IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import { viVN } from "@/utils/constants";
 import IngredientCreateModal from "@/components/ingredient/IngredientCreateModal";
@@ -154,58 +154,59 @@ const page = () => {
       width: 150,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          <Tooltip title='Xem chi tiết'>
-            <IconButton
-              size='small'
-              color='primary'
-              sx={{
-                width: 30,
-                height: 30,
-                fontSize: "16px",
-              }}
-              onClick={() => {
-                setSelectedId(params.row._id);
-                setOpenDetailIngredient(true);
-              }}
-            >
-              👁️
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Xem chi tiết'
+            size='small'
+            color='primary'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              setSelectedId(params.row._id);
+              setOpenDetailIngredient(true);
+            }}
+          >
+            👁️
+          </IconButton>
           {!blockEdit && (
             <>
-              <Tooltip title='Chỉnh sửa'>
-                <IconButton
-                  size='small'
-                  color='info'
-                  sx={{
-                    width: 30,
-                    height: 30,
-                    fontSize: "16px",
-                  }}
-                  onClick={() => {
-                    setSelectedId(params.row._id);
-                    setOpenEditIngredient(true);
-                  }}
-                >
-                  ✏️
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Xoá'>
-                <IconButton
-                  size='small'
-                  color='error'
-                  sx={{
-                    width: 30,
-                    height: 30,
-                    fontSize: "16px",
-                  }}
-                  onClick={() => {
-                    handleDelete(params.row._id);
-                  }}
-                >
-                  🗑️
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                data-tooltip-id='dish-tooltip'
+                data-tooltip-content='Chỉnh sửa'
+                size='small'
+                color='info'
+                sx={{
+                  width: 30,
+                  height: 30,
+                  fontSize: "16px",
+                }}
+                onClick={() => {
+                  setSelectedId(params.row._id);
+                  setOpenEditIngredient(true);
+                }}
+              >
+                ✏️
+              </IconButton>
+
+              <IconButton
+                data-tooltip-id='dish-tooltip'
+                data-tooltip-content='Xoá'
+                size='small'
+                color='error'
+                sx={{
+                  width: 30,
+                  height: 30,
+                  fontSize: "16px",
+                }}
+                onClick={() => {
+                  handleDelete(params.row._id);
+                }}
+              >
+                🗑️
+              </IconButton>
             </>
           )}
         </div>

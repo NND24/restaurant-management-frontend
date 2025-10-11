@@ -61,7 +61,16 @@ export const analyzeBusinessResult = async ({ period = "day", month, year }) => 
 
 export const getRecommendedDishes = async () => {
   try {
-    const res = await axios.get("/statistics/revenue/recommend-dish");
+    const res = await axios.get("/statistics/recommend-dish");
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const improveVietnameseDescription = async (caption) => {
+  try {
+    const res = await axios.post("/statistics/improve-description", caption);
     return res.data;
   } catch (error) {
     return error.response?.data || { message: "Unknown error occurred" };

@@ -14,6 +14,7 @@ import {
   Typography,
   IconButton,
   MenuItem,
+  Switch,
 } from "@mui/material";
 import { FaMinus, FaPlus, FaRegImage, FaTimes } from "react-icons/fa";
 import { createDish } from "@/service/dish";
@@ -21,6 +22,9 @@ import { getActiveStoreToppingGroups } from "@/service/topping";
 import { uploadImages } from "@/service/upload";
 import { getIngredientsByCategory } from "@/service/ingredient";
 import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
+import { generateImageDescription } from "@/service/huggingface";
+import { toast } from "react-toastify";
+import { improveVietnameseDescription } from "@/service/statistic";
 
 const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
@@ -38,6 +42,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [autoDescribe, setAutoDescribe] = useState(true);
 
   useEffect(() => {
     if (open) {
@@ -101,9 +106,43 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) setImage(URL.createObjectURL(file));
+    if (!file) return;
+
+    const localPreview = URL.createObjectURL(file);
+    setImage(localPreview);
+
+    try {
+      toast.info("Đang tải ảnh lên...");
+
+      const form = new FormData();
+      form.append("file", file);
+      const res = await uploadImages(form);
+
+      if (!res || !res[0]?.url) throw new Error("Upload thất bại");
+
+      const uploadedUrl = res[0].url;
+      setImage(uploadedUrl);
+
+      // 🔹 Chỉ mô tả ảnh nếu người dùng bật toggle
+      if (autoDescribe) {
+        toast.info("Đang mô tả hình ảnh món ăn...");
+
+        const caption = await generateImageDescription(uploadedUrl);
+        setFormData((prev) => ({
+          ...prev,
+          description: caption || prev.description,
+        }));
+
+        toast.success("Đã tự động thêm mô tả món ăn");
+      } else {
+        toast.info("Bỏ qua mô tả tự động (do bạn đã tắt)");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể xử lý ảnh");
+    }
   };
 
   const handleSave = async () => {
@@ -209,6 +248,11 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 onChange={handleImageUpload}
               />
             </Paper>
+          </Box>
+
+          <Box display='flex' alignItems='center' gap={1}>
+            <Typography variant='subtitle1'>Tự động gợi ý mô tả từ hình ảnh</Typography>
+            <Switch checked={autoDescribe} onChange={(e) => setAutoDescribe(e.target.checked)} color='primary' />
           </Box>
 
           <TextField

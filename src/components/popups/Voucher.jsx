@@ -127,7 +127,7 @@ const VoucherModal = ({ open, onClose, storeId, voucherId, isUpdate = false, rea
     if (!validate()) return;
 
     const confirm = await Swal.fire({
-      title: isUpdate ? "Xác nhận cập nhật voucher?" : "Xác nhận thêm voucher?",
+      title: isUpdate ? "Xác nhận cập nhật phiếu giảm giá?" : "Xác nhận thêm phiếu giảm giá?",
       icon: "question",
       showCancelButton: true,
       confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
@@ -142,7 +142,7 @@ const VoucherModal = ({ open, onClose, storeId, voucherId, isUpdate = false, rea
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(isUpdate ? "Cập nhật thất bại" : "Thêm voucher thất bại");
+      toast.error(isUpdate ? "Cập nhật thất bại" : "Thêm phiếu giảm giá thất bại");
     } finally {
       setLoading(false);
     }
@@ -151,7 +151,7 @@ const VoucherModal = ({ open, onClose, storeId, voucherId, isUpdate = false, rea
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        {readOnly ? "Chi tiết Voucher" : isUpdate ? "Cập nhật Voucher" : "Thêm Voucher mới"}
+        {readOnly ? "Chi tiết phiếu giảm giá" : isUpdate ? "Cập nhật phiếu giảm giá" : "Thêm phiếu giảm giá mới"}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>

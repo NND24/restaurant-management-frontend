@@ -149,6 +149,12 @@ export default function SidebarLayout({ children }) {
             <MenuItem active={pathname.startsWith("/voucher")} onClick={() => handleMenuClick("/voucher")}>
               Voucher
             </MenuItem>
+            <MenuItem active={pathname.startsWith("/voucher")} onClick={() => handleMenuClick("/voucher")}>
+              Phiếu giảm giá
+            </MenuItem>
+            <MenuItem active={pathname.startsWith("/shipping-fee")} onClick={() => handleMenuClick("/shipping-fee")}>
+              Phí vận chuyển
+            </MenuItem>
           </SubMenu>
 
           <SubMenu

@@ -47,10 +47,10 @@ export const getRevenueByDishGroup = async ({ limit = 5, period = "day", month, 
   }
 };
 
-export const analyzeBusinessResult = async ({ period = "day", month, year }) => {
+export const analyzeBusinessResult = async (params) => {
   try {
     const res = await axios.get("/statistics/revenue/analyze-business", {
-      params: { period, month, year },
+      params,
     });
     return res.data;
   } catch (error) {

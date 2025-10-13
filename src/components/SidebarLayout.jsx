@@ -72,6 +72,12 @@ export default function SidebarLayout({ children }) {
             <MenuItem active={pathname === "/statistic/revenue"} onClick={() => handleMenuClick("/statistic/revenue")}>
               Doanh thu
             </MenuItem>
+            <MenuItem
+              active={pathname === "/statistic/analyze-business"}
+              onClick={() => handleMenuClick("/statistic/analyze-business")}
+            >
+              Phân tích dự đoán
+            </MenuItem>
             <MenuItem active={pathname === "/statistic/orders"} onClick={() => handleMenuClick("/statistic/orders")}>
               Đơn hàng
             </MenuItem>

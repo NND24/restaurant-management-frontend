@@ -31,7 +31,7 @@ import {
   ComposedChart,
 } from "recharts";
 import { FaMoneyBillWave, FaCalendarWeek, FaChartLine } from "react-icons/fa";
-import { getRevenueSummary, revenueByPeriod, analyzeBusinessResult } from "@/service/statistic";
+import { getRevenueSummary, revenueByPeriod } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import CountUp from "react-countup";
@@ -61,14 +61,6 @@ const DashboardPage = () => {
 
   useEffect(() => {
     revenueByPeriod({ period: viewType, month, year }).then((res) => setByDay(res.data));
-  }, [viewType, week, month, year]);
-
-  useEffect(() => {
-    analyzeBusinessResult({ period: viewType, month, year }).then((res) => {
-      setAnalysis(res.data.analysis || []);
-      setPredictions(res.data.predictions || []);
-      setForecast(res.data.forecast || null);
-    });
   }, [viewType, week, month, year]);
 
   const summaryCards = [
@@ -261,61 +253,6 @@ const DashboardPage = () => {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-
-        {/* Dự đoán kỳ tới */}
-        <Grid item xs={12} md={6} mb={4}>
-          <Card sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}>
-            <CardContent>
-              <Typography variant='h6' gutterBottom>
-                📌 Dự đoán kỳ tới
-              </Typography>
-              {forecast && (
-                <>
-                  <Typography>
-                    Doanh thu dự kiến: <b>{forecast.predictedRevenue.toLocaleString("vi-VN")}</b> ₫
-                  </Typography>
-                  <Typography>
-                    Lợi nhuận dự kiến: <b>{forecast.predictedProfit.toLocaleString("vi-VN")}</b> ₫
-                  </Typography>
-                  <Typography>
-                    Tăng trưởng TB: <b>{forecast.avgGrowth}</b>
-                  </Typography>
-                </>
-              )}
-
-              <Typography variant='h6' mt={2}>
-                📢 Nhận định
-              </Typography>
-              <ul>
-                {predictions.map((p, i) => (
-                  <li key={i}>{p}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Biểu đồ dự đoán */}
-        {forecast && (
-          <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
-            <CardContent>
-              <Typography variant='h6' gutterBottom>
-                📈 Biểu đồ dự đoán doanh thu & lợi nhuận
-              </Typography>
-              <ResponsiveContainer width='100%' height={300}>
-                <LineChart data={forecastChartData}>
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='label' />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name='Doanh thu' />
-                  <Line type='monotone' dataKey='profit' stroke='#82ca9d' name='Lợi nhuận' />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
       </Box>
     </div>
   );

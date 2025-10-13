@@ -151,7 +151,7 @@ const page = () => {
           pagination
           pageSizeOptions={[]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 14 } },
+            pagination: { paginationModel: { pageSize: 9 } },
           }}
           loading={loading}
           disableRowSelectionOnClick

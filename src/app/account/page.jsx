@@ -3,11 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import Swal from "sweetalert2";
-import Heading from "@/components/Heading";
 import { logoutUser } from "@/service/auth";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter();
   const { user, setUser, setUserId } = useAuth();
 
   const confirmLogout = async () => {

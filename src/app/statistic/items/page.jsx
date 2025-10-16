@@ -19,7 +19,12 @@ import {
   Grid,
 } from "@mui/material";
 import { PieChart, Pie, Tooltip as RechartsTooltip, Cell, Legend, ResponsiveContainer } from "recharts";
-import { getRevenueByItem, getRevenueByDishGroup, getRecommendedDishes } from "@/service/statistic";
+import {
+  getRevenueByItem,
+  getRevenueByDishGroup,
+  getRecommendedDishes,
+  getRecommendedDishesByCategory,
+} from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 
@@ -51,6 +56,7 @@ const DashboardPage = () => {
   const [pieGroupType, setPieGroupType] = useState("revenue");
 
   const [recommendedDishes, setRecommendedDishes] = useState([]);
+  const [recommendedDishesByCategory, setRecommendedDishesByCategory] = useState([]);
 
   // ===== Fetch data =====
   const fetchItem = async () => {
@@ -72,6 +78,15 @@ const DashboardPage = () => {
     }
   };
 
+  const fetchRecommendedByCategory = async () => {
+    try {
+      const res = await getRecommendedDishesByCategory();
+      if (res.success) setRecommendedDishesByCategory(res.data || []);
+    } catch (err) {
+      console.error("❌ Lỗi fetch gợi ý món:", err);
+    }
+  };
+
   useEffect(() => {
     fetchItem();
   }, [viewType, week, month, year, itemLimit]);
@@ -82,6 +97,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     fetchRecommended();
+    fetchRecommendedByCategory();
   }, []);
 
   // ===== Tính margin =====
@@ -109,6 +125,14 @@ const DashboardPage = () => {
         return 0;
     }
   };
+
+  // Gom nhóm món ăn theo danh mục
+  const groupedByCategory = recommendedDishesByCategory.reduce((acc, dish) => {
+    const categoryName = dish.category?.name || dish.category || "Khác";
+    if (!acc[categoryName]) acc[categoryName] = [];
+    if (acc[categoryName].length < 5) acc[categoryName].push(dish);
+    return acc;
+  }, {});
 
   return (
     <div className='overflow-y-scroll h-full'>
@@ -407,6 +431,31 @@ const DashboardPage = () => {
               </Grid>
             ) : (
               <Typography>Đang phân tích dữ liệu & gợi ý món ăn...</Typography>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ===== Gợi ý món ăn theo danh mục ===== */}
+        <Card sx={{ borderRadius: 3, boxShadow: 3, mt: 4 }}>
+          <CardContent>
+            <Typography variant='h6' gutterBottom>
+              🍱 Gợi ý món ăn theo danh mục
+            </Typography>
+
+            {recommendedDishesByCategory.length > 0 ? (
+              Object.entries(groupedByCategory).map(([category, dishes]) => (
+                <Box key={category} mb={2}>
+                  <Typography variant='subtitle1' fontWeight='bold' sx={{ mb: 1 }}>
+                    Các món {category}:
+                  </Typography>
+
+                  <Typography variant='body2' color='text.secondary'>
+                    {dishes.map((d) => d.name).join(", ")}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>Đang phân tích dữ liệu & gợi ý món ăn theo danh mục...</Typography>
             )}
           </CardContent>
         </Card>

@@ -26,7 +26,7 @@ export default function SidebarLayout({ children }) {
       <Sidebar breakPoint='md' collapsedWidth='64px' className='shadow-lg'>
         {/* Header */}
         <header className='bg-white border-b px-4 py-3 flex items-center justify-between'>
-          <h1 className='text-lg font-bold text-[#fc6011] truncate'>{storeName}</h1>
+          <h1 className='text-lg font-bold text-[#fc6011] max-w-[150px] truncate'>{storeName}</h1>
 
           <div className='flex items-center space-x-5'>
             <Link href='/notifications' className='relative'>
@@ -71,12 +71,6 @@ export default function SidebarLayout({ children }) {
           <SubMenu icon={<FaChartBar />} label='Thống kê' defaultOpen={pathname.startsWith("/statistic")}>
             <MenuItem active={pathname === "/statistic/revenue"} onClick={() => handleMenuClick("/statistic/revenue")}>
               Doanh thu
-            </MenuItem>
-            <MenuItem
-              active={pathname === "/statistic/analyze-business"}
-              onClick={() => handleMenuClick("/statistic/analyze-business")}
-            >
-              Phân tích dự đoán
             </MenuItem>
             <MenuItem active={pathname === "/statistic/orders"} onClick={() => handleMenuClick("/statistic/orders")}>
               Đơn hàng

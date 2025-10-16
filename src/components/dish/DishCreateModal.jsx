@@ -25,6 +25,7 @@ import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCatego
 import { generateImageDescription } from "@/service/huggingface";
 import { toast } from "react-toastify";
 import { improveVietnameseDescription } from "@/service/statistic";
+import { getSystemCategoryByStoreId } from "@/service/systemCategory";
 
 const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
@@ -40,6 +41,8 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [allSystemCategories, setAllSystemCategories] = useState([]);
+
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [autoDescribe, setAutoDescribe] = useState(true);
@@ -62,6 +65,18 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
         }
       };
       fetchToppingGroups();
+
+      const fetchSystemCategories = async () => {
+        try {
+          const res = await getSystemCategoryByStoreId(storeId);
+          console.log(res?.data);
+          setAllSystemCategories(res?.data || []);
+        } catch (err) {
+          console.error("Failed to load system categories", err);
+        }
+      };
+      fetchSystemCategories();
+
       setSelectedCategory("");
       setIngredientsByCategory([]);
     }
@@ -180,6 +195,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
         })),
         toppingGroups: formData.toppingGroups.map((t) => t._id),
         status: formData.status,
+        category: formData.category,
       };
 
       await createDish({ storeId, data: payload });
@@ -264,6 +280,20 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             multiline
             rows={3}
           />
+
+          <TextField
+            select
+            label='Loại món ăn'
+            value={formData.category || ""}
+            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+            fullWidth
+          >
+            {allSystemCategories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </TextField>
 
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             {/* Select loại nguyên liệu */}

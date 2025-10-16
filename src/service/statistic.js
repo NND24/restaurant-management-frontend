@@ -11,10 +11,10 @@ export const getRevenueSummary = async () => {
   }
 };
 
-export const revenueByPeriod = async ({ period, month, year }) => {
+export const revenueByPeriod = async (params) => {
   try {
     const res = await axios.get("/statistics/revenue/by-period", {
-      params: { period, month, year },
+      params,
     });
     return res.data;
   } catch (error) {
@@ -62,6 +62,15 @@ export const analyzeBusinessResult = async (params) => {
 export const getRecommendedDishes = async () => {
   try {
     const res = await axios.get("/statistics/recommend-dish");
+    return res.data;
+  } catch (error) {
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
+export const getRecommendedDishesByCategory = async () => {
+  try {
+    const res = await axios.get("/statistics/recommend-dish-category");
     return res.data;
   } catch (error) {
     return error.response?.data || { message: "Unknown error occurred" };

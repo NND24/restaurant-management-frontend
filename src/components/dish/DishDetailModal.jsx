@@ -104,14 +104,23 @@ const DishDetailModal = ({ open, onClose, id }) => {
             />
           )}
 
+          {dish.category && (
+            <TextField
+              label='Phân loại món'
+              value={dish.category?.name || "Không có"}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+          )}
+
           {/* Nguyên liệu */}
-          {dish.ingredients.length > 0 && (
+          {dish.ingredients?.length > 0 && (
             <Box>
               <Typography variant='subtitle1' sx={{ mb: 0.5, fontWeight: "bold" }}>
                 Nguyên liệu
               </Typography>
               <List dense>
-                {dish.ingredients?.map((ing) => (
+                {dish.ingredients.map((ing) => (
                   <ListItem key={ing._id} sx={{ p: 0 }}>
                     <ListItemText
                       primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${

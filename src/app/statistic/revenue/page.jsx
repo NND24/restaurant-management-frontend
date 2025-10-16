@@ -16,6 +16,9 @@ import {
   TableCell,
   TableRow,
   TableContainer,
+  TextField,
+  Button,
+  CircularProgress,
 } from "@mui/material";
 import {
   BarChart,
@@ -30,8 +33,8 @@ import {
   ResponsiveContainer,
   ComposedChart,
 } from "recharts";
-import { FaMoneyBillWave, FaCalendarWeek, FaChartLine } from "react-icons/fa";
-import { getRevenueSummary, revenueByPeriod } from "@/service/statistic";
+import { FaMoneyBillWave, FaCalendarWeek, FaChartLine, FaChartArea } from "react-icons/fa";
+import { getRevenueSummary, revenueByPeriod, analyzeBusinessResult } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import CountUp from "react-countup";
@@ -50,18 +53,193 @@ const DashboardPage = () => {
   const [week, setWeek] = useState(dayjs().isoWeek());
   const [month, setMonth] = useState(dayjs().month() + 1);
   const [year, setYear] = useState(dayjs().year());
+
+  const [day, setDay] = useState(dayjs().format("DD")); // day of month (1-31)
+  const [monthMode, setMonthMode] = useState("day"); // 'day' hoặc 'week'
+
   const [chartMetric, setChartMetric] = useState("all");
   const [analysis, setAnalysis] = useState([]);
-  const [predictions, setPredictions] = useState([]);
   const [forecast, setForecast] = useState(null);
+
+  const [decomposition, setDecomposition] = useState(null);
+  const [insightMessages, setInsightMessages] = useState([]);
+
+  const [trendChange, setTrendChange] = useState(0);
+  const [scenarioData, setScenarioData] = useState([]);
+  const [seasonalChange, setSeasonalChange] = useState(0);
+  const [costChange, setCostChange] = useState(0);
+  const [topDishes, setTopDishes] = useState([]);
+  const [dishInsights, setDishInsights] = useState([]);
+
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+
+  // Build request params and call backend
+  const handleAnalyze = async () => {
+    setLoadingAnalysis(true);
+    try {
+      const params = {
+        period: viewType,
+        scenario: {
+          trendChange,
+          seasonalChange,
+          costChange,
+        },
+      };
+      if (viewType === "week") {
+        params.week = week;
+        params.year = year;
+      } else if (viewType === "month") {
+        params.month = month;
+        params.year = year;
+        params.groupBy = monthMode;
+      } else if (viewType === "day") {
+        const paddedMonth = String(month).padStart(2, "0");
+        const paddedDay = String(day).padStart(2, "0");
+        params.date = `${year}-${paddedMonth}-${paddedDay}`;
+      } else if (viewType === "year") {
+        params.year = year;
+      }
+
+      const res = await analyzeBusinessResult(params);
+      const data = res.data || {};
+      setAnalysis(data.analysis || []);
+      setForecast(data.forecast || null);
+      setDecomposition(data.decomposition || null);
+      setInsightMessages(data.insightMessages || []);
+      setTopDishes(data.topDishes || []);
+      setDishInsights(data.dishInsights || []);
+
+      setScenarioData([]);
+    } catch (err) {
+      console.error("Lỗi khi phân tích:", err);
+    } finally {
+      setLoadingAnalysis(false);
+    }
+  };
+
+  const forecastChartData = analysis.map((item, idx) => ({
+    label: item.period,
+    revenue: item.revenue, // thực tế
+    profit: item.profit,
+    predictedRevenue: forecast?.predictedRevenueSeries?.[idx] ?? null, // dự đoán
+    predictedProfit: forecast?.predictedProfitSeries?.[idx] ?? null,
+  }));
+
+  // decompositionChartData: map decomposition arrays to objects safely
+  const decompositionChartData =
+    decomposition && analysis.length
+      ? analysis.map((a, i) => ({
+          date:
+            viewType === "hour"
+              ? // format period to HH:mm if possible
+                (() => {
+                  try {
+                    const p = dayjs(a.period);
+                    return p.isValid() ? p.format("HH:mm") : String(a.period).slice(11, 16);
+                  } catch {
+                    return a.period;
+                  }
+                })()
+              : a.period,
+          trend: decomposition.trend && decomposition.trend[i] != null ? decomposition.trend[i] : 0,
+          seasonal: decomposition.seasonal && decomposition.seasonal[i] != null ? decomposition.seasonal[i] : 0,
+          resid: decomposition.resid && decomposition.resid[i] != null ? decomposition.resid[i] : 0,
+        }))
+      : [];
+
+  // convenience: sync a default day when month/year change
+  useEffect(() => {
+    // ensure day is valid in month
+    const daysInMonth = dayjs(`${year}-${String(month).padStart(2, "0")}-01`).daysInMonth();
+    if (Number(day) > daysInMonth) setDay(String(daysInMonth));
+  }, [month, year]);
+
+  let trendMean = 0;
+  let seasonalAmplitude = 0;
+  let seasonalStrength = "yếu";
+
+  if (decomposition && analysis.length > 1) {
+    // 1️⃣ Tính trung bình độ dốc của trend
+    const diffs = [];
+    for (let i = 1; i < decomposition.trend.length; i++) {
+      const prev = decomposition.trend[i - 1] ?? 0;
+      const curr = decomposition.trend[i] ?? 0;
+      diffs.push(curr - prev);
+    }
+    trendMean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+
+    // 2️⃣ Độ dao động mùa vụ
+    const seasonalVals = decomposition.seasonal.filter((v) => typeof v === "number");
+    if (seasonalVals.length > 0) {
+      const maxVal = Math.max(...seasonalVals);
+      const minVal = Math.min(...seasonalVals);
+      seasonalAmplitude = maxVal - minVal;
+      seasonalStrength = seasonalAmplitude > 0.1 * (Math.max(...analysis.map((a) => a.revenue)) || 1) ? "mạnh" : "yếu";
+    }
+  }
+
+  const handleScenario = () => {
+    if (!forecast) return;
+
+    const trendFactor = 1 + trendChange / 100;
+    const seasonalFactor = 1 + seasonalChange / 100;
+    const costFactor = 1 - costChange / 100;
+
+    const scenarioRevenue = forecast.predictedRevenue * trendFactor * seasonalFactor;
+    const scenarioProfit = scenarioRevenue - (forecast.predictedRevenue - forecast.predictedProfit) * costFactor;
+
+    const baseData = [...forecastChartData.filter((d) => !d.isScenario && !d.isForecast)];
+
+    setScenarioData([
+      ...baseData,
+      {
+        label: "Dự đoán",
+        revenue: forecast.predictedRevenue,
+        profit: forecast.predictedProfit,
+        isForecast: true,
+      },
+      {
+        label: "Kịch bản giả lập",
+        revenue: scenarioRevenue,
+        profit: scenarioProfit,
+        isScenario: true,
+      },
+    ]);
+  };
 
   useEffect(() => {
     getRevenueSummary().then((res) => setSummary(res.data));
   }, []);
 
   useEffect(() => {
-    revenueByPeriod({ period: viewType, month, year }).then((res) => setByDay(res.data));
-  }, [viewType, week, month, year]);
+    const fetchRevenueByPeriod = async () => {
+      try {
+        const params = { period: viewType };
+
+        if (viewType === "week") {
+          params.week = week;
+          params.year = year;
+        } else if (viewType === "month") {
+          params.month = month;
+          params.year = year;
+          params.groupBy = monthMode;
+        } else if (viewType === "day") {
+          const paddedMonth = String(month).padStart(2, "0");
+          const paddedDay = String(day).padStart(2, "0");
+          params.date = `${year}-${paddedMonth}-${paddedDay}`;
+        } else if (viewType === "year") {
+          params.year = year;
+        }
+
+        const res = await revenueByPeriod(params);
+        setByDay(res.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu revenueByPeriod:", error);
+      }
+    };
+
+    fetchRevenueByPeriod();
+  }, [viewType, week, month, year, day, monthMode]);
 
   const summaryCards = [
     {
@@ -81,20 +259,6 @@ const DashboardPage = () => {
       data: summary.month,
       icon: <FaChartLine size={28} />,
       bg: "linear-gradient(135deg,#667eea,#764ba2)",
-    },
-  ];
-
-  const forecastChartData = [
-    ...analysis.map((a) => ({
-      label: a.period,
-      revenue: a.revenue,
-      profit: a.profit,
-    })),
-    {
-      label: "Dự đoán",
-      revenue: forecast?.predictedRevenue || 0,
-      profit: forecast?.predictedProfit || 0,
-      isForecast: true,
     },
   ];
 
@@ -150,8 +314,9 @@ const DashboardPage = () => {
         {/* Bộ lọc */}
         <Card sx={{ mb: 3, borderRadius: 3, boxShadow: 2, backgroundColor: "#fff" }}>
           <CardContent>
-            <Box display='flex' gap={3} flexWrap='wrap' alignItems='center'>
-              <FormControl size='medium' sx={{ minWidth: 140 }}>
+            <Box display='flex' flexWrap='wrap' gap={3} alignItems='center'>
+              {/* Chọn chế độ xem */}
+              <FormControl size='medium' sx={{ minWidth: 160 }}>
                 <InputLabel>Chế độ xem</InputLabel>
                 <Select value={viewType} label='Chế độ xem' onChange={(e) => setViewType(e.target.value)}>
                   <MenuItem value='day'>Ngày</MenuItem>
@@ -161,8 +326,27 @@ const DashboardPage = () => {
                 </Select>
               </FormControl>
 
+              {/* Các bộ chọn phụ thuộc chế độ xem */}
               {viewType !== "year" && (
                 <>
+                  {viewType === "day" && (
+                    <TextField
+                      label='Chọn ngày'
+                      type='date'
+                      value={dayjs(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`).format(
+                        "YYYY-MM-DD"
+                      )}
+                      onChange={(e) => {
+                        const d = dayjs(e.target.value);
+                        if (!d.isValid()) return;
+                        setMonth(d.month() + 1);
+                        setYear(d.year());
+                        setDay(d.date());
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                      size='small'
+                    />
+                  )}
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
                       <InputLabel>Tuần</InputLabel>
@@ -175,20 +359,28 @@ const DashboardPage = () => {
                       </Select>
                     </FormControl>
                   )}
+                  {viewType === "month" && (
+                    <>
+                      <FormControl size='medium' sx={{ minWidth: 120 }}>
+                        <InputLabel>Tháng</InputLabel>
+                        <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                            <MenuItem key={m} value={m}>
+                              Tháng {m}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
 
-                  {viewType !== "week" && (
-                    <FormControl size='medium' sx={{ minWidth: 120 }}>
-                      <InputLabel>Tháng</InputLabel>
-                      <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                          <MenuItem key={m} value={m}>
-                            Tháng {m}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                      <FormControl size='medium' sx={{ minWidth: 160 }}>
+                        <InputLabel>Chế độ hiển thị</InputLabel>
+                        <Select value={monthMode} onChange={(e) => setMonthMode(e.target.value)}>
+                          <MenuItem value='day'>Theo ngày</MenuItem>
+                          <MenuItem value='week'>Theo tuần</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </>
                   )}
-
                   <FormControl size='medium' sx={{ minWidth: 120 }}>
                     <InputLabel>Năm</InputLabel>
                     <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
@@ -201,6 +393,9 @@ const DashboardPage = () => {
                   </FormControl>
                 </>
               )}
+
+              {/* Nút Phân tích nằm bên phải */}
+              <Box flex='1 1 auto' display='flex' justifyContent='flex-end'></Box>
             </Box>
           </CardContent>
         </Card>
@@ -253,6 +448,280 @@ const DashboardPage = () => {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* --- Phần hướng dẫn & phân tích --- */}
+        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
+          <CardContent>
+            <Typography variant='h6' gutterBottom>
+              🔍 Giới thiệu phân tích
+            </Typography>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 1 }}>
+              Hệ thống sẽ phân tích dữ liệu doanh thu sử dụng kỹ thuật <b>Time Series Decomposition</b> để tách thành 3
+              thành phần:
+            </Typography>
+            <ul style={{ marginTop: 0 }}>
+              <li>
+                <b>Trend</b> – xu hướng dài hạn (tăng/giảm theo thời gian)
+              </li>
+              <li>
+                <b>Seasonality</b> – tính mùa vụ (ví dụ cuối tuần tăng, giữa tuần giảm)
+              </li>
+              <li>
+                <b>Residual</b> – phần sai lệch ngẫu nhiên, khó dự đoán
+              </li>
+            </ul>
+
+            <Button
+              variant='contained'
+              color='primary'
+              startIcon={<FaChartArea />}
+              onClick={handleAnalyze}
+              disabled={loadingAnalysis}
+            >
+              {loadingAnalysis ? <CircularProgress size={20} sx={{ color: "white" }} /> : "Phân tích dữ liệu"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* ===== Scenario Simulation (tách riêng) ===== */}
+        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
+          <CardContent>
+            <Typography variant='h6' gutterBottom>
+              ⚙️ Giả lập kịch bản (Scenario Simulation)
+            </Typography>
+            <Box display='flex' flexWrap='wrap' gap={2} mt={2}>
+              <TextField
+                label='% Điều chỉnh Trend'
+                type='number'
+                value={trendChange}
+                onChange={(e) => setTrendChange(Number(e.target.value))}
+                size='small'
+              />
+              <TextField
+                label='% Điều chỉnh Seasonality'
+                type='number'
+                value={seasonalChange}
+                onChange={(e) => setSeasonalChange(Number(e.target.value))}
+                size='small'
+              />
+              <TextField
+                label='% Giảm chi phí'
+                type='number'
+                value={costChange}
+                onChange={(e) => setCostChange(Number(e.target.value))}
+                size='small'
+              />
+              <Button variant='contained' color='secondary' onClick={handleScenario}>
+                Tạo kịch bản giả lập
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* --- Biểu đồ doanh thu & lợi nhuận --- */}
+        {scenarioData.length > 0 && (
+          <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                📊 Biểu đồ doanh thu & lợi nhuận
+              </Typography>
+
+              {decomposition && (
+                <Box mb={2} sx={{ backgroundColor: "#f0f7ff", borderRadius: 2, p: 2 }}>
+                  <Typography variant='body1'>
+                    📈 <b>Xu hướng:</b> {trendMean > 0 ? "Đang tăng" : trendMean < 0 ? "Đang giảm" : "Ổn định"}
+                  </Typography>
+                  <Typography variant='body1'>
+                    🌀 <b>Tính mùa vụ:</b> {seasonalStrength} (dao động {seasonalAmplitude.toFixed(0)} ₫)
+                  </Typography>
+                </Box>
+              )}
+
+              {scenarioData.length > 0 && (
+                <Box mt={2} sx={{ backgroundColor: "#fff8e1", borderRadius: 2, p: 2 }}>
+                  <Typography variant='h6' gutterBottom>
+                    🧮 Kết quả giả lập
+                  </Typography>
+                  <Typography>
+                    Doanh thu dự kiến (kịch bản): <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
+                  </Typography>
+                  <Typography>
+                    Lợi nhuận dự kiến (kịch bản): <b>{scenarioData.at(-1)?.profit?.toLocaleString("vi-VN")}</b> ₫
+                  </Typography>
+                </Box>
+              )}
+
+              <ResponsiveContainer width='100%' height={350}>
+                <ComposedChart data={forecastChartData}>
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <XAxis dataKey='label' />
+                  <YAxis yAxisId='left' />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId='left' dataKey='revenue' name='Doanh thu' fill='#8884d8' />
+                  <Bar yAxisId='left' dataKey='profit' name='Lợi nhuận' fill='#82ca9d' />
+                  {/* Scenario line if any */}
+                  {scenarioData.length > 0 && (
+                    <Line
+                      type='monotone'
+                      dataKey='revenue'
+                      data={scenarioData}
+                      stroke='#ff3b3b'
+                      strokeDasharray='5 5'
+                      name='Kịch bản (Doanh thu)'
+                      dot={false}
+                      yAxisId='left'
+                    />
+                  )}
+                </ComposedChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* --- Biểu đồ decomposition --- */}
+        {decomposition && decompositionChartData.length > 0 && (
+          <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                📈 Phân tích thành phần thời gian (Time Series Decomposition)
+              </Typography>
+
+              <Box display='flex' flexWrap='wrap' gap={1}>
+                {insightMessages.map((msg, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      backgroundColor: "#e3f2fd",
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    {msg}
+                  </Box>
+                ))}
+              </Box>
+
+              <ResponsiveContainer width='100%' height={300}>
+                <LineChart data={decompositionChartData}>
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <XAxis dataKey='date' />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type='monotone' dataKey='trend' stroke='#8884d8' name='Trend' dot={false} />
+                  <Line type='monotone' dataKey='seasonal' stroke='#82ca9d' name='Seasonality' dot={false} />
+                  <Line type='monotone' dataKey='resid' stroke='#ff7f50' name='Residual' dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* --- Dự đoán kỳ tới & Scenario --- */}
+        {forecast && (
+          <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                📌 Dự đoán kỳ tới
+              </Typography>
+              <Typography>
+                Doanh thu dự kiến: <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
+              </Typography>
+              <Typography>
+                Lợi nhuận dự kiến: <b>{Number(forecast.predictedProfit || 0).toLocaleString("vi-VN")}</b> ₫
+              </Typography>
+              <Typography>
+                Tăng trưởng trung bình: <b>{forecast.avgGrowth || "-"}</b>
+              </Typography>
+
+              <ResponsiveContainer width='100%' height={350}>
+                <LineChart data={forecastChartData}>
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <XAxis dataKey='label' />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+
+                  {/* Doanh thu */}
+                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name='Doanh thu thực tế' dot={false} />
+                  <Line
+                    type='monotone'
+                    dataKey='predictedRevenue'
+                    stroke='#ff3b3b'
+                    strokeDasharray='5 5'
+                    name='Doanh thu dự đoán'
+                    dot={false}
+                  />
+
+                  {/* Lợi nhuận */}
+                  <Line type='monotone' dataKey='profit' stroke='#82ca9d' name='Lợi nhuận thực tế' dot={false} />
+                  <Line
+                    type='monotone'
+                    dataKey='predictedProfit'
+                    stroke='#ff9900'
+                    strokeDasharray='5 5'
+                    name='Lợi nhuận dự đoán'
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* --- Món ăn bán chạy --- */}
+        {topDishes.length > 0 && (
+          <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                🍽️ Top món ăn bán chạy
+              </Typography>
+
+              <ResponsiveContainer width='100%' height={300}>
+                <ComposedChart data={topDishes}>
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <XAxis dataKey='name' />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey='totalRevenue' fill='#8884d8' name='Doanh thu (₫)' />
+                  <Line type='monotone' dataKey='totalOrders' stroke='#82ca9d' name='Số đơn hàng' dot={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* --- Nhận định chi tiết theo món --- */}
+        {dishInsights.length > 0 && (
+          <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3, backgroundColor: "#f5f7fa" }}>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                💡 Nhận định chi tiết theo món
+              </Typography>
+              <Box display='flex' flexDirection='column' gap={1}>
+                {dishInsights.map((msg, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      backgroundColor: "#fff",
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      boxShadow: 1,
+                      borderLeft: "4px solid #2196f3",
+                    }}
+                  >
+                    {msg}
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        )}
       </Box>
     </div>
   );

@@ -22,6 +22,7 @@ import { getIngredientsByCategory } from "@/service/ingredient";
 import { getActiveStoreToppingGroups } from "@/service/topping";
 import { uploadImages } from "@/service/upload";
 import { toast } from "react-toastify";
+import { getSystemCategoryByStoreId } from "@/service/systemCategory";
 
 const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   const [formData, setFormData] = useState({
@@ -30,33 +31,41 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     description: "",
     ingredients: [],
     toppingGroups: [],
-    status: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
+    category: "", // ✅ thêm
+    status: "ACTIVE",
   });
+
   const [allCategories, setAllCategories] = useState([]);
   const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
   const [allToppingGroups, setAllToppingGroups] = useState([]);
+  const [allSystemCategories, setAllSystemCategories] = useState([]); // ✅ thêm
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedIngredient, setSelectedIngredient] = useState("");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Load categories & toppingGroups khi mở modal
+  // ✅ Load dữ liệu khi mở modal
   useEffect(() => {
     if (open) {
-      const fetchCategories = async () => {
-        const res = await getActiveIngredientCategoriesByStore(storeId);
-        setAllCategories(res?.data || []);
+      const fetchAll = async () => {
+        try {
+          const [resIngCat, resTopping, resSysCat] = await Promise.all([
+            getActiveIngredientCategoriesByStore(storeId),
+            getActiveStoreToppingGroups(storeId),
+            getSystemCategoryByStoreId(storeId),
+          ]);
+          setAllCategories(resIngCat?.data || []);
+          setAllToppingGroups(resTopping?.data || []);
+          setAllSystemCategories(resSysCat?.data || []);
+        } catch (err) {
+          console.error("Failed to load categories:", err);
+        }
       };
-      const fetchToppingGroups = async () => {
-        const res = await getActiveStoreToppingGroups(storeId);
-        setAllToppingGroups(res?.data || []);
-      };
-      fetchCategories();
-      fetchToppingGroups();
+      fetchAll();
     }
   }, [open, storeId]);
 
-  // Load dish hiện tại
+  // ✅ Load món ăn hiện tại
   useEffect(() => {
     if (open && id) {
       const fetchDish = async () => {
@@ -69,6 +78,7 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
               price: d.price,
               description: d.description || "",
               status: d.status || "ACTIVE",
+              category: d.category?._id || "", // ✅ load category hiện tại
               ingredients:
                 d.ingredients?.map((i) => ({
                   ingredient: i.ingredient,
@@ -135,6 +145,10 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       toast.error("Cần chọn ít nhất 1 nguyên liệu");
       return;
     }
+    if (!formData.category) {
+      toast.error("Vui lòng chọn loại món ăn");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -156,11 +170,12 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
         description: formData.description,
         status: formData.status,
         image: uploadedImage,
+        category: formData.category, // ✅ gửi category
         ingredients: formData.ingredients.map((i) => ({
           ingredient: i.ingredient._id,
           quantity: i.quantity,
         })),
-        toppingGroupIds: formData.toppingGroups.map((t) => t._id),
+        toppingGroups: formData.toppingGroups.map((t) => t._id),
       };
 
       await updateDish({ dishId: id, data: payload });
@@ -203,7 +218,22 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             required
           />
 
-          {/* Image Upload */}
+          {/* ✅ Chọn loại món ăn */}
+          <TextField
+            select
+            label='Loại món ăn'
+            value={formData.category || ""}
+            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+            fullWidth
+          >
+            {allSystemCategories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          {/* Hình ảnh */}
           <Box>
             <Typography variant='subtitle1' gutterBottom>
               Hình ảnh
@@ -236,6 +266,7 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             </Paper>
           </Box>
 
+          {/* Mô tả */}
           <TextField
             label='Mô tả'
             value={formData.description}

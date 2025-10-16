@@ -344,7 +344,7 @@ const DashboardPage = () => {
                         setDay(d.date());
                       }}
                       InputLabelProps={{ shrink: true }}
-                      size='small'
+                      size='medium'
                     />
                   )}
                   {viewType === "week" && (

@@ -17,8 +17,21 @@ import {
   TableContainer,
   Tooltip,
   Grid,
+  TextField,
 } from "@mui/material";
-import { PieChart, Pie, Tooltip as RechartsTooltip, Cell, Legend, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Tooltip as RechartsTooltip,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Line,
+} from "recharts";
 import {
   getRevenueByItem,
   getRevenueByDishGroup,
@@ -51,6 +64,8 @@ const DashboardPage = () => {
   const [viewType, setViewType] = useState("day");
   const [week, setWeek] = useState(dayjs().isoWeek());
   const [month, setMonth] = useState(dayjs().month() + 1);
+  const [day, setDay] = useState(dayjs().format("DD")); // day of month (1-31)
+  const [monthMode, setMonthMode] = useState("day"); // 'day' hoặc 'week'
   const [year, setYear] = useState(dayjs().year());
   const [pieType, setPieType] = useState("revenue");
   const [pieGroupType, setPieGroupType] = useState("revenue");
@@ -58,15 +73,47 @@ const DashboardPage = () => {
   const [recommendedDishes, setRecommendedDishes] = useState([]);
   const [recommendedDishesByCategory, setRecommendedDishesByCategory] = useState([]);
 
+  // ===== Helper: Tạo params theo viewType =====
+  const buildParams = () => {
+    const params = { period: viewType };
+
+    if (viewType === "week") {
+      params.week = week;
+      params.year = year;
+    } else if (viewType === "month") {
+      params.month = month;
+      params.year = year;
+      params.groupBy = monthMode;
+    } else if (viewType === "day") {
+      const paddedMonth = String(month).padStart(2, "0");
+      const paddedDay = String(day).padStart(2, "0");
+      params.date = `${year}-${paddedMonth}-${paddedDay}`;
+    } else if (viewType === "year") {
+      params.year = year;
+    }
+
+    return params;
+  };
+
   // ===== Fetch data =====
   const fetchItem = async () => {
-    const resItem = await getRevenueByItem({ limit: itemLimit, period: viewType, month, year });
-    setByItem(resItem.data);
+    try {
+      const params = { ...buildParams(), limit: itemLimit };
+      const resItem = await getRevenueByItem(params);
+      if (resItem?.success) setByItem(resItem.data || []);
+    } catch (err) {
+      console.error("❌ Lỗi fetch món ăn:", err);
+    }
   };
 
   const fetchGroup = async () => {
-    const resGroup = await getRevenueByDishGroup({ limit: groupLimit, period: viewType, month, year });
-    setByGroup(resGroup.data);
+    try {
+      const params = { ...buildParams(), limit: groupLimit };
+      const resGroup = await getRevenueByDishGroup(params);
+      if (resGroup?.success) setByGroup(resGroup.data || []);
+    } catch (err) {
+      console.error("❌ Lỗi fetch nhóm món:", err);
+    }
   };
 
   const fetchRecommended = async () => {
@@ -101,15 +148,37 @@ const DashboardPage = () => {
   }, []);
 
   // ===== Tính margin =====
-  const byItemWithMargin = byItem.map((item) => ({
-    ...item,
-    margin: item.totalRevenue > 0 ? (item.totalProfit / item.totalRevenue) * 100 : 0,
-  }));
+  const byItemWithMargin = byItem.map((item) => {
+    const dishName = item.dishName || item._id?.dishName || "Không rõ món";
+    const time = item.time || item._id?.time || null;
+    const margin = item.totalRevenue > 0 ? (item.totalProfit / item.totalRevenue) * 100 : 0;
 
-  const byGroupWithMargin = byGroup.map((g) => ({
-    ...g,
-    margin: g.totalRevenue > 0 ? (g.totalProfit / g.totalRevenue) * 100 : 0,
-  }));
+    return {
+      ...item,
+      dishName,
+      time,
+      margin,
+    };
+  });
+
+  // Giải phẳng dữ liệu theo nhóm món (byGroup)
+  const flattenedGroups = byGroup.flatMap((item) =>
+    (item.groups || []).map((g) => ({
+      ...g,
+      time: item.time,
+    }))
+  );
+
+  const byGroupWithMargin = flattenedGroups.map((g) => {
+    const groupName = g.group || g._id?.group || "Không rõ nhóm";
+    const margin = g.totalRevenue > 0 ? (g.totalProfit / g.totalRevenue) * 100 : 0;
+
+    return {
+      ...g,
+      groupName,
+      margin,
+    };
+  });
 
   const getPieValue = (obj, type) => {
     switch (type) {
@@ -125,6 +194,18 @@ const DashboardPage = () => {
         return 0;
     }
   };
+
+  // Pivot dữ liệu để LineChart hiểu
+  const pivotedData = Object.values(
+    byGroupWithMargin.reduce((acc, item) => {
+      if (!acc[item.time]) acc[item.time] = { time: item.time };
+      acc[item.time][item.groupName] = getPieValue(item, pieGroupType);
+      return acc;
+    }, {})
+  );
+
+  // Lấy tất cả groupName để vẽ nhiều Line
+  const groupNames = [...new Set(byGroupWithMargin.map((g) => g.groupName))];
 
   // Gom nhóm món ăn theo danh mục
   const groupedByCategory = recommendedDishesByCategory.reduce((acc, dish) => {
@@ -142,9 +223,10 @@ const DashboardPage = () => {
         </Typography>
 
         {/* ===== Bộ lọc ===== */}
-        <Card sx={{ borderRadius: 3, mb: 4, boxShadow: 3, backgroundColor: "#fff" }}>
+        <Card sx={{ mb: 3, borderRadius: 3, boxShadow: 2, backgroundColor: "#fff" }}>
           <CardContent>
-            <Box display='flex' gap={3} flexWrap='wrap' alignItems='center'>
+            <Box display='flex' flexWrap='wrap' gap={3} alignItems='center'>
+              {/* Chọn chế độ xem */}
               <FormControl size='medium' sx={{ minWidth: 160 }}>
                 <InputLabel>Chế độ xem</InputLabel>
                 <Select value={viewType} label='Chế độ xem' onChange={(e) => setViewType(e.target.value)}>
@@ -155,8 +237,27 @@ const DashboardPage = () => {
                 </Select>
               </FormControl>
 
+              {/* Các bộ chọn phụ thuộc chế độ xem */}
               {viewType !== "year" && (
                 <>
+                  {viewType === "day" && (
+                    <TextField
+                      label='Chọn ngày'
+                      type='date'
+                      value={dayjs(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`).format(
+                        "YYYY-MM-DD"
+                      )}
+                      onChange={(e) => {
+                        const d = dayjs(e.target.value);
+                        if (!d.isValid()) return;
+                        setMonth(d.month() + 1);
+                        setYear(d.year());
+                        setDay(d.date());
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                      size='medium'
+                    />
+                  )}
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
                       <InputLabel>Tuần</InputLabel>
@@ -169,20 +270,28 @@ const DashboardPage = () => {
                       </Select>
                     </FormControl>
                   )}
+                  {viewType === "month" && (
+                    <>
+                      <FormControl size='medium' sx={{ minWidth: 120 }}>
+                        <InputLabel>Tháng</InputLabel>
+                        <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                            <MenuItem key={m} value={m}>
+                              Tháng {m}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
 
-                  {viewType !== "week" && (
-                    <FormControl size='medium' sx={{ minWidth: 120 }}>
-                      <InputLabel>Tháng</InputLabel>
-                      <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                          <MenuItem key={m} value={m}>
-                            Tháng {m}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                      <FormControl size='medium' sx={{ minWidth: 160 }}>
+                        <InputLabel>Chế độ hiển thị</InputLabel>
+                        <Select value={monthMode} onChange={(e) => setMonthMode(e.target.value)}>
+                          <MenuItem value='day'>Theo ngày</MenuItem>
+                          <MenuItem value='week'>Theo tuần</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </>
                   )}
-
                   <FormControl size='medium' sx={{ minWidth: 120 }}>
                     <InputLabel>Năm</InputLabel>
                     <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
@@ -195,73 +304,18 @@ const DashboardPage = () => {
                   </FormControl>
                 </>
               )}
+
+              {/* Nút Phân tích nằm bên phải */}
+              <Box flex='1 1 auto' display='flex' justifyContent='flex-end'></Box>
             </Box>
           </CardContent>
         </Card>
 
-        {/* ===== Top Nhóm Món Ăn ===== */}
-        <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
-          <CardContent>
-            <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>🥗 Top Nhóm Món Ăn</Typography>
-              <FormControl size='small' sx={{ minWidth: 120 }}>
-                <InputLabel>Hiển thị</InputLabel>
-                <Select value={groupLimit} onChange={(e) => setGroupLimit(Number(e.target.value))}>
-                  {[5, 10, 20, 50].map((n) => (
-                    <MenuItem key={n} value={n}>
-                      {n}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Nhóm</TableCell>
-                    <TableCell align='center'>Số lượng</TableCell>
-                    <TableCell align='center'>Doanh thu</TableCell>
-                    <TableCell align='center'>Lợi nhuận</TableCell>
-                    <TableCell align='center'>Tỷ suất (%)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {byGroupWithMargin.map((g, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Typography
-                          data-tooltip-id='dish-tooltip'
-                          data-tooltip-content={g.groupName}
-                          sx={{
-                            minWidth: 85,
-                            maxWidth: 150,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {g.groupName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align='center'>{g.totalQuantity}</TableCell>
-                      <TableCell align='center'>{g.totalRevenue.toLocaleString("vi-VN")}</TableCell>
-                      <TableCell align='center'>{g.totalProfit.toLocaleString("vi-VN")}</TableCell>
-                      <TableCell align='center'>{g.margin.toFixed(1)}%</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-
-        {/* ===== Biểu đồ Nhóm (PieChart - Recharts) ===== */}
+        {/* ===== Biểu đồ Nhóm (LineChart / BarChart - Recharts) ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 6 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>📊 Tỷ lệ Theo Nhóm</Typography>
+              <Typography variant='h6'>📈 Doanh thu theo Nhóm</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
                 <InputLabel>Hiển thị theo</InputLabel>
                 <Select value={pieGroupType} onChange={(e) => setPieGroupType(e.target.value)}>
@@ -273,23 +327,25 @@ const DashboardPage = () => {
               </FormControl>
             </Box>
 
-            <ResponsiveContainer width='100%' height={350}>
-              <PieChart>
-                <Pie
-                  data={byGroupWithMargin}
-                  dataKey={(entry) => getPieValue(entry, pieGroupType)}
-                  nameKey='groupName'
-                  outerRadius={130}
-                  label
-                >
-                  {byGroupWithMargin.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-
-                <RechartsTooltip />
+            <ResponsiveContainer width='100%' height={400}>
+              <LineChart data={pivotedData}>
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis dataKey='time' /> {/* 👉 Hiển thị ngày ở trục X */}
+                <YAxis />
+                <Tooltip />
                 <Legend />
-              </PieChart>
+                {groupNames.map((name, idx) => (
+                  <Line
+                    key={name}
+                    type='monotone'
+                    dataKey={name}
+                    name={name}
+                    strokeWidth={2}
+                    stroke={`hsl(${(idx * 50) % 360}, 70%, 50%)`} // màu tự động khác nhau
+                    dot={{ r: 3 }}
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

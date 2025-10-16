@@ -23,26 +23,22 @@ export const revenueByPeriod = async (params) => {
   }
 };
 
-export const getRevenueByItem = async ({ limit = 5, period = "day", month, year }) => {
+export const getRevenueByItem = async (params = {}) => {
   try {
-    const res = await axios.get("/statistics/revenue/by-item", {
-      params: { limit, period, month, year },
-    });
+    const res = await axios.get("/statistics/revenue/by-item", { params });
     return res.data;
   } catch (error) {
-    console.error("Get revenue by item error:", error);
+    console.error("❌ Get revenue by item error:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
-export const getRevenueByDishGroup = async ({ limit = 5, period = "day", month, year }) => {
+export const getRevenueByDishGroup = async (params = {}) => {
   try {
-    const res = await axios.get("/statistics/revenue/by-dish-group", {
-      params: { period, month, year },
-    });
+    const res = await axios.get("/statistics/revenue/by-dish-group", { params });
     return res.data;
   } catch (error) {
-    console.error("Get revenue by dish group error:", error);
+    console.error("❌ Get revenue by dish group error:", error);
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };

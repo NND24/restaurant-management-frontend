@@ -450,7 +450,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* --- Phần hướng dẫn & phân tích --- */}
-        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
+        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
               🔍 Giới thiệu phân tích
@@ -484,7 +484,7 @@ const DashboardPage = () => {
         </Card>
 
         {/* ===== Scenario Simulation (tách riêng) ===== */}
-        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
+        <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
               ⚙️ Giả lập kịch bản (Scenario Simulation)

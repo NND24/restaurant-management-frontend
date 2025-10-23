@@ -129,7 +129,6 @@ const Page = () => {
       <div className='flex w-full md:w-1/2 justify-center items-center bg-white'>
         <div className='w-full max-w-md p-10'>
           <h3 className='text-[#4A4B4D] text-3xl font-bold mb-6 text-center'>Đăng nhập</h3>
-          <Image src='/assets/app_logo.png' alt='App logo' width={120} height={120} className='mx-auto mb-6' />
 
           <form onSubmit={formik.handleSubmit} className='space-y-5'>
             {/* Email */}

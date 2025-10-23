@@ -110,26 +110,6 @@ const ToppingGroupDetailModal = ({ open, onClose, id }) => {
                     </Typography>
                     <Chip label={`${top.price.toLocaleString()}₫`} color='primary' size='small' />
                   </Box>
-
-                  {top.ingredients?.length > 0 && (
-                    <Box mt={1}>
-                      <Typography variant='body2' fontWeight='500' color='text.secondary'>
-                        Nguyên liệu:
-                      </Typography>
-                      <List dense sx={{ pl: 2 }}>
-                        {top.ingredients.map((ing) => (
-                          <ListItem key={ing._id} sx={{ p: 0 }}>
-                            <ListItemText
-                              primary={`• ${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
-                                ing.ingredient?.unit?.name || ""
-                              }`}
-                              primaryTypographyProps={{ variant: "body2" }}
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Box>
-                  )}
                 </Card>
               ))}
             </Box>

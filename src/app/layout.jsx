@@ -12,13 +12,14 @@ import "react-tooltip/dist/react-tooltip.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith("/auth");
+  const isSupportPage = pathname.startsWith("/support");
 
   return (
     <html lang='en'>
       <body>
         <SocketProvider>
           <AuthProvider>
-            {isAuthPage ? children : <SidebarLayout>{children}</SidebarLayout>}
+            {isAuthPage || isSupportPage ? children : <SidebarLayout>{children}</SidebarLayout>}
             <ToastContainer position='top-right' autoClose={5000} />
             <Tooltip
               id='dish-tooltip'

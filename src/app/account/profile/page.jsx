@@ -61,10 +61,11 @@ const page = () => {
         console.error(error);
       }
     },
+    enableReinitialize: true,
   });
 
   return (
-    <div className='pt-[30px] pb-[100px] px-[20px] md:pt-[75px] md:mt-[20px] md:px-0 bg-[#fff] md:bg-[#f9f9f9]'>
+    <div className='overflow-y-scroll h-full pt-[30px] pb-[100px] px-[20px] md:px-0 bg-[#fff] md:bg-[#f9f9f9]'>
       <div className='bg-[#fff] lg:w-[60%] md:w-[80%] md:mx-auto md:border md:border-[#a3a3a3a3] md:border-solid md:rounded-[10px] md:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] md:overflow-hidden md:p-[20px]'>
         <div className='flex flex-col items-center mt-[20px]'>
           <div className='relative w-[110px] pt-[110px] mt-[20px] '>

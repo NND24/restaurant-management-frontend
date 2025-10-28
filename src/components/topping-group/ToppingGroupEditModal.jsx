@@ -34,8 +34,8 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
   // load data khi mở modal
   useEffect(() => {
     if (open) {
-      setIsLoadingData(true);
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           // load danh sách topping của store
           const toppingRes = await getStoreToppings(storeId);

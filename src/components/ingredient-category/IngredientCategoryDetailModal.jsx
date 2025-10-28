@@ -10,11 +10,13 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getIngredientCategoryById } from "@/service/ingredientCategory";
 
 const IngredientCategoryDetailModal = ({ open, onClose, id }) => {
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -24,6 +26,7 @@ const IngredientCategoryDetailModal = ({ open, onClose, id }) => {
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getIngredientCategoryById(id);
           if (res?.success === true) {
@@ -31,6 +34,8 @@ const IngredientCategoryDetailModal = ({ open, onClose, id }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -56,24 +61,30 @@ const IngredientCategoryDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField label='Tên' name='name' value={formData.name} fullWidth InputProps={{ readOnly: true }} />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField label='Tên' name='name' value={formData.name} fullWidth InputProps={{ readOnly: true }} />
 
-          <TextField
-            label='Mô tả'
-            name='description'
-            value={formData.description}
-            fullWidth
-            multiline
-            rows={3}
-            InputProps={{ readOnly: true }}
-          />
+            <TextField
+              label='Mô tả'
+              name='description'
+              value={formData.description}
+              fullWidth
+              multiline
+              rows={3}
+              InputProps={{ readOnly: true }}
+            />
 
-          <TextField select label='Trạng thái' value={formData.isActive} fullWidth InputProps={{ readOnly: true }}>
-            <MenuItem value={true}>Hoạt động</MenuItem>
-            <MenuItem value={false}>Ngưng</MenuItem>
-          </TextField>
-        </Box>
+            <TextField select label='Trạng thái' value={formData.isActive} fullWidth InputProps={{ readOnly: true }}>
+              <MenuItem value={true}>Hoạt động</MenuItem>
+              <MenuItem value={false}>Ngưng</MenuItem>
+            </TextField>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

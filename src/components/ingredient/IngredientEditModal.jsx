@@ -10,6 +10,7 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getIngredientById, updateIngredient } from "@/service/ingredient";
@@ -18,6 +19,7 @@ import { getIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import { toast } from "react-toastify";
 
 const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -49,6 +51,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     if (open && id) {
       const fetchData = async () => {
         try {
+          setIsLoadingData(true);
           const res = await getIngredientById(id);
           if (res?.success === true) {
             const ing = res.data;
@@ -64,6 +67,8 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -124,98 +129,111 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField
-            label='Tên nguyên liệu'
-            name='name'
-            value={formData.name}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
-
-          <TextField
-            label='Mô tả'
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={3}
-          />
-
-          <Box sx={{ display: "flex", gap: 2 }}>
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
             <TextField
-              select
-              label='Loại đơn vị'
-              name='unitType'
-              value={formData.unitType}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  unitType: e.target.value,
-                  unit: "",
-                }))
-              }
+              label='Tên nguyên liệu'
+              name='name'
+              value={formData.name}
+              onChange={handleChange}
               fullWidth
               required
-            >
-              <MenuItem value='weight'>Khối lượng</MenuItem>
-              <MenuItem value='volume'>Thể tích</MenuItem>
-              <MenuItem value='count'>Đếm</MenuItem>
-            </TextField>
+            />
+
+            <TextField
+              label='Mô tả'
+              name='description'
+              value={formData.description}
+              onChange={handleChange}
+              fullWidth
+              multiline
+              rows={3}
+            />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                select
+                label='Loại đơn vị'
+                name='unitType'
+                value={formData.unitType}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    unitType: e.target.value,
+                    unit: "",
+                  }))
+                }
+                fullWidth
+                required
+              >
+                <MenuItem value='weight'>Khối lượng</MenuItem>
+                <MenuItem value='volume'>Thể tích</MenuItem>
+                <MenuItem value='count'>Đếm</MenuItem>
+              </TextField>
+
+              <TextField
+                select
+                label='Đơn vị tính'
+                name='unit'
+                value={formData.unit}
+                onChange={handleChange}
+                fullWidth
+                required
+              >
+                {allUnits
+                  .filter((u) => u.type === formData.unitType)
+                  .map((u) => (
+                    <MenuItem key={u._id} value={u._id}>
+                      {u.name}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            </Box>
 
             <TextField
               select
-              label='Đơn vị tính'
-              name='unit'
-              value={formData.unit}
+              label='Loại nguyên liệu'
+              name='category'
+              value={formData.category}
               onChange={handleChange}
               fullWidth
               required
             >
-              {allUnits
-                .filter((u) => u.type === formData.unitType)
-                .map((u) => (
-                  <MenuItem key={u._id} value={u._id}>
-                    {u.name}
-                  </MenuItem>
-                ))}
+              {allCategories.map((c) => (
+                <MenuItem key={c._id} value={c._id}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              label='Ngưỡng tồn kho cảnh báo'
+              type='number'
+              name='reorderLevel'
+              value={formData.reorderLevel}
+              onChange={handleChange}
+              fullWidth
+              inputProps={{ min: 0 }}
+            />
+
+            <TextField
+              select
+              label='Trạng thái'
+              name='status'
+              value={formData.status}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
+              <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
+              <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
             </TextField>
           </Box>
-
-          <TextField
-            select
-            label='Loại nguyên liệu'
-            name='category'
-            value={formData.category}
-            onChange={handleChange}
-            fullWidth
-            required
-          >
-            {allCategories.map((c) => (
-              <MenuItem key={c._id} value={c._id}>
-                {c.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            label='Ngưỡng tồn kho cảnh báo'
-            type='number'
-            name='reorderLevel'
-            value={formData.reorderLevel}
-            onChange={handleChange}
-            fullWidth
-            inputProps={{ min: 0 }}
-          />
-
-          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
-            <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
-            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
-            <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
-          </TextField>
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

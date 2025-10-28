@@ -23,12 +23,12 @@ const reasonMap = {
 
 const WasteDetailModal = ({ open, onClose, id }) => {
   const [waste, setWaste] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
     if (open && id) {
+      setIsLoadingData(true);
       const fetchData = async () => {
-        setIsLoading(true);
         try {
           const res = await getWasteById(id);
           if (res?.success) {
@@ -37,7 +37,7 @@ const WasteDetailModal = ({ open, onClose, id }) => {
         } catch (err) {
           console.error(err);
         } finally {
-          setIsLoading(false);
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -68,7 +68,7 @@ const WasteDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        {isLoading ? (
+        {isLoadingData ? (
           <Box className='flex justify-center items-center h-40'>
             <CircularProgress color='warning' />
           </Box>

@@ -15,16 +15,19 @@ import {
   ListItemText,
   Card,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getDishGroupById } from "@/service/dishGroup";
 
 const DishGroupDetailModal = ({ open, onClose, id }) => {
   const [group, setGroup] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getDishGroupById(id);
           if (res?.success) {
@@ -32,6 +35,8 @@ const DishGroupDetailModal = ({ open, onClose, id }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -59,43 +64,49 @@ const DishGroupDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField label='Tên nhóm' value={group.name} fullWidth InputProps={{ readOnly: true }} />
-
-          <TextField
-            label='Trạng thái'
-            value={group.isActive ? "Hoạt động" : "Ngưng"}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <Box>
-            <Typography variant='h6' sx={{ fontWeight: "bold", mb: 2 }}>
-              Danh sách món ăn
-            </Typography>
-
-            {group.dishes?.map((top) => (
-              <Card
-                key={top._id}
-                variant='outlined'
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  "&:hover": { boxShadow: 3 },
-                }}
-              >
-                <Box display='flex' justifyContent='space-between' alignItems='center'>
-                  <Typography variant='subtitle1' fontWeight='600'>
-                    {top.name}
-                  </Typography>
-                  <Chip label={`${top.price.toLocaleString()}₫`} color='primary' size='small' />
-                </Box>
-              </Card>
-            ))}
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
           </Box>
-        </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField label='Tên nhóm' value={group.name} fullWidth InputProps={{ readOnly: true }} />
+
+            <TextField
+              label='Trạng thái'
+              value={group.isActive ? "Hoạt động" : "Ngưng"}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+
+            <Box>
+              <Typography variant='h6' sx={{ fontWeight: "bold", mb: 2 }}>
+                Danh sách món ăn
+              </Typography>
+
+              {group.dishes?.map((top) => (
+                <Card
+                  key={top._id}
+                  variant='outlined'
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    "&:hover": { boxShadow: 3 },
+                  }}
+                >
+                  <Box display='flex' justifyContent='space-between' alignItems='center'>
+                    <Typography variant='subtitle1' fontWeight='600'>
+                      {top.name}
+                    </Typography>
+                    <Chip label={`${top.price.toLocaleString()}₫`} color='primary' size='small' />
+                  </Box>
+                </Card>
+              ))}
+            </Box>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

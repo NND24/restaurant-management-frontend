@@ -13,16 +13,19 @@ import {
   List,
   ListItem,
   ListItemText,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getToppingById } from "@/service/topping";
 
 const ToppingDetailModal = ({ open, onClose, id }) => {
   const [topping, setTopping] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getToppingById(id);
           if (res?.success) {
@@ -30,6 +33,8 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -70,37 +75,43 @@ const ToppingDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField label='Tên món thêm' value={topping.name} fullWidth InputProps={{ readOnly: true }} />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField label='Tên món thêm' value={topping.name} fullWidth InputProps={{ readOnly: true }} />
 
-          <TextField label='Giá' value={topping.price} fullWidth InputProps={{ readOnly: true }} />
+            <TextField label='Giá' value={topping.price} fullWidth InputProps={{ readOnly: true }} />
 
-          {topping.ingredients.length > 0 && (
-            <Box>
-              <Typography variant='subtitle1' sx={{ mb: 0, fontWeight: "bold" }}>
-                Nguyên liệu
-              </Typography>
-              <List dense>
-                {topping.ingredients?.map((ing) => (
-                  <ListItem key={ing._id} sx={{ p: 0 }}>
-                    <ListItemText
-                      primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
-                        ing.ingredient?.unit?.name || ""
-                      }`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          )}
+            {topping.ingredients.length > 0 && (
+              <Box>
+                <Typography variant='subtitle1' sx={{ mb: 0, fontWeight: "bold" }}>
+                  Nguyên liệu
+                </Typography>
+                <List dense>
+                  {topping.ingredients?.map((ing) => (
+                    <ListItem key={ing._id} sx={{ p: 0 }}>
+                      <ListItemText
+                        primary={`${ing.ingredient?.name || "Nguyên liệu"}: ${ing.quantity} ${
+                          ing.ingredient?.unit?.name || ""
+                        }`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            )}
 
-          <TextField
-            label='Trạng thái'
-            value={getStatusLabel(topping.status)}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-        </Box>
+            <TextField
+              label='Trạng thái'
+              value={getStatusLabel(topping.status)}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

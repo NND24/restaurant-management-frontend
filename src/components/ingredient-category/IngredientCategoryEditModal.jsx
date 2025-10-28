@@ -10,12 +10,14 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getIngredientCategoryById, updateIngredientCategory } from "@/service/ingredientCategory";
 import { toast } from "react-toastify";
 
 const IngredientCategoryEditModal = ({ open, onClose, id, onUpdated }) => {
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -27,6 +29,7 @@ const IngredientCategoryEditModal = ({ open, onClose, id, onUpdated }) => {
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getIngredientCategoryById(id);
           if (res?.success === true) {
@@ -34,6 +37,8 @@ const IngredientCategoryEditModal = ({ open, onClose, id, onUpdated }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -87,31 +92,37 @@ const IngredientCategoryEditModal = ({ open, onClose, id, onUpdated }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField label='Tên' name='name' value={formData.name} onChange={handleChange} fullWidth required />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField label='Tên' name='name' value={formData.name} onChange={handleChange} fullWidth required />
 
-          <TextField
-            label='Mô tả'
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={3}
-          />
+            <TextField
+              label='Mô tả'
+              name='description'
+              value={formData.description}
+              onChange={handleChange}
+              fullWidth
+              multiline
+              rows={3}
+            />
 
-          <TextField
-            select
-            label='Trạng thái'
-            name='isActive'
-            value={formData.isActive}
-            onChange={handleChange}
-            fullWidth
-          >
-            <MenuItem value={true}>Hoạt động</MenuItem>
-            <MenuItem value={false}>Ngưng</MenuItem>
-          </TextField>
-        </Box>
+            <TextField
+              select
+              label='Trạng thái'
+              name='isActive'
+              value={formData.isActive}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value={true}>Hoạt động</MenuItem>
+              <MenuItem value={false}>Ngưng</MenuItem>
+            </TextField>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

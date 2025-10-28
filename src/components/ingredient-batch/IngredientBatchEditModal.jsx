@@ -10,6 +10,7 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getBatchById, updateBatch } from "@/service/ingredientBatch";
@@ -30,10 +31,12 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getBatchById(id);
           if (res?.success) {
@@ -41,6 +44,8 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -90,94 +95,107 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          {/* batchCode */}
-          <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
-
-          <TextField
-            label='Nguyên liệu'
-            value={formData.ingredient?.name || ""}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label='Số lượng nhập'
-              type='number'
-              value={formData.quantity}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label='Số lượng còn lại'
-              type='number'
-              value={formData.remainingQuantity}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
           </Box>
+        ) : (
+          <Box className='space-y-4'>
+            {/* batchCode */}
+            <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
 
-          <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label='Giá / đơn vị'
-              type='number'
-              value={formData.costPerUnit}
+              label='Nguyên liệu'
+              value={formData.ingredient?.name || ""}
               fullWidth
               InputProps={{ readOnly: true }}
             />
-            <TextField
-              label='Tổng giá'
-              type='number'
-              value={formData.quantity * formData.costPerUnit}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-          </Box>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Số lượng nhập'
+                type='number'
+                value={formData.quantity}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Số lượng còn lại'
+                type='number'
+                value={formData.remainingQuantity}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Giá / đơn vị'
+                type='number'
+                value={formData.costPerUnit}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Tổng giá'
+                type='number'
+                value={formData.quantity * formData.costPerUnit}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Ngày nhập'
+                type='text'
+                value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Hạn sử dụng'
+                type='date'
+                name='expiryDate'
+                value={formData.expiryDate ? formData.expiryDate.split("T")[0] : ""}
+                onChange={handleChange}
+                fullWidth
+                inputProps={{
+                  min: new Date().toISOString().slice(0, 10),
+                }}
+              />
+            </Box>
+
             <TextField
-              label='Ngày nhập'
-              type='text'
-              value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label='Hạn sử dụng'
-              type='date'
-              name='expiryDate'
-              value={formData.expiryDate ? formData.expiryDate.split("T")[0] : ""}
+              label='Nhà cung cấp'
+              name='supplierName'
+              value={formData.supplierName || ""}
               onChange={handleChange}
               fullWidth
-              inputProps={{
-                min: new Date().toISOString().slice(0, 10),
-              }}
             />
+
+            <TextField
+              label='Vị trí lưu trữ'
+              name='storageLocation'
+              value={formData.storageLocation || ""}
+              onChange={handleChange}
+              fullWidth
+            />
+
+            <TextField
+              select
+              label='Trạng thái'
+              name='status'
+              value={formData.status}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value='active'>Hoạt động</MenuItem>
+              <MenuItem value='expired'>Hết hạn</MenuItem>
+              <MenuItem value='finished'>Đã dùng hết</MenuItem>
+            </TextField>
           </Box>
-
-          <TextField
-            label='Nhà cung cấp'
-            name='supplierName'
-            value={formData.supplierName || ""}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <TextField
-            label='Vị trí lưu trữ'
-            name='storageLocation'
-            value={formData.storageLocation || ""}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
-            <MenuItem value='active'>Hoạt động</MenuItem>
-            <MenuItem value='expired'>Hết hạn</MenuItem>
-            <MenuItem value='finished'>Đã dùng hết</MenuItem>
-          </TextField>
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

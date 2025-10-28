@@ -1,10 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getIngredientById } from "@/service/ingredient";
 
 const IngredientDetailModal = ({ open, onClose, id }) => {
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -18,12 +29,15 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
     if (open && id) {
       const fetchData = async () => {
         try {
+          setIsLoadingData(true);
           const res = await getIngredientById(id);
           if (res?.success === true) {
             setFormData(res.data);
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -63,48 +77,54 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField label='Tên nguyên liệu' value={formData.name} fullWidth InputProps={{ readOnly: true }} />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            <TextField label='Tên nguyên liệu' value={formData.name} fullWidth InputProps={{ readOnly: true }} />
 
-          <TextField
-            label='Mô tả'
-            value={formData.description}
-            fullWidth
-            multiline
-            rows={2}
-            InputProps={{ readOnly: true }}
-          />
-
-          <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label='Đơn vị tính'
-              value={formData.unit?.name || ""}
+              label='Mô tả'
+              value={formData.description}
+              fullWidth
+              multiline
+              rows={2}
+              InputProps={{ readOnly: true }}
+            />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Đơn vị tính'
+                value={formData.unit?.name || ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Loại nguyên liệu'
+                value={formData.category?.name || ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
+            <TextField
+              label='Ngưỡng tồn kho cảnh báo'
+              type='number'
+              value={formData.reorderLevel}
               fullWidth
               InputProps={{ readOnly: true }}
             />
+
             <TextField
-              label='Loại nguyên liệu'
-              value={formData.category?.name || ""}
+              label='Trạng thái'
+              value={getStatusLabel(formData.status)}
               fullWidth
               InputProps={{ readOnly: true }}
             />
           </Box>
-
-          <TextField
-            label='Ngưỡng tồn kho cảnh báo'
-            type='number'
-            value={formData.reorderLevel}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <TextField
-            label='Trạng thái'
-            value={getStatusLabel(formData.status)}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

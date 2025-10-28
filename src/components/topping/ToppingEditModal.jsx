@@ -10,6 +10,7 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { FaTimes, FaPlus, FaMinus } from "react-icons/fa";
 import { getToppingById, updateTopping } from "@/service/topping";
@@ -30,6 +31,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedIngredient, setSelectedIngredient] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Load categories khi mở modal
   useEffect(() => {
@@ -46,6 +48,7 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   useEffect(() => {
     if (open && id) {
       const fetchTopping = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getToppingById(id);
           if (res?.success) {
@@ -62,6 +65,8 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           }
         } catch (err) {
           console.error("Error fetching topping:", err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchTopping();
@@ -146,137 +151,143 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <TextField
-            label='Tên món thêm'
-            value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            fullWidth
-            required
-          />
-
-          <TextField
-            label='Giá'
-            type='number'
-            value={formData.price}
-            onChange={(e) => setFormData((prev) => ({ ...prev, price: Number(e.target.value) }))}
-            fullWidth
-            required
-          />
-
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
             <TextField
-              select
-              label='Loại nguyên liệu'
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setSelectedIngredient("");
-              }}
-              sx={{ flex: 1 }}
-            >
-              {allCategories.map((c) => (
-                <MenuItem key={c._id} value={c._id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </TextField>
+              label='Tên món thêm'
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              fullWidth
+              required
+            />
 
             <TextField
+              label='Giá'
+              type='number'
+              value={formData.price}
+              onChange={(e) => setFormData((prev) => ({ ...prev, price: Number(e.target.value) }))}
+              fullWidth
+              required
+            />
+
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                select
+                label='Loại nguyên liệu'
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedIngredient("");
+                }}
+                sx={{ flex: 1 }}
+              >
+                {allCategories.map((c) => (
+                  <MenuItem key={c._id} value={c._id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                select
+                label='Nguyên liệu'
+                value={selectedIngredient}
+                onChange={(e) => {
+                  const ingId = e.target.value;
+                  setSelectedIngredient(ingId);
+                  const ing = ingredientsByCategory.find((i) => i._id === ingId);
+                  if (ing) addIngredient(ing);
+                }}
+                sx={{ flex: 1 }}
+                disabled={!selectedCategory}
+              >
+                {ingredientsByCategory.map((ing) => (
+                  <MenuItem key={ing._id} value={ing._id}>
+                    {ing.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+
+            {formData.ingredients.length > 0 && (
+              <Box className='border rounded-md space-y-1'>
+                {formData.ingredients.map((i) => {
+                  let step = 1;
+                  let unitLabel = i.ingredient.unit?.name || "";
+                  switch (i.ingredient.unit?.type) {
+                    case "weight":
+                      step = 50;
+                      if (!unitLabel) unitLabel = "g";
+                      break;
+                    case "volume":
+                      step = 10;
+                      if (!unitLabel) unitLabel = "ml";
+                      break;
+                    case "count":
+                      step = 1;
+                      if (!unitLabel) unitLabel = "cái";
+                      break;
+                    default:
+                      step = 1;
+                  }
+
+                  return (
+                    <Box
+                      key={i.ingredient._id}
+                      className='flex justify-between items-center py-1 px-2 bg-gray-50 rounded'
+                    >
+                      <span className='font-medium'>{i.ingredient.name}</span>
+                      <Box className='flex items-center gap-1'>
+                        <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
+                          <FaMinus />
+                        </IconButton>
+                        <TextField
+                          size='small'
+                          type='number'
+                          value={i.quantity}
+                          onChange={(e) => {
+                            const val = Math.max(0, Number(e.target.value));
+                            setFormData((prev) => ({
+                              ...prev,
+                              ingredients: prev.ingredients.map((ing) =>
+                                ing.ingredient._id === i.ingredient._id ? { ...ing, quantity: val } : ing
+                              ),
+                            }));
+                          }}
+                          inputProps={{ step }}
+                          sx={{ width: 70, textAlign: "center" }}
+                        />
+                        <span>{unitLabel}</span>
+                        <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
+                          <FaPlus />
+                        </IconButton>
+                        <IconButton size='small' color='error' onClick={() => removeIngredient(i.ingredient._id)}>
+                          🗑️
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
+
+            <TextField
               select
-              label='Nguyên liệu'
-              value={selectedIngredient}
-              onChange={(e) => {
-                const ingId = e.target.value;
-                setSelectedIngredient(ingId);
-                const ing = ingredientsByCategory.find((i) => i._id === ingId);
-                if (ing) addIngredient(ing);
-              }}
-              sx={{ flex: 1 }}
-              disabled={!selectedCategory}
+              label='Trạng thái'
+              value={formData.status}
+              onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+              fullWidth
             >
-              {ingredientsByCategory.map((ing) => (
-                <MenuItem key={ing._id} value={ing._id}>
-                  {ing.name}
-                </MenuItem>
-              ))}
+              <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
+              <MenuItem value='INACTIVE'>Ngưng</MenuItem>
+              <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
             </TextField>
           </Box>
-
-          {formData.ingredients.length > 0 && (
-            <Box className='border rounded-md space-y-1'>
-              {formData.ingredients.map((i) => {
-                let step = 1;
-                let unitLabel = i.ingredient.unit?.name || "";
-                switch (i.ingredient.unit?.type) {
-                  case "weight":
-                    step = 50;
-                    if (!unitLabel) unitLabel = "g";
-                    break;
-                  case "volume":
-                    step = 10;
-                    if (!unitLabel) unitLabel = "ml";
-                    break;
-                  case "count":
-                    step = 1;
-                    if (!unitLabel) unitLabel = "cái";
-                    break;
-                  default:
-                    step = 1;
-                }
-
-                return (
-                  <Box
-                    key={i.ingredient._id}
-                    className='flex justify-between items-center py-1 px-2 bg-gray-50 rounded'
-                  >
-                    <span className='font-medium'>{i.ingredient.name}</span>
-                    <Box className='flex items-center gap-1'>
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
-                        <FaMinus />
-                      </IconButton>
-                      <TextField
-                        size='small'
-                        type='number'
-                        value={i.quantity}
-                        onChange={(e) => {
-                          const val = Math.max(0, Number(e.target.value));
-                          setFormData((prev) => ({
-                            ...prev,
-                            ingredients: prev.ingredients.map((ing) =>
-                              ing.ingredient._id === i.ingredient._id ? { ...ing, quantity: val } : ing
-                            ),
-                          }));
-                        }}
-                        inputProps={{ step }}
-                        sx={{ width: 70, textAlign: "center" }}
-                      />
-                      <span>{unitLabel}</span>
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
-                        <FaPlus />
-                      </IconButton>
-                      <IconButton size='small' color='error' onClick={() => removeIngredient(i.ingredient._id)}>
-                        🗑️
-                      </IconButton>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-          )}
-
-          <TextField
-            select
-            label='Trạng thái'
-            value={formData.status}
-            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
-            fullWidth
-          >
-            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
-            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
-            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
-          </TextField>
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

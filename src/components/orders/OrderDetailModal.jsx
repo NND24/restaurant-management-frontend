@@ -26,8 +26,8 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
     if (!open || !orderId) return;
 
     const fetchOrder = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const response = await getOrder({ orderId });
         setOrder(response?.data);
       } catch (err) {

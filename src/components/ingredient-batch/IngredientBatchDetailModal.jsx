@@ -1,10 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getBatchById } from "@/service/ingredientBatch";
 
 const IngredientBatchDetailModal = ({ open, onClose, id }) => {
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     batchCode: "",
     ingredient: { _id: "", name: "" },
@@ -21,6 +32,7 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
   useEffect(() => {
     if (open && id) {
       const fetchData = async () => {
+        setIsLoadingData(true);
         try {
           const res = await getBatchById(id);
           if (res?.success) {
@@ -28,6 +40,8 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
           }
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoadingData(false);
         }
       };
       fetchData();
@@ -53,77 +67,83 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          {/* batchCode */}
-          <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
+        {isLoadingData ? (
+          <Box className='flex justify-center items-center h-40'>
+            <CircularProgress color='warning' />
+          </Box>
+        ) : (
+          <Box className='space-y-4'>
+            {/* batchCode */}
+            <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
 
-          <TextField
-            label='Nguyên liệu'
-            value={formData.ingredient?.name || ""}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label='Số lượng nhập'
-              type='number'
-              value={formData.quantity}
+              label='Nguyên liệu'
+              value={formData.ingredient?.name || ""}
               fullWidth
               InputProps={{ readOnly: true }}
             />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Số lượng nhập'
+                type='number'
+                value={formData.quantity}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Giá / đơn vị'
+                type='number'
+                value={formData.costPerUnit}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
             <TextField
-              label='Giá / đơn vị'
+              label='Tổng giá'
               type='number'
-              value={formData.costPerUnit}
+              value={formData.totalCost}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label='Ngày nhập'
+                type='text'
+                value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label='Hạn sử dụng'
+                type='text'
+                value={formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString() : ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
+            <TextField label='Nhà cung cấp' value={formData.supplierName} fullWidth InputProps={{ readOnly: true }} />
+
+            <TextField
+              label='Vị trí lưu trữ'
+              value={formData.storageLocation}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+
+            <TextField
+              label='Trạng thái'
+              value={
+                formData.status === "active" ? "Hoạt động" : formData.status === "expired" ? "Hết hạn" : "Đã kết thúc"
+              }
               fullWidth
               InputProps={{ readOnly: true }}
             />
           </Box>
-
-          <TextField
-            label='Tổng giá'
-            type='number'
-            value={formData.totalCost}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label='Ngày nhập'
-              type='text'
-              value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-            <TextField
-              label='Hạn sử dụng'
-              type='text'
-              value={formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString() : ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
-          </Box>
-
-          <TextField label='Nhà cung cấp' value={formData.supplierName} fullWidth InputProps={{ readOnly: true }} />
-
-          <TextField
-            label='Vị trí lưu trữ'
-            value={formData.storageLocation}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-
-          <TextField
-            label='Trạng thái'
-            value={
-              formData.status === "active" ? "Hoạt động" : formData.status === "expired" ? "Hết hạn" : "Đã kết thúc"
-            }
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>

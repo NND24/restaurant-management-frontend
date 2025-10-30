@@ -217,38 +217,42 @@ const page = () => {
             👁️
           </IconButton>
 
-          <IconButton
-            data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
-            size='small'
-            color='info'
-            sx={{
-              width: 30,
-              height: 30,
-              fontSize: "16px",
-            }}
-            onClick={() => {
-              setSelectedId(params.row._id);
-              setOpenEditDish(true);
-            }}
-          >
-            ✏️
-          </IconButton>
+          {!blockEdit && (
+            <IconButton
+              data-tooltip-id='dish-tooltip'
+              data-tooltip-content='Chỉnh sửa'
+              size='small'
+              color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedId(params.row._id);
+                setOpenEditDish(true);
+              }}
+            >
+              ✏️
+            </IconButton>
+          )}
 
-          <IconButton
-            data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xoá'
-            size='small'
-            sx={{
-              width: 30,
-              height: 30,
-              fontSize: "16px",
-            }}
-            color='error'
-            onClick={() => handleDelete(params.row._id)}
-          >
-            🗑️
-          </IconButton>
+          {!blockEdit && (
+            <IconButton
+              data-tooltip-id='dish-tooltip'
+              data-tooltip-content='Xoá'
+              size='small'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              color='error'
+              onClick={() => handleDelete(params.row._id)}
+            >
+              🗑️
+            </IconButton>
+          )}
         </div>
       ),
     },

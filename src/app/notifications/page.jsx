@@ -1,5 +1,4 @@
 "use client";
-import Header from "../../components/Header";
 import Notification from "../../components/Notification";
 import React, { useEffect, useState } from "react";
 import { updateNotificationStatus } from "@/service/notification";
@@ -13,11 +12,7 @@ const page = () => {
   };
 
   return (
-    <div className='pt-[30px] pb-[100px] md:pt-[75px]'>
-      <div className='hidden md:block'>
-        <Header page='notifications' />
-      </div>
-
+    <div className='pt-[30px] overflow-y-scroll h-full'>
       <div className='pt-[20px] lg:w-[60%] md:w-[80%] md:mx-auto'>
         {notifications &&
           notifications

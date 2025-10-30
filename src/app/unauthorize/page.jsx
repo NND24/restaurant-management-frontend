@@ -3,9 +3,11 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import localStorageService from "@/utils/localStorageService";
 
 const UnauthorizedPage = () => {
   const router = useRouter();
+  const getRole = localStorageService.getRole();
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-100 px-4'>
@@ -26,7 +28,7 @@ const UnauthorizedPage = () => {
         {/* Actions */}
         <div className='flex flex-col gap-4'>
           <button
-            onClick={() => router.push("/statistic/revenue")}
+            onClick={() => router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current")}
             className='px-6 py-2 rounded-lg bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-300 text-white font-semibold transition'
           >
             Về trang chủ

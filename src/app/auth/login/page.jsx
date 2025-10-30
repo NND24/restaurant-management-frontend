@@ -15,6 +15,7 @@ const Page = () => {
     email: yup.string().email("Email không hợp lệ!").required("Vui lòng nhập Email!"),
     password: yup.string().required("Vui lòng nhập mật khẩu!"),
   });
+  const getRole = localStorageService.getRole();
 
   const checkStoreStatus = async () => {
     try {
@@ -45,7 +46,7 @@ const Page = () => {
       const status = await checkStoreStatus();
       switch (status) {
         case "APPROVED":
-          router.push("/statistic/revenue");
+          router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current");
           break;
         case "PENDING":
           router.push("/auth/verification-pending");
@@ -86,7 +87,7 @@ const Page = () => {
         switch (status) {
           case "APPROVED":
             toast.success("Đăng nhập thành công!");
-            router.push("/statistic/revenue");
+            router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current");
             break;
           case "PENDING":
             toast.success("Đăng nhập thành công!");

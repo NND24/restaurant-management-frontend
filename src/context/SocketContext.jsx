@@ -19,7 +19,6 @@ export const SocketProvider = ({ children }) => {
     const newSocket = io(ENDPOINT, { transports: ["websocket"] });
     setSocket(newSocket);
 
-    newSocket.emit("registerUser", userId);
     if (storeId) newSocket.emit("registerStore", storeId);
 
     console.log("Socket connected");
@@ -30,9 +29,10 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on("newOrderNotification", (payload) => {
       setNotifications((prev) => [...prev, payload.notification]);
-      console.log("NEW ORDER NOTIFICATION")
+      console.log(payload);
+      console.log(notifications);
+      console.log("NEW ORDER NOTIFICATION");
     });
-
 
     newSocket.on("newNotification", (newNotification) => {
       setNotifications((prev) => [...prev, newNotification]);

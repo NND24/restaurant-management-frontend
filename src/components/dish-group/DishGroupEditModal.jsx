@@ -66,7 +66,7 @@ const DishGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) => {
       return;
     }
     if (formData.dishes.length === 0) {
-      toast.error("Cần chọn ít nhất 1 món thêm");
+      toast.error("Cần chọn ít nhất 1 món ăn");
       return;
     }
 
@@ -145,13 +145,7 @@ const DishGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) => {
               )}
               renderTags={() => null}
               renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant='outlined'
-                  label='Chọn món thêm'
-                  placeholder='Chọn topping...'
-                  fullWidth
-                />
+                <TextField {...params} variant='outlined' label='Chọn món ăn' placeholder='Chọn món ăn...' fullWidth />
               )}
               PaperComponent={({ children }) => (
                 <Paper

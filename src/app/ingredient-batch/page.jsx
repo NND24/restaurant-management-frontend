@@ -154,41 +154,40 @@ const page = () => {
           >
             👁️
           </IconButton>
-          {!blockEdit && (
-            <>
-              <IconButton
-                data-tooltip-id='dish-tooltip'
-                data-tooltip-content='Chỉnh sửa'
-                size='small'
-                color='info'
-                sx={{
-                  width: 30,
-                  height: 30,
-                  fontSize: "16px",
-                }}
-                onClick={() => {
-                  setSelectedId(params.row._id);
-                  setOpenEditIngredient(true);
-                }}
-              >
-                ✏️
-              </IconButton>
 
-              <IconButton
-                data-tooltip-id='dish-tooltip'
-                data-tooltip-content='Xoá'
-                size='small'
-                color='error'
-                sx={{
-                  width: 30,
-                  height: 30,
-                  fontSize: "16px",
-                }}
-                onClick={() => handleDelete(params.row._id)}
-              >
-                🗑️
-              </IconButton>
-            </>
+          <IconButton
+            data-tooltip-id='dish-tooltip'
+            data-tooltip-content='Chỉnh sửa'
+            size='small'
+            color='info'
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: "16px",
+            }}
+            onClick={() => {
+              setSelectedId(params.row._id);
+              setOpenEditIngredient(true);
+            }}
+          >
+            ✏️
+          </IconButton>
+
+          {!blockEdit && (
+            <IconButton
+              data-tooltip-id='dish-tooltip'
+              data-tooltip-content='Xoá'
+              size='small'
+              color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => handleDelete(params.row._id)}
+            >
+              🗑️
+            </IconButton>
           )}
         </div>
       ),
@@ -227,17 +226,15 @@ const page = () => {
       <div className='flex align-center justify-between mb-2'>
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Lô nguyên liệu</span>
 
-        {!blockEdit && (
-          <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
-            <button
-              onClick={() => setOpenCreateIngredient(true)}
-              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
-            >
-              <FaPlus className='text-lg' />
-              <span>Nhập lô mới</span>
-            </button>
-          </div>
-        )}
+        <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+          <button
+            onClick={() => setOpenCreateIngredient(true)}
+            className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+          >
+            <FaPlus className='text-lg' />
+            <span>Nhập lô mới</span>
+          </button>
+        </div>
       </div>
 
       <Box sx={{ height: 525, width: "100%" }}>

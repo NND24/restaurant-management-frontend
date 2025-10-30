@@ -1,9 +1,9 @@
-import axios from 'axios';
-import localStorageService from '@/utils/localStorageService';
+import axios from "axios";
+import localStorageService from "@/utils/localStorageService";
 
 // Create base Axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api/v1",
   withCredentials: true, // Needed for sending refresh token cookie
 });
 
@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 let isRefreshing = false;
 let failedQueue = [];
 
-const processQueue = (error , token) => {
+const processQueue = (error, token) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -25,8 +25,8 @@ const processQueue = (error , token) => {
 // Attach access token from localStorage before requests
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = JSON.parse(localStorage.getItem('token'));
+    if (typeof window !== "undefined") {
+      const token = JSON.parse(localStorage.getItem("token"));
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -42,8 +42,13 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (!originalRequest || !originalRequest.url) {
+      console.error("Axios Interceptor: missing request info", error);
+      return Promise.reject(error);
+    }
+
     const authUrls = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/reset-password"];
-    if (authUrls.some(url => originalRequest.url.includes(url))) {
+    if (authUrls.some((url) => originalRequest.url.includes(url))) {
       // Just reject with the original error
       return Promise.reject(error);
     }
@@ -67,11 +72,11 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Refresh the token via API call
-        const res = await axios.get('http://localhost:5000/api/v1/auth/refresh', { withCredentials: true });
+        const res = await axios.get("http://localhost:5000/api/v1/auth/refresh", { withCredentials: true });
         const newToken = res.data?.accessToken;
 
         if (newToken) {
-          localStorageService.setToken(newToken)
+          localStorageService.setToken(newToken);
           processQueue(null, newToken);
           // Setup other credentials if needed
 
@@ -79,11 +84,11 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return axiosInstance(originalRequest);
         } else {
-          throw new Error('No token in refresh response');
+          throw new Error("No token in refresh response");
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        console.error('Token refresh failed:', refreshError);
+        console.error("Token refresh failed:", refreshError);
         // Optional: redirect to login
         return Promise.reject(refreshError);
       } finally {

@@ -1,9 +1,11 @@
 import moment from "moment";
+import Link from "next/link";
 import React from "react";
 
 const Notification = ({ notification, handleNotificationStatusChange }) => {
   return (
-    <div
+    <Link
+      href='/orders/current'
       onClick={() => {
         handleNotificationStatusChange(notification._id);
       }}
@@ -34,7 +36,7 @@ const Notification = ({ notification, handleNotificationStatusChange }) => {
           {moment(notification?.createdAt).format("DD/MM/YYYY HH:mm")}
         </p>
       </div>
-    </div>
+    </Link>
   );
 };
 

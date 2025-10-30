@@ -16,6 +16,8 @@ export default function SidebarLayout({ children }) {
 
   const unreadCount = notifications.filter((noti) => noti.status === "unread").length;
 
+  const getRole = localStorageService.getRole();
+
   const handleMenuClick = (path) => {
     router.push(path);
   };
@@ -68,29 +70,34 @@ export default function SidebarLayout({ children }) {
             }),
           }}
         >
-          <SubMenu icon={<FaChartBar />} label='Thống kê' defaultOpen={pathname.startsWith("/statistic")}>
-            <MenuItem active={pathname === "/statistic/revenue"} onClick={() => handleMenuClick("/statistic/revenue")}>
-              Doanh thu
-            </MenuItem>
-            <MenuItem active={pathname === "/statistic/orders"} onClick={() => handleMenuClick("/statistic/orders")}>
-              Đơn hàng
-            </MenuItem>
-            <MenuItem active={pathname === "/statistic/items"} onClick={() => handleMenuClick("/statistic/items")}>
-              Món ăn
-            </MenuItem>
-            <MenuItem
-              active={pathname === "/statistic/customers"}
-              onClick={() => handleMenuClick("/statistic/customers")}
-            >
-              Khách hàng
-            </MenuItem>
-            <MenuItem
-              active={pathname === "/statistic/vouchers"}
-              onClick={() => handleMenuClick("/statistic/vouchers")}
-            >
-              Giảm giá
-            </MenuItem>
-          </SubMenu>
+          {getRole !== "staff" && (
+            <SubMenu icon={<FaChartBar />} label='Thống kê' defaultOpen={pathname.startsWith("/statistic")}>
+              <MenuItem
+                active={pathname === "/statistic/revenue"}
+                onClick={() => handleMenuClick("/statistic/revenue")}
+              >
+                Doanh thu
+              </MenuItem>
+              <MenuItem active={pathname === "/statistic/orders"} onClick={() => handleMenuClick("/statistic/orders")}>
+                Đơn hàng
+              </MenuItem>
+              <MenuItem active={pathname === "/statistic/items"} onClick={() => handleMenuClick("/statistic/items")}>
+                Món ăn
+              </MenuItem>
+              <MenuItem
+                active={pathname === "/statistic/customers"}
+                onClick={() => handleMenuClick("/statistic/customers")}
+              >
+                Khách hàng
+              </MenuItem>
+              <MenuItem
+                active={pathname === "/statistic/vouchers"}
+                onClick={() => handleMenuClick("/statistic/vouchers")}
+              >
+                Giảm giá
+              </MenuItem>
+            </SubMenu>
+          )}
 
           <SubMenu
             icon={<FaUtensils />}
@@ -133,26 +140,30 @@ export default function SidebarLayout({ children }) {
             </MenuItem>
           </SubMenu>
 
-          <SubMenu
-            icon={<FaStore />}
-            label='Cửa hàng'
-            defaultOpen={
-              pathname.startsWith("/store") || pathname.startsWith("/staff") || pathname.startsWith("/voucher")
-            }
-          >
-            <MenuItem active={pathname.startsWith("/store")} onClick={() => handleMenuClick("/store")}>
-              Thông tin
-            </MenuItem>
-            <MenuItem active={pathname.startsWith("/staff")} onClick={() => handleMenuClick("/staff")}>
-              Nhân viên
-            </MenuItem>
-            <MenuItem active={pathname.startsWith("/voucher")} onClick={() => handleMenuClick("/voucher")}>
-              Phiếu giảm giá
-            </MenuItem>
-            <MenuItem active={pathname.startsWith("/shipping-fee")} onClick={() => handleMenuClick("/shipping-fee")}>
-              Phí vận chuyển
-            </MenuItem>
-          </SubMenu>
+          {getRole !== "staff" && (
+            <SubMenu
+              icon={<FaStore />}
+              label='Cửa hàng'
+              defaultOpen={
+                pathname.startsWith("/store") || pathname.startsWith("/staff") || pathname.startsWith("/voucher")
+              }
+            >
+              {getRole !== "manager" && (
+                <MenuItem active={pathname.startsWith("/store")} onClick={() => handleMenuClick("/store")}>
+                  Thông tin
+                </MenuItem>
+              )}
+              <MenuItem active={pathname.startsWith("/staff")} onClick={() => handleMenuClick("/staff")}>
+                Nhân viên
+              </MenuItem>
+              <MenuItem active={pathname.startsWith("/voucher")} onClick={() => handleMenuClick("/voucher")}>
+                Phiếu giảm giá
+              </MenuItem>
+              <MenuItem active={pathname.startsWith("/shipping-fee")} onClick={() => handleMenuClick("/shipping-fee")}>
+                Phí vận chuyển
+              </MenuItem>
+            </SubMenu>
+          )}
 
           <SubMenu
             icon={<FaBoxes />}

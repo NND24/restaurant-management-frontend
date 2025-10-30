@@ -152,40 +152,44 @@ const page = () => {
             👁️
           </IconButton>
 
-          <IconButton
-            data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
-            size='small'
-            color='info'
-            sx={{
-              width: 30,
-              height: 30,
-              fontSize: "16px",
-            }}
-            onClick={() => {
-              setSelectedToppingGroupId(params.row._id);
-              setOpenEditToppingGroup(true);
-            }}
-          >
-            ✏️
-          </IconButton>
+          {!blockEdit && (
+            <IconButton
+              data-tooltip-id='dish-tooltip'
+              data-tooltip-content='Chỉnh sửa'
+              size='small'
+              color='info'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                setSelectedToppingGroupId(params.row._id);
+                setOpenEditToppingGroup(true);
+              }}
+            >
+              ✏️
+            </IconButton>
+          )}
 
-          <IconButton
-            data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xoá'
-            size='small'
-            color='error'
-            sx={{
-              width: 30,
-              height: 30,
-              fontSize: "16px",
-            }}
-            onClick={() => {
-              handleDelete(params.row._id);
-            }}
-          >
-            🗑️
-          </IconButton>
+          {!blockEdit && (
+            <IconButton
+              data-tooltip-id='dish-tooltip'
+              data-tooltip-content='Xoá'
+              size='small'
+              color='error'
+              sx={{
+                width: 30,
+                height: 30,
+                fontSize: "16px",
+              }}
+              onClick={() => {
+                handleDelete(params.row._id);
+              }}
+            >
+              🗑️
+            </IconButton>
+          )}
         </div>
       ),
     },
@@ -236,24 +240,28 @@ const page = () => {
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món thêm của món {dish.name}</span>
 
         <div className='flex gap-2'>
-          <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
-            <button
-              onClick={() => setOpenManage(true)}
-              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
-            >
-              <FaCog className='text-lg' />
-              <span> Quản lý</span>
-            </button>
-          </div>
+          {!blockEdit && (
+            <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
+              <button
+                onClick={() => setOpenManage(true)}
+                className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+              >
+                <FaCog className='text-lg' />
+                <span> Quản lý</span>
+              </button>
+            </div>
+          )}
 
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
-            <button
-              onClick={() => setOpenCreateToppingGroup(true)}
-              className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
-            >
-              <FaPlus className='text-lg' />
-              <span>Thêm</span>
-            </button>
+            {!blockEdit && (
+              <button
+                onClick={() => setOpenCreateToppingGroup(true)}
+                className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
+              >
+                <FaPlus className='text-lg' />
+                <span>Thêm</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

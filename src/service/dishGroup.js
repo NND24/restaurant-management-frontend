@@ -1,9 +1,9 @@
 import axios from "../libs/axiosInstance";
 
-export const getStoreDishGroups = async (storeId, activeOnly = false) => {
+export const getStoreDishGroups = async (storeId, activeOnly = false, dishActiveOnly = false) => {
   try {
     const response = await axios.get(`/dish-group/store/${storeId}`, {
-      params: { activeOnly },
+      params: { activeOnly, dishActiveOnly },
     });
     return response.data;
   } catch (error) {

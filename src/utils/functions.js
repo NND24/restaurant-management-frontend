@@ -11,8 +11,6 @@ export const getClosestProvince = ({ lat, lon }) => {
 
 export const haversineDistance = (coords1, coords2) => {
   const R = 6371; // Bán kính Trái Đất (km)
-  console.log(coords1);
-  console.log(coords2);
   const [lat1, lon1] = coords1;
   const [lat2, lon2] = coords2;
 

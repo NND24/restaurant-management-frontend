@@ -10,54 +10,47 @@ const LOGIN_ENDPOINT = process.env.API_LOGIN_ENDPOINT || "/api/v1/auth/login";
  * If your login returns a different JSON shape, adjust token extraction.
  */
 export async function loginAndGetToken(email, password) {
-    const api = await request.newContext({ baseURL: API_BASE });
-    console.log("Logging in with:", { email, password });
-    const res = await api.post(LOGIN_ENDPOINT, {
-        data: { email, password },
-    });
-    console.log("Login response:", res.status(), await res.json());
-    expect(res.status() == 200).toBeTruthy();
+  const api = await request.newContext({ baseURL: API_BASE });
+  const res = await api.post(LOGIN_ENDPOINT, {
+    data: { email, password },
+  });
+  expect(res.status() == 200).toBeTruthy();
 
-    const body = await res.json();
-    // adjust these lines to your API response fields
-    const token = body?.token || body?.data?.accessToken || body?.accessToken;
-    if (!token)
-        throw new Error(
-            "Login did not return a token. Check API response/LOGIN_ENDPOINT."
-        );
-    return { token, api };
+  const body = await res.json();
+  // adjust these lines to your API response fields
+  const token = body?.token || body?.data?.accessToken || body?.accessToken;
+  if (!token) throw new Error("Login did not return a token. Check API response/LOGIN_ENDPOINT.");
+  return { token, api };
 }
 
 /**
  * Create/update cart with one line item.
  */
 export async function updateCart(apiOrToken, payload) {
-    const { api, token } = await ensureContext(apiOrToken);
+  const { api, token } = await ensureContext(apiOrToken);
 
-    const res = await api.post("/api/v1/cart/update", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: payload,
-    });
-    console.log("Update cart response:", res.status(), await res.json());
-    expect(res.status() == 200).toBeTruthy();
+  const res = await api.post("/api/v1/cart/update", {
+    headers: { Authorization: `Bearer ${token}` },
+    data: payload,
+  });
+  expect(res.status() == 200).toBeTruthy();
 
-    return res.json(); // cart state
+  return res.json(); // cart state
 }
 
 /**
  * Complete the cart (creates an order). Returns { orderId, ... } from API.
  */
 export async function completeCart(apiOrToken, payload) {
-    const { api, token } = await ensureContext(apiOrToken);
+  const { api, token } = await ensureContext(apiOrToken);
 
-    const res = await api.post("/api/v1/cart/complete", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: payload,
-    });
-    console.log("Complete cart response:", res.status(), await res.json());
-    expect(res.status() == 201).toBeTruthy();
+  const res = await api.post("/api/v1/cart/complete", {
+    headers: { Authorization: `Bearer ${token}` },
+    data: payload,
+  });
+  expect(res.status() == 201).toBeTruthy();
 
-    return res.json(); // should include order info
+  return res.json(); // should include order info
 }
 
 /**
@@ -65,106 +58,94 @@ export async function completeCart(apiOrToken, payload) {
  * Returns { orderId, cart, complete } for assertions.
  */
 export async function createPendingOrder({
-    email,
-    password,
-    storeId,
-    dishId,
-    quantity = 1,
-    toppings = [],
-    note = "",
-    paymentMethod = "cash",
-    deliveryAddress = "SYSTEM TEST ADDRESS",
-    customerName = "SYSTEM TESTER",
-    customerPhonenumber = "0123456789",
-    detailAddress = "",
-    location = [109.1764224, 12.2585088],
-    vouchers = [],
+  email,
+  password,
+  storeId,
+  dishId,
+  quantity = 1,
+  toppings = [],
+  note = "",
+  paymentMethod = "cash",
+  deliveryAddress = "SYSTEM TEST ADDRESS",
+  customerName = "SYSTEM TESTER",
+  customerPhonenumber = "0123456789",
+  detailAddress = "",
+  location = [109.1764224, 12.2585088],
+  vouchers = [],
 }) {
-    const { token, api } = await loginAndGetToken(email, password);
+  const { token, api } = await loginAndGetToken(email, password);
 
-    const cart = await updateCart(
-        { token, api },
-        {
-            storeId,
-            dishId,
-            quantity,
-            toppings,
-            note,
-        }
-    );
-
-    const complete = await completeCart(
-        { token, api },
-        {
-            storeId,
-            paymentMethod,
-            deliveryAddress,
-            customerName,
-            customerPhonenumber,
-            detailAddress,
-            note,
-            location,
-            vouchers,
-        }
-    );
-
-    // Guess the order id path—adjust to your API response!
-    const orderId =
-        complete?.orderId ||
-        complete?.data?.orderId ||
-        complete?.order?._id ||
-        complete?._id;
-
-    if (!orderId) {
-        console.warn("completeCart response:", complete);
-        throw new Error(
-            "Could not find orderId in completeCart response—adjust parsing."
-        );
+  const cart = await updateCart(
+    { token, api },
+    {
+      storeId,
+      dishId,
+      quantity,
+      toppings,
+      note,
     }
+  );
 
-    return { token, api, cart, complete, orderId };
+  const complete = await completeCart(
+    { token, api },
+    {
+      storeId,
+      paymentMethod,
+      deliveryAddress,
+      customerName,
+      customerPhonenumber,
+      detailAddress,
+      note,
+      location,
+      vouchers,
+    }
+  );
+
+  // Guess the order id path—adjust to your API response!
+  const orderId = complete?.orderId || complete?.data?.orderId || complete?.order?._id || complete?._id;
+
+  if (!orderId) {
+    console.warn("completeCart response:", complete);
+    throw new Error("Could not find orderId in completeCart response—adjust parsing.");
+  }
+
+  return { token, api, cart, complete, orderId };
 }
 
 /** Optional helper for deleting an order later (fill in your endpoint when ready). */
 export async function deleteOrder(apiOrToken, orderId) {
-    const { api, token } = await ensureContext(apiOrToken);
-    // Replace endpoint with your real one when you have it.
-    const res = await api.delete(`/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    expect(res.ok()).toBeTruthy();
-    return res.json();
+  const { api, token } = await ensureContext(apiOrToken);
+  // Replace endpoint with your real one when you have it.
+  const res = await api.delete(`/orders/${orderId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(res.ok()).toBeTruthy();
+  return res.json();
 }
 
 // ---------- internal ----------
 async function ensureContext(apiOrToken) {
-    if (typeof apiOrToken === "string") {
-        const api = await request.newContext({ baseURL: API_BASE });
-        return { api, token: apiOrToken };
-    }
-    if (apiOrToken?.token && apiOrToken?.api) {
-        return apiOrToken;
-    }
-    throw new Error("Pass a token string or an object { token, api }.");
+  if (typeof apiOrToken === "string") {
+    const api = await request.newContext({ baseURL: API_BASE });
+    return { api, token: apiOrToken };
+  }
+  if (apiOrToken?.token && apiOrToken?.api) {
+    return apiOrToken;
+  }
+  throw new Error("Pass a token string or an object { token, api }.");
 }
 
 export async function getOrderById(apiOrToken, orderId) {
-    const { api, token } = await ensureContext(apiOrToken);
-    const res = await api.get(`/api/v1/order/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    console.log("Get order by ID response:", res.status(), await res.json());
-    expect(res.status() == 200).toBeTruthy();
-    return res.json(); // { _id, items, user, status, ... }
+  const { api, token } = await ensureContext(apiOrToken);
+  const res = await api.get(`/api/v1/order/${orderId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(res.status() == 200).toBeTruthy();
+  return res.json(); // { _id, items, user, status, ... }
 }
 
 export async function findItemToEdit(order) {
-    if (!order?.items?.length) throw new Error("Order has no items to edit.");
-    // Prefer a known dish if present, else first item.
-    console.log(order.items);
-    return (
-        order.items.find((it) =>
-            (it.dish?.name || it.dishName || "").includes("Value Burger Tôm")
-        ) || order.items[0]
-    );
+  if (!order?.items?.length) throw new Error("Order has no items to edit.");
+  // Prefer a known dish if present, else first item.
+  return order.items.find((it) => (it.dish?.name || it.dishName || "").includes("Value Burger Tôm")) || order.items[0];
 }

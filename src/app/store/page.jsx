@@ -68,7 +68,6 @@ const page = () => {
   const handleUpdateTime = async (data) => {
     try {
       const res = await updateHours(data);
-      console.log(res);
       if (res && res.success === true) {
         // Gọi lại API để lấy dữ liệu mới
         await fetchStore();
@@ -106,7 +105,6 @@ const page = () => {
         const avatarFormData = new FormData();
         avatarFormData.append("file", data.avatar); // phải đúng field 'images'
         const res = await uploadImages(avatarFormData); // gọi API upload
-        console.log("resImg ", res);
         if (Array.isArray(res) && res.length > 0) {
           avatarUrl = res[0].url;
         } else {
@@ -225,7 +223,6 @@ const page = () => {
   const handleUpdateAddress = async (data) => {
     try {
       const res = await updateAddress(data);
-      console.log(res);
       if (res && res.success === true) {
         // Gọi lại API để lấy dữ liệu mới
         await fetchStore();

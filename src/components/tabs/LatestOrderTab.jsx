@@ -57,15 +57,28 @@ const LatestOrder = ({ storeId }) => {
 
   const handleConfirm = async (order) => {
     try {
-      const updatedOrder = { ...order, status: "confirmed" };
+      // 1️⃣ Tìm lại order gốc từ orders
+      const originalOrder = orders.find((o) => o._id === order.id);
+
+      // 2️⃣ Tạo bản cập nhật từ order gốc
+      const updatedOrder = { ...originalOrder, status: "confirmed" };
+
+      // 3️⃣ Gửi API
+      await updateOrder({
+        orderId: originalOrder._id,
+        updatedData: updatedOrder,
+      });
+
+      // 4️⃣ Gửi thông báo
       sendNotification({
-        userId: order.userId,
+        userId: originalOrder.userId,
         title: "Cập nhật trạng thái đơn hàng",
-        message: `Đơn hàng #${order._id} đã được xác nhận.`,
-        orderId: order._id,
+        message: `Đơn hàng #${originalOrder._id} đã được xác nhận.`,
+        orderId: originalOrder._id,
         type: "info",
       });
-      await updateOrder({ orderId: order._id, updatedData: updatedOrder });
+
+      // 5️⃣ Load lại danh sách
       fetchOrders();
     } catch (err) {
       console.error("Update failed:", err);
@@ -134,7 +147,10 @@ const LatestOrder = ({ storeId }) => {
             backgroundColor: "#fc6011",
           }}
           size='small'
-          onClick={() => handleConfirm(params.row)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleConfirm(params.row);
+          }}
         >
           Xác nhận
         </Button>

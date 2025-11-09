@@ -1,18 +1,10 @@
 import axios from "../libs/axiosInstance";
 
-export const getStoreDishGroups = async (storeId) => {
+export const getStoreDishGroups = async (storeId, activeOnly = false) => {
   try {
-    const response = await axios.get(`/dish-group/store/${storeId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Get categories error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
-  }
-};
-
-export const getActiveStoreDishGroups = async (storeId) => {
-  try {
-    const response = await axios.get(`/dish-group/store/${storeId}/active`);
+    const response = await axios.get(`/dish-group/store/${storeId}`, {
+      params: { activeOnly },
+    });
     return response.data;
   } catch (error) {
     console.error("Get categories error:", error);

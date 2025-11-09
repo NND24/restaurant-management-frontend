@@ -32,7 +32,11 @@ const page = () => {
       setError(null);
       const unitData = await getBatchesByStore(storeId);
       const list = unitData?.data?.data || unitData?.data || [];
-      setAllIngredientBatches(list);
+      const transformed = list.map((item) => ({
+        ...item,
+        ingredientName: item.ingredient?.name || "",
+      }));
+      setAllIngredientBatches(transformed);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
       setError("Lỗi tải danh sách món");
@@ -78,11 +82,11 @@ const page = () => {
       renderCell: (params) => <span>{params.row?.batchCode || "-"}</span>,
     },
     {
-      field: "ingredient",
+      field: "ingredientName",
       headerName: "Lô nguyên liệu",
       width: 200,
       headerAlign: "center",
-      renderCell: (params) => <span>{params.row?.ingredient?.name || ""}</span>,
+      renderCell: (params) => <span>{params.row?.ingredientName || ""}</span>,
     },
     {
       field: "remainingQuantity",

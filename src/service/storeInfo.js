@@ -2,7 +2,6 @@ import axios from "../libs/axiosInstance";
 export const getInformation = async () => {
   try {
     const res = await axios.get(`/store`);
-    console.log("Get all information: ", res);
     return res.data;
   } catch (error) {
     console.error("Get all information error:", error);

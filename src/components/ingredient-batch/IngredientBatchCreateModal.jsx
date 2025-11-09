@@ -70,12 +70,20 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
     fetchIngredients();
   }, [selectedCategory, storeId]);
 
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
     if (["quantity", "costPerUnit"].includes(name)) {
       newValue = parseFloat(value) || 0;
     }
+
+    if (name === "ingredient") {
+      const ing = ingredientsByCategory.find((item) => item._id === value);
+      setSelectedIngredient(ing || null);
+    }
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: newValue };
       if (name === "quantity" || name === "costPerUnit") {
@@ -162,7 +170,7 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               required
             />
             <TextField
-              label='Giá / đơn vị'
+              label={`Giá / ${selectedIngredient?.unit?.name || "đơn vị"}`}
               type='number'
               name='costPerUnit'
               value={formData.costPerUnit}

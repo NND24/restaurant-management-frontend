@@ -61,15 +61,16 @@ export default function VerifyOrderTab({ storeId }) {
 
   const handleUpdateOrder = async (order, status) => {
     try {
+      const originalOrder = orders.find((o) => o._id === order.id);
       await updateOrder({
-        orderId: order._id,
-        updatedData: { ...order, status },
+        orderId: order.id,
+        updatedData: { ...originalOrder, status },
       });
       sendNotification({
         userId: order.userId,
         title: "Cập nhật trạng thái đơn hàng",
-        message: `Đơn hàng #${order._id} → ${statusTypes[status]}`,
-        orderId: order._id,
+        message: `Đơn hàng #${order.id} → ${statusTypes[status]}`,
+        orderId: order.id,
         type: "info",
       });
       fetchOrders();
@@ -134,13 +135,29 @@ export default function VerifyOrderTab({ storeId }) {
         const order = params.row.raw;
         if (order.status === "finished") {
           return (
-            <Button variant='contained' color='warning' size='small' onClick={() => handleUpdateOrder(order, "taken")}>
+            <Button
+              variant='contained'
+              color='warning'
+              size='small'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateOrder(order, "taken");
+              }}
+            >
               Giao tài xế
             </Button>
           );
         }
         return (
-          <Button variant='contained' color='primary' size='small' onClick={() => handleUpdateOrder(order, "finished")}>
+          <Button
+            variant='contained'
+            color='primary'
+            size='small'
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUpdateOrder(order, "finished");
+            }}
+          >
             Thông báo tài xế
           </Button>
         );

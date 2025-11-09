@@ -6,10 +6,17 @@ import { useSocket } from "@/context/SocketContext";
 import localStorageService from "@/utils/localStorageService";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { logoutUser } from "@/service/auth";
+import { useAuth } from "@/context/AuthContext";
+import { FiUser, FiKey, FiLogOut } from "react-icons/fi";
 
 export default function SidebarLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname(); // 👈 Lấy route hiện tại
+
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+  const { user, setUser, setUserId } = useAuth();
 
   const { notifications } = useSocket();
   const storeName = localStorageService.getStore()?.name ?? "Cửa hàng";
@@ -20,6 +27,34 @@ export default function SidebarLayout({ children }) {
 
   const handleMenuClick = (path) => {
     router.push(path);
+  };
+
+  useEffect(() => {
+    const closeMenu = () => setOpenUserMenu(false);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, []);
+
+  const confirmLogout = async () => {
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn đăng xuất không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Đồng ý",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await logoutUser();
+        setUserId(null);
+        setUser(null);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        router.push("/auth/login");
+      }
+    }
   };
 
   return (
@@ -46,9 +81,47 @@ export default function SidebarLayout({ children }) {
               )}
             </Link>
 
-            <Link href='/account' className='hover:opacity-80'>
-              <Image src='/assets/user.png' alt='User' width={26} height={26} className='cursor-pointer' />
-            </Link>
+            <div className='relative'>
+              <Image
+                src='/assets/user.png'
+                alt='User'
+                width={26}
+                height={26}
+                className='cursor-pointer'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenUserMenu((prev) => !prev);
+                }}
+              />
+
+              {openUserMenu && (
+                <div className='absolute right-0 mt-2 bg-white shadow-lg border rounded-xl w-56 z-50 py-2'>
+                  <button
+                    className='w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition'
+                    onClick={() => router.push("/account/profile")}
+                  >
+                    <FiUser size={18} className='text-gray-600' />
+                    <span>Thông tin cá nhân</span>
+                  </button>
+
+                  <button
+                    className='w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition'
+                    onClick={() => router.push("/account/change-password")}
+                  >
+                    <FiKey size={18} className='text-gray-600' />
+                    <span>Đổi mật khẩu</span>
+                  </button>
+
+                  <button
+                    className='w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition text-red-500'
+                    onClick={confirmLogout}
+                  >
+                    <FiLogOut size={18} />
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -168,7 +241,9 @@ export default function SidebarLayout({ children }) {
           <SubMenu
             icon={<FaBoxes />}
             label='Nguyên liệu'
-            defaultOpen={pathname.startsWith("/ingredient") || pathname.startsWith("/waste")}
+            defaultOpen={
+              pathname.startsWith("/ingredient") || pathname.startsWith("/waste") || pathname.startsWith("/unit")
+            }
           >
             <MenuItem active={pathname === "/ingredient"} onClick={() => handleMenuClick("/ingredient")}>
               Nguyên liệu
@@ -187,6 +262,9 @@ export default function SidebarLayout({ children }) {
               onClick={() => handleMenuClick("/ingredient-category")}
             >
               Loại nguyên liệu
+            </MenuItem>
+            <MenuItem active={pathname === "/unit"} onClick={() => handleMenuClick("/unit")}>
+              Đơn vị
             </MenuItem>
           </SubMenu>
         </Menu>

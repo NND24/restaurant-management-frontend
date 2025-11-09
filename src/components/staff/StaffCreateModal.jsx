@@ -22,6 +22,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
     phonenumber: "",
     gender: "male",
     role: "staff",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +34,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
           email: initialData.email || "",
           phonenumber: initialData.phonenumber || "",
           gender: initialData.gender || "male",
+          password: "",
           // nếu role là array thì lấy phần tử ưu tiên, ví dụ phần tử cuối
           role: Array.isArray(initialData.role)
             ? initialData.role.includes("manager")
@@ -66,12 +68,22 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
       toast.error("Email không được để trống.");
       return false;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast.error("Email không đúng định dạng.");
+      return false;
+    }
     if (!formData.phonenumber.trim()) {
       toast.error("Số điện thoại không được để trống.");
       return false;
     }
     if (!/^\d+$/.test(formData.phonenumber.trim())) {
       toast.error("Số điện thoại chỉ được chứa chữ số.");
+      return false;
+    }
+
+    if (!isUpdate && !formData.password?.trim()) {
+      toast.error("Mật khẩu không được để trống.");
       return false;
     }
     return true;
@@ -162,6 +174,16 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             <MenuItem value='staff'>Nhân viên</MenuItem>
             <MenuItem value='manager'>Quản lý</MenuItem>
           </TextField>
+          {!isUpdate && (
+            <TextField
+              label='Mật khẩu'
+              name='password'
+              type='password'
+              value={formData.password}
+              onChange={handleChange}
+              fullWidth
+            />
+          )}
         </Box>
       </DialogContent>
 

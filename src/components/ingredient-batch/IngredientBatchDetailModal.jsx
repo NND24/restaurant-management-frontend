@@ -92,7 +92,7 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
                 InputProps={{ readOnly: true }}
               />
               <TextField
-                label='Giá / đơn vị'
+                label={`Giá / ${formData.ingredient?.unit?.name || "đơn vị"}`}
                 type='number'
                 value={formData.costPerUnit}
                 fullWidth

@@ -21,17 +21,12 @@ export const SocketProvider = ({ children }) => {
 
     if (storeId) newSocket.emit("registerStore", storeId);
 
-    console.log("Socket connected");
-
     newSocket.on("getAllNotifications", (allNotifications) => {
       setNotifications(allNotifications);
     });
 
     newSocket.on("newOrderNotification", (payload) => {
       setNotifications((prev) => [...prev, payload.notification]);
-      console.log(payload);
-      console.log(notifications);
-      console.log("NEW ORDER NOTIFICATION");
     });
 
     newSocket.on("newNotification", (newNotification) => {

@@ -43,7 +43,6 @@ export const getIngredientCategoryById = async (id) => {
 
 export const updateIngredientCategory = async ({ id, data }) => {
   try {
-    console.log(id);
     const res = await axios.put(`/ingredient-category/${id}`, data);
     return res.data;
   } catch (error) {

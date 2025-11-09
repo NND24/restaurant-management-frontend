@@ -1,8 +1,8 @@
 import axios from "../libs/axiosInstance";
 
-export const createUnit = async ({ name, type, storeId }) => {
+export const createUnit = async ({ name, type, isActive, storeId }) => {
   try {
-    let data = { name, type, storeId };
+    let data = { name, type, storeId, isActive };
     const res = await axios.post(`/unit/`, data);
     return res.data;
   } catch (error) {
@@ -11,9 +11,11 @@ export const createUnit = async ({ name, type, storeId }) => {
   }
 };
 
-export const getUnits = async (storeId) => {
+export const getUnits = async (storeId, activeOnly = false) => {
   try {
-    const res = await axios.get(`/unit/`);
+    const res = await axios.get(`/unit/store/${storeId}`, {
+      params: { activeOnly },
+    });
     return res.data;
   } catch (error) {
     console.error(error);
@@ -31,9 +33,8 @@ export const getUnitById = async (id) => {
   }
 };
 
-export const updateUnit = async ({ id, name, type, isActive }) => {
+export const updateUnit = async ({ id, data }) => {
   try {
-    let data = { name, type, isActive };
     const res = await axios.put(`/unit/${id}`, data);
     return res.data;
   } catch (error) {
@@ -42,7 +43,7 @@ export const updateUnit = async ({ id, name, type, isActive }) => {
   }
 };
 
-export const deleteUnit = async ({ id }) => {
+export const deleteUnit = async (id) => {
   try {
     const res = await axios.delete(`/unit/${id}`);
     return res.data;

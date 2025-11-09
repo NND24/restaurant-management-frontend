@@ -91,10 +91,6 @@ const ToppingGroupEditModal = ({ open, onClose, groupId, storeId, onUpdated }) =
     }
   };
 
-  useEffect(() => {
-    console.log(isLoadingData);
-  }, [isLoadingData]);
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>

@@ -31,7 +31,10 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const [unitRes, categoryRes] = await Promise.all([getUnits(storeId), getIngredientCategoriesByStore(storeId)]);
+      const [unitRes, categoryRes] = await Promise.all([
+        getUnits(storeId, true),
+        getIngredientCategoriesByStore(storeId),
+      ]);
       setAllUnits(unitRes?.data || []);
       setAllCategories(categoryRes?.data || []);
     };

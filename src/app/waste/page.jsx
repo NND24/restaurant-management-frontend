@@ -35,7 +35,12 @@ const WastePage = () => {
       setError(null);
       const res = await getWasteList(storeId);
       const list = res?.data?.data || res?.data || [];
-      setAllWastes(list);
+
+      const transformed = list.map((item) => ({
+        ...item,
+        ingredientName: item?.ingredientBatchId?.ingredient?.name || "",
+      }));
+      setAllWastes(transformed);
     } catch (err) {
       console.error("Failed to fetch Wastes", err);
       setError("Lỗi tải danh sách waste");
@@ -58,14 +63,11 @@ const WastePage = () => {
   // Cột hiển thị Waste
   const columns = [
     {
-      field: "ingredientBatchId",
+      field: "ingredientName",
       headerName: "Nguyên liệu",
       flex: 1,
       headerAlign: "center",
-      renderCell: (params) => {
-        const ing = params.row?.ingredientBatchId?.ingredient;
-        return <span>{ing?.name || "N/A"}</span>;
-      },
+      renderCell: (params) => <span>{params.row?.ingredientName || ""}</span>,
     },
     {
       field: "quantity",
@@ -91,7 +93,7 @@ const WastePage = () => {
       headerName: "Nhân viên ghi nhận",
       flex: 1,
       headerAlign: "center",
-      renderCell: (params) => params.row?.staff?.name || "N/A",
+      renderCell: (params) => params.row?.staff?.name || "Hệ thống ghi nhận",
     },
     {
       field: "date",

@@ -1,5 +1,6 @@
 import axios from "axios";
 import localStorageService from "@/utils/localStorageService";
+import { logoutUser } from "@/service/auth";
 
 // Create base Axios instance
 const axiosInstance = axios.create({
@@ -26,9 +27,10 @@ const processQueue = (error, token) => {
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = JSON.parse(localStorage.getItem("token"));
+      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token || ""}`;
+        config.headers.Accept = `application/json`;
       }
     }
     return config;
@@ -47,7 +49,7 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const authUrls = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/reset-password"];
+    const authUrls = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/reset-password", "/auth/logout"];
     if (authUrls.some((url) => originalRequest.url.includes(url))) {
       // Just reject with the original error
       return Promise.reject(error);

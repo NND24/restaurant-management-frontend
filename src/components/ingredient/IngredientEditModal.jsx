@@ -37,7 +37,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   // Load Units + Categories
   useEffect(() => {
     if (open) {
-      getUnits().then((res) => {
+      getUnits(storeId, true).then((res) => {
         if (res?.success) setAllUnits(res.data);
       });
       getIngredientCategoriesByStore(storeId).then((res) => {

@@ -16,7 +16,8 @@ import { viVN } from "@/utils/constants";
 const ShippingFeePage = () => {
   const [fees, setFees] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [storeId] = useState(localStorageService.getStoreId());
+  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
+  const storeId = storeData ? JSON.parse(storeData)?._id : "";
   const [feeBeingEdited, setFeeBeingEdited] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
   const [loading, setLoading] = useState(false);

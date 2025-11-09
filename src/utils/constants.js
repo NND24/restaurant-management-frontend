@@ -24,6 +24,70 @@ export const viVN = {
     labelRowsPerPage: "Số hàng mỗi trang:",
     labelDisplayedRows: ({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`,
   },
+
+  columnMenuSortAsc: "Sắp xếp tăng dần",
+  columnMenuSortDesc: "Sắp xếp giảm dần",
+  columnMenuUnsort: "Hủy sắp xếp",
+  columnMenuFilter: "Lọc",
+  columnMenuHideColumn: "Ẩn cột",
+  columnMenuShowColumns: "Hiện cột",
+  columnMenuManageColumns: "Quản lý cột",
+
+  // Columns panel
+  columnsPanelTextFieldLabel: "Tìm cột",
+  columnsPanelTextFieldPlaceholder: "Tên cột",
+  columnsPanelShowAllButton: "Hiện tất cả",
+  columnsPanelHideAllButton: "Ẩn tất cả",
+
+  // Filter panel
+  filterPanelAddFilter: "Thêm bộ lọc",
+  filterPanelRemoveAll: "Xóa tất cả",
+  filterPanelDeleteIconLabel: "Xóa",
+  filterPanelLogicOperator: "Toán tử logic",
+  filterPanelOperatorAnd: "Và",
+  filterPanelOperatorOr: "Hoặc",
+  filterPanelColumns: "Cột",
+  filterPanelOperators: "Điều kiện",
+  filterPanelInputLabel: "Giá trị",
+  filterPanelInputPlaceholder: "Nhập giá trị",
+
+  // Filter operators
+  filterOperatorContains: "chứa",
+  filterOperatorDoesNotContain: "không chứa",
+  filterOperatorEquals: "bằng",
+  filterOperatorDoesNotEqual: "không bằng",
+  filterOperatorStartsWith: "bắt đầu bằng",
+  filterOperatorEndsWith: "kết thúc bằng",
+  filterOperatorIs: "là",
+  filterOperatorNot: "không phải",
+  filterOperatorAfter: "sau",
+  filterOperatorOnOrAfter: "vào hoặc sau",
+  filterOperatorBefore: "trước",
+  filterOperatorOnOrBefore: "vào hoặc trước",
+  filterOperatorIsEmpty: "trống",
+  filterOperatorIsNotEmpty: "không trống",
+  filterOperatorIsAnyOf: "là một trong",
+  filterOperatorIsIn: "nằm trong",
+  filterOperatorIsNotIn: "không nằm trong",
+  filterOperatorBetween: "trong khoảng",
+  filterOperatorNotBetween: "ngoài khoảng",
+
+  // Filter value
+  filterValueAny: "bất kỳ",
+  filterValueTrue: "đúng",
+  filterValueFalse: "sai",
+
+  // Column header filters
+  columnHeaderFiltersLabel: "Hiện bộ lọc",
+  columnHeaderSortIconLabel: "Sắp xếp",
+
+  // Footer
+  footerRowSelected: (count) =>
+    count !== 1 ? `${count.toLocaleString()} dòng đã chọn` : `${count.toLocaleString()} dòng đã chọn`,
+  footerTotalRows: "Tổng số dòng:",
+
+  // Misc
+  checkboxSelectionHeaderName: "Chọn dòng",
 };
 
 export const provinces = [

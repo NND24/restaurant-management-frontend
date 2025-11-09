@@ -12,7 +12,10 @@ import { FaPlus } from "react-icons/fa";
 const VoucherPage = () => {
   const [vouchers, setVouchers] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [storeId] = useState(localStorageService.getStoreId());
+
+  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
+  const storeId = storeData ? JSON.parse(storeData)?._id : "";
+
   const [voucherBeingEdited, setVoucherBeingEdited] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
   const [loading, setLoading] = useState(false);

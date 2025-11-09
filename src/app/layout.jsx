@@ -8,6 +8,7 @@ import SidebarLayout from "@/components/SidebarLayout";
 import { usePathname } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
+import { ThemeProvider } from "next-themes";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -16,25 +17,27 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang='en'>
-      <body>
-        <SocketProvider>
-          <AuthProvider>
-            {isAuthPage || isSupportPage ? children : <SidebarLayout>{children}</SidebarLayout>}
-            <ToastContainer position='top-right' autoClose={5000} />
-            <Tooltip
-              id='dish-tooltip'
-              place='top'
-              style={{
-                zIndex: 9999,
-                backgroundColor: "#333",
-                color: "#fff",
-                fontSize: "12px",
-                borderRadius: "6px",
-                padding: "4px 8px",
-              }}
-            />
-          </AuthProvider>
-        </SocketProvider>
+      <body className=''>
+        <ThemeProvider attribute='class' defaultTheme='light' enableSystem={true}>
+          <SocketProvider>
+            <AuthProvider>
+              {isAuthPage || isSupportPage ? children : <SidebarLayout>{children}</SidebarLayout>}
+              <ToastContainer position='top-right' autoClose={5000} />
+              <Tooltip
+                id='dish-tooltip'
+                place='top'
+                style={{
+                  zIndex: 9999,
+                  backgroundColor: "#333",
+                  color: "#fff",
+                  fontSize: "12px",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                }}
+              />
+            </AuthProvider>
+          </SocketProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -17,7 +17,8 @@ export default function StaffDataGrid() {
   const [showForm, setShowForm] = useState(false);
   const [staffBeingEdited, setStaffBeingEdited] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
-  const storeId = localStorageService.getStoreId();
+  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
+  const storeId = storeData ? JSON.parse(storeData)?._id : "";
 
   const fetchStaff = async () => {
     try {

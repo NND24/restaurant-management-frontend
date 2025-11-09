@@ -26,6 +26,7 @@ import { generateImageDescription } from "@/service/huggingface";
 import { toast } from "react-toastify";
 import { improveVietnameseDescription } from "@/service/statistic";
 import { getSystemCategoryByStoreId } from "@/service/systemCategory";
+import axios from "axios";
 
 const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
@@ -46,6 +47,52 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [autoDescribe, setAutoDescribe] = useState(true);
+
+  // 🔹 Dùng cho AI caption từ FoodCaptioner
+  const [captionData, setCaptionData] = useState(null);
+  const [currentCaptionIndex, setCurrentCaptionIndex] = useState(0);
+  const [editableCaption, setEditableCaption] = useState("");
+
+  const API_IMAGE = "http://localhost:8000/generate-caption-from-image";
+  const API_URL = "http://127.0.0.1:8000/caption";
+
+  // 🟦 Tạo mô tả từ FILE
+  const generateCaptionFromFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("top_k", "3");
+
+    try {
+      const res = await axios.post(API_IMAGE, formData);
+      setCaptionData(res.data);
+
+      const randomIndex = Math.floor(Math.random() * res.data.descriptions.length);
+      setCurrentCaptionIndex(randomIndex);
+      setEditableCaption(res.data.descriptions[randomIndex]);
+    } catch (e) {
+      console.error(e);
+      toast.error("Không thể sinh mô tả từ ảnh");
+    }
+  };
+
+  // 🟦 Tạo mô tả từ URL ảnh
+  const generateCaptionFromUrl = async (url) => {
+    try {
+      const res = await axios.post(API_URL, null, { params: { url } });
+      setEditableCaption(res.data.caption_vi);
+    } catch (e) {
+      console.error(e);
+      toast.error("Không thể sinh mô tả từ URL ảnh");
+    }
+  };
+
+  useEffect(() => {
+    if (captionData?.descriptions) {
+      const newCaption = captionData.descriptions[currentCaptionIndex] || "";
+      setEditableCaption(newCaption);
+      setFormData((prev) => ({ ...prev, description: newCaption }));
+    }
+  }, [currentCaptionIndex, captionData]);
 
   useEffect(() => {
     if (open) {
@@ -69,7 +116,6 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
       const fetchSystemCategories = async () => {
         try {
           const res = await getSystemCategoryByStoreId(storeId);
-          console.log(res?.data);
           setAllSystemCategories(res?.data || []);
         } catch (err) {
           console.error("Failed to load system categories", err);
@@ -130,7 +176,6 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
     try {
       toast.info("Đang tải ảnh lên...");
-
       const form = new FormData();
       form.append("file", file);
       const res = await uploadImages(form);
@@ -140,19 +185,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
       const uploadedUrl = res[0].url;
       setImage(uploadedUrl);
 
-      // 🔹 Chỉ mô tả ảnh nếu người dùng bật toggle
+      // 🟦 Gọi AI mô tả
       if (autoDescribe) {
-        toast.info("Đang mô tả hình ảnh món ăn...");
+        toast.info("Đang mô tả món ăn...");
+        await generateCaptionFromFile(file);
 
-        const caption = await generateImageDescription(uploadedUrl);
-        setFormData((prev) => ({
-          ...prev,
-          description: caption || prev.description,
-        }));
-
-        toast.success("Đã tự động thêm mô tả món ăn");
-      } else {
-        toast.info("Bỏ qua mô tả tự động (do bạn đã tắt)");
+        toast.success("Đã sinh mô tả từ hình ảnh!");
       }
     } catch (err) {
       console.error(err);
@@ -271,15 +309,49 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             <Switch checked={autoDescribe} onChange={(e) => setAutoDescribe(e.target.checked)} color='primary' />
           </Box>
 
-          <TextField
-            label='Mô tả'
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={3}
-          />
+          <Box>
+            <Box display='flex' justifyContent='space-between' alignItems='center'>
+              <Typography variant='subtitle1'>Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)</Typography>
+
+              {captionData?.descriptions?.length > 1 && (
+                <Button
+                  onClick={() => {
+                    const total = captionData.descriptions.length;
+                    let newIdx = currentCaptionIndex;
+
+                    while (newIdx === currentCaptionIndex) {
+                      newIdx = Math.floor(Math.random() * total);
+                    }
+
+                    setCurrentCaptionIndex(newIdx);
+                  }}
+                  size='small'
+                  variant='outlined'
+                >
+                  Mô tả khác
+                </Button>
+              )}
+            </Box>
+
+            <textarea
+              value={editableCaption}
+              onChange={(e) => {
+                setEditableCaption(e.target.value);
+                setFormData((prev) => ({ ...prev, description: e.target.value }));
+              }}
+              rows={6}
+              style={{
+                width: "100%",
+                marginTop: 8,
+                padding: 12,
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                fontSize: 15,
+                fontFamily: "inherit",
+                background: "#fafafa",
+              }}
+            />
+          </Box>
 
           <TextField
             select

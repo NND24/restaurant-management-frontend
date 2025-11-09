@@ -67,8 +67,6 @@ const VoucherModal = ({ open, onClose, storeId, voucherId, isUpdate = false, rea
 
   useEffect(() => {
     if (initialData) {
-      console.log("InitialData:", initialData);
-
       setFormData({
         code: initialData.code || "",
         description: initialData.description || "",

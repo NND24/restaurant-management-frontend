@@ -42,11 +42,6 @@ const RegisterPage = () => {
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 0));
-
-  useEffect(() => {
-    console.log("📝 formData cập nhật:", formData);
-  }, [formData]);
-
   const renderStepComponent = () => {
     switch (step) {
       case 0:

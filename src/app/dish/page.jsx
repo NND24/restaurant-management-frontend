@@ -125,6 +125,7 @@ const page = () => {
       field: "category",
       headerName: "Phân loại món",
       headerAlign: "center",
+      align: "center",
       flex: 1,
       renderCell: (params) => <span>{params.row?.category?.name || ""}</span>,
     },

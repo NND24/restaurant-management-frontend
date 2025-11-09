@@ -130,7 +130,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label='Giá / đơn vị'
+                label={`Giá / ${formData.ingredient?.unit?.name || "đơn vị"}`}
                 type='number'
                 value={formData.costPerUnit}
                 fullWidth

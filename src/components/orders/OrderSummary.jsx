@@ -4,7 +4,6 @@ import DishDetailModal from "../dish/DishDetailModal";
 import ToppingDetailModal from "../topping/ToppingDetailModal";
 
 const OrderSummary = ({ detailItems, subtotalPrice, shippingFee, totalDiscount }) => {
-  console.log(detailItems);
   const [openDetailDish, setOpenDetailDish] = useState(false);
   const [openDetailTopping, setOpenDetailTopping] = useState(false);
   const [selectedId, setSelectedId] = useState(null);

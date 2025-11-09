@@ -32,7 +32,12 @@ const page = () => {
       setError(null);
       const unitData = await getIngredientsByStore(storeId);
       const list = unitData?.data?.data || unitData?.data || [];
-      setAllIngredients(list);
+      const transformed = list.map((item) => ({
+        ...item,
+        unitName: item.unit?.name || "",
+        categoryName: item.category?.name || "",
+      }));
+      setAllIngredients(transformed);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
       setError("Lỗi tải danh sách món");
@@ -77,19 +82,19 @@ const page = () => {
       renderCell: (params) => <span>{params.row?.name || ""}</span>,
     },
     {
-      field: "unit",
+      field: "unitName",
       headerName: "Đơn vị tính",
       headerAlign: "center",
       align: "center",
       width: 120,
-      renderCell: (params) => <span>{params.row?.unit?.name || ""}</span>,
+      renderCell: (params) => <span>{params.row?.unitName || ""}</span>,
     },
     {
-      field: "category",
+      field: "categoryName",
       headerName: "Loại nguyên liệu",
       headerAlign: "center",
       width: 160,
-      renderCell: (params) => <span>{params.row?.category?.name || ""}</span>,
+      renderCell: (params) => <span>{params.row?.categoryName || ""}</span>,
     },
     {
       field: "reorderLevel",

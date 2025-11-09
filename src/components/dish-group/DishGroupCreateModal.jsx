@@ -48,10 +48,6 @@ const DishGroupCreateModal = ({ open, onClose, storeId, onCreated }) => {
       toast.error("Tên Nhóm món ăn là bắt buộc");
       return;
     }
-    if (formData.dishes.length === 0) {
-      toast.error("Cần chọn ít nhất 1 món ăn");
-      return;
-    }
 
     try {
       setLoading(true);

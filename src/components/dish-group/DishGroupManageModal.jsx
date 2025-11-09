@@ -39,10 +39,6 @@ const DishGroupManageModal = ({ open, onClose, groupId, storeId, currentDishes, 
   }, [open, storeId, currentDishes]);
 
   const handleSave = async () => {
-    if (selected.length === 0) {
-      toast.error("Cần chọn ít nhất 1 món ăn");
-      return;
-    }
     try {
       setLoading(true);
       await updateDishGroupById({ dishGroupId: groupId, data: { dishes: selected.map((t) => t._id) } });

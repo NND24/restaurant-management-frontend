@@ -32,6 +32,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
+    image: null,
     description: "",
     ingredients: [],
     toppingGroups: [],
@@ -43,32 +44,23 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [selectedIngredient, setSelectedIngredient] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [allSystemCategories, setAllSystemCategories] = useState([]);
-
-  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [autoDescribe, setAutoDescribe] = useState(true);
 
   // 🔹 Dùng cho AI caption từ FoodCaptioner
-  const [captionData, setCaptionData] = useState(null);
-  const [currentCaptionIndex, setCurrentCaptionIndex] = useState(0);
-  const [editableCaption, setEditableCaption] = useState("");
-
   const API_IMAGE = "http://localhost:8000/generate-caption-from-image";
   const API_URL = "http://127.0.0.1:8000/caption";
 
   // 🟦 Tạo mô tả từ FILE
-  const generateCaptionFromFile = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("top_k", "3");
-
+  const generateCaptionFromFile = async (formData) => {
     try {
-      const res = await axios.post(API_IMAGE, formData);
-      setCaptionData(res.data);
-
-      const randomIndex = Math.floor(Math.random() * res.data.descriptions.length);
-      setCurrentCaptionIndex(randomIndex);
-      setEditableCaption(res.data.descriptions[randomIndex]);
+      const res = await axios.post(API_IMAGE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Đã sinh mô tả từ hình ảnh!");
+      return res.data;
     } catch (e) {
       console.error(e);
       toast.error("Không thể sinh mô tả từ ảnh");
@@ -79,7 +71,6 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const generateCaptionFromUrl = async (url) => {
     try {
       const res = await axios.post(API_URL, null, { params: { url } });
-      setEditableCaption(res.data.caption_vi);
     } catch (e) {
       console.error(e);
       toast.error("Không thể sinh mô tả từ URL ảnh");
@@ -87,16 +78,16 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   };
 
   useEffect(() => {
-    if (captionData?.descriptions) {
-      const newCaption = captionData.descriptions[currentCaptionIndex] || "";
-      setEditableCaption(newCaption);
-      setFormData((prev) => ({ ...prev, description: newCaption }));
-    }
-  }, [currentCaptionIndex, captionData]);
-
-  useEffect(() => {
     if (open) {
-      setFormData({ name: "", price: 0, description: "", status: "ACTIVE", ingredients: [], toppingGroups: [] });
+      setFormData({
+        name: "",
+        price: 0,
+        image: null,
+        description: "",
+        status: "ACTIVE",
+        ingredients: [],
+        toppingGroups: [],
+      });
       const fetchCategories = async () => {
         const res = await getActiveIngredientCategoriesByStore(storeId);
         setAllCategories(res?.data || []);
@@ -131,14 +122,19 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   useEffect(() => {
     if (!selectedCategory) return setIngredientsByCategory([]);
     const fetchIngredients = async () => {
-      const res = await getIngredientsByCategory({ storeId, categoryId: selectedCategory });
+      const res = await getIngredientsByCategory({
+        storeId,
+        categoryId: selectedCategory,
+      });
       setIngredientsByCategory(res?.data || []);
     };
     fetchIngredients();
   }, [selectedCategory]);
 
   const addIngredient = (ingredient) => {
-    if (!formData.ingredients.find((i) => i.ingredient._id === ingredient._id)) {
+    if (
+      !formData.ingredients.find((i) => i.ingredient._id === ingredient._id)
+    ) {
       setFormData((prev) => ({
         ...prev,
         ingredients: [...prev.ingredients, { ingredient, quantity: 1 }],
@@ -157,7 +153,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     setFormData((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((i) =>
-        i.ingredient._id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
+        i.ingredient._id === id
+          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          : i
       ),
     }));
   };
@@ -170,9 +168,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const localPreview = URL.createObjectURL(file);
-    setImage(localPreview);
+    setFormData((prev) => ({ ...prev, image: file }));
 
     try {
       toast.info("Đang tải ảnh lên...");
@@ -182,15 +178,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
       if (!res || !res[0]?.url) throw new Error("Upload thất bại");
 
-      const uploadedUrl = res[0].url;
-      setImage(uploadedUrl);
-
       // 🟦 Gọi AI mô tả
       if (autoDescribe) {
         toast.info("Đang mô tả món ăn...");
-        await generateCaptionFromFile(file);
-
-        toast.success("Đã sinh mô tả từ hình ảnh!");
+        const res = await generateCaptionFromFile(form);
+        setFormData((prev) => ({ ...prev, description: res.caption }));
+        console.log(res);
       }
     } catch (err) {
       console.error(err);
@@ -198,17 +191,27 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     }
   };
 
-  const handleSave = async () => {
-    let uploadedImage = { filePath: "", url: image };
+  const reGenerateCaptionFromFile = async () => {
+    try {
+      toast.info("Đang mô tả món ăn...");
+      const form = new FormData();
+      form.append("file", formData.image);
+      const res = await generateCaptionFromFile(form);
+      setFormData((prev) => ({ ...prev, description: res.caption }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể xử lý ảnh");
+    }
+  };
 
-    if (image && !image.startsWith("http")) {
-      const fileInput = document.getElementById("imageUpload");
-      if (fileInput.files.length) {
-        const form = new FormData();
-        form.append("file", fileInput.files[0]);
-        const res = await uploadImages(form);
-        uploadedImage = { filePath: res[0].filePath, url: res[0].url };
-      }
+  const handleSave = async () => {
+    let uploadedImage = { filePath: "", url: formData.image };
+
+    if (formData.image) {
+      const form = new FormData();
+      form.append("file", formData.image);
+      const res = await uploadImages(form);
+      uploadedImage = { filePath: res[0].filePath, url: res[0].url };
     }
 
     if (!formData.name.trim()) {
@@ -248,23 +251,35 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle
+        sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}
+      >
         Thêm món ăn
-        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
           <FaTimes />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
+        <Box className="space-y-4">
           {/* Form Fields */}
-          <Box display='flex' gap={2} flexWrap='wrap'>
-            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
+          <Box display="flex" gap={2} flexWrap="wrap">
             <TextField
-              label='Giá*'
-              name='price'
-              type='number'
+              label="Tên*"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Giá*"
+              name="price"
+              type="number"
               value={formData.price}
               onChange={handleChange}
               fullWidth
@@ -273,11 +288,11 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           {/* Image Upload */}
           <Box>
-            <Typography variant='subtitle1' gutterBottom>
+            <Typography variant="subtitle1" gutterBottom>
               Hình ảnh
             </Typography>
             <Paper
-              variant='outlined'
+              variant="outlined"
               sx={{
                 width: 150,
                 height: 150,
@@ -289,44 +304,51 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
               }}
               onClick={() => document.getElementById("imageUpload").click()}
             >
-              {image ? (
-                <img src={image} alt='Preview' style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {formData.image ? (
+                <img
+                  src={URL.createObjectURL(formData.image)}
+                  alt="Preview"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
               ) : (
-                <FaRegImage size={32} color='#aaa' />
+                <FaRegImage size={32} color="#aaa" />
               )}
               <input
-                type='file'
-                id='imageUpload'
-                accept='image/*'
+                type="file"
+                id="imageUpload"
+                accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleImageUpload}
               />
             </Paper>
           </Box>
 
-          <Box display='flex' alignItems='center' gap={1}>
-            <Typography variant='subtitle1'>Tự động gợi ý mô tả từ hình ảnh</Typography>
-            <Switch checked={autoDescribe} onChange={(e) => setAutoDescribe(e.target.checked)} color='primary' />
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="subtitle1">
+              Tự động gợi ý mô tả từ hình ảnh
+            </Typography>
+            <Switch
+              checked={autoDescribe}
+              onChange={(e) => setAutoDescribe(e.target.checked)}
+              color="primary"
+            />
           </Box>
 
           <Box>
-            <Box display='flex' justifyContent='space-between' alignItems='center'>
-              <Typography variant='subtitle1'>Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)</Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography variant="subtitle1">
+                Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)
+              </Typography>
 
-              {captionData?.descriptions?.length > 1 && (
+              {formData.description && (
                 <Button
-                  onClick={() => {
-                    const total = captionData.descriptions.length;
-                    let newIdx = currentCaptionIndex;
-
-                    while (newIdx === currentCaptionIndex) {
-                      newIdx = Math.floor(Math.random() * total);
-                    }
-
-                    setCurrentCaptionIndex(newIdx);
-                  }}
-                  size='small'
-                  variant='outlined'
+                  onClick={reGenerateCaptionFromFile}
+                  size="small"
+                  variant="outlined"
                 >
                   Mô tả khác
                 </Button>
@@ -334,10 +356,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             </Box>
 
             <textarea
-              value={editableCaption}
+              value={formData.description}
               onChange={(e) => {
-                setEditableCaption(e.target.value);
-                setFormData((prev) => ({ ...prev, description: e.target.value }));
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }));
               }}
               rows={6}
               style={{
@@ -355,9 +379,11 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             select
-            label='Loại món ăn'
+            label="Loại món ăn"
             value={formData.category || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, category: e.target.value }))
+            }
             fullWidth
           >
             {allSystemCategories.map((cat) => (
@@ -371,7 +397,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             {/* Select loại nguyên liệu */}
             <TextField
               select
-              label='Loại nguyên liệu'
+              label="Loại nguyên liệu"
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
@@ -389,7 +415,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             {/* Select nguyên liệu theo loại */}
             <TextField
               select
-              label='Nguyên liệu'
+              label="Nguyên liệu"
               value={selectedIngredient}
               onChange={(e) => {
                 const ingId = e.target.value;
@@ -410,7 +436,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           {/* Nguyên liệu đã chọn */}
           {formData.ingredients.length > 0 && (
-            <Box className='border rounded-md space-y-1'>
+            <Box className="border rounded-md space-y-1">
               {formData.ingredients.map((i) => {
                 // Xác định bước tăng/giảm theo loại unit
                 let step = 1;
@@ -436,25 +462,30 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 return (
                   <Box
                     key={i.ingredient._id}
-                    className='flex justify-between items-center py-1 px-2 bg-gray-50 rounded'
+                    className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
                   >
-                    <span className='font-medium'>{i.ingredient.name}</span>
-                    <Box className='flex items-center gap-1'>
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
+                    <span className="font-medium">{i.ingredient.name}</span>
+                    <Box className="flex items-center gap-1">
+                      <IconButton
+                        size="small"
+                        onClick={() => updateQuantity(i.ingredient._id, -step)}
+                      >
                         <FaMinus />
                       </IconButton>
 
                       {/* Input để chỉnh số lượng trực tiếp */}
                       <TextField
-                        size='small'
-                        type='number'
+                        size="small"
+                        type="number"
                         value={i.quantity}
                         onChange={(e) => {
                           const val = Math.max(0, Number(e.target.value)); // không cho âm
                           setFormData((prev) => ({
                             ...prev,
                             ingredients: prev.ingredients.map((ing) =>
-                              ing.ingredient._id === i.ingredient._id ? { ...ing, quantity: val } : ing
+                              ing.ingredient._id === i.ingredient._id
+                                ? { ...ing, quantity: val }
+                                : ing
                             ),
                           }));
                         }}
@@ -464,10 +495,17 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
                       <span>{unitLabel}</span>
 
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => updateQuantity(i.ingredient._id, step)}
+                      >
                         <FaPlus />
                       </IconButton>
-                      <IconButton size='small' color='error' onClick={() => removeIngredient(i.ingredient._id)}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => removeIngredient(i.ingredient._id)}
+                      >
                         🗑️
                       </IconButton>
                     </Box>
@@ -482,7 +520,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             options={allToppingGroups}
             getOptionLabel={(option) => option.name}
             value={formData.toppingGroups}
-            onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppingGroups: newValue }))}
+            onChange={(e, newValue) =>
+              setFormData((prev) => ({ ...prev, toppingGroups: newValue }))
+            }
             disableCloseOnSelect
             renderOption={(props, option, { selected }) => (
               <li
@@ -497,7 +537,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 }}
               >
                 <input
-                  type='checkbox'
+                  type="checkbox"
                   checked={selected}
                   readOnly
                   style={{ width: 16, height: 16, accentColor: "#fc6011" }}
@@ -509,9 +549,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             renderInput={(params) => (
               <TextField
                 {...params}
-                variant='outlined'
-                label='Chọn nhóm món thêm'
-                placeholder='Chọn nhóm món thêm...'
+                variant="outlined"
+                label="Chọn nhóm món thêm"
+                placeholder="Chọn nhóm món thêm..."
                 fullWidth
               />
             )}
@@ -522,7 +562,10 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                   maxHeight: 240,
                   overflowY: "auto",
                   "&::-webkit-scrollbar": { width: 6 },
-                  "&::-webkit-scrollbar-thumb": { backgroundColor: "#fc6011", borderRadius: 3 },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "#fc6011",
+                    borderRadius: 3,
+                  },
                 }}
               >
                 {children}
@@ -541,10 +584,12 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                   onDelete={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      toppingGroups: prev.toppingGroups.filter((t) => t._id !== option._id),
+                      toppingGroups: prev.toppingGroups.filter(
+                        (t) => t._id !== option._id
+                      ),
                     }))
                   }
-                  size='medium'
+                  size="medium"
                   sx={{
                     backgroundColor: "#fc6011",
                     color: "#fff",
@@ -559,23 +604,30 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             select
-            label='Trạng thái'
+            label="Trạng thái"
             value={formData.status}
-            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, status: e.target.value }))
+            }
             fullWidth
           >
-            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
-            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
-            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
+            <MenuItem value="ACTIVE">Hoạt động</MenuItem>
+            <MenuItem value="INACTIVE">Ngưng</MenuItem>
+            <MenuItem value="OUT_OF_STOCK">Hết hàng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>
-        <Button onClick={onClose} color='error' variant='outlined'>
+        <Button onClick={onClose} color="error" variant="outlined">
           Hủy
         </Button>
-        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          disabled={loading}
+        >
           {loading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>

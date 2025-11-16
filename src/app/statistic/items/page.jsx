@@ -450,7 +450,16 @@ const DashboardPage = () => {
             <Typography variant='h6' gutterBottom>
               Gợi ý món ăn mới
             </Typography>
-            <p>Gợi ý món ăn mới dựa theo chuyên môn của nhà hàng</p>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
+              Hệ thống sẽ phân tích dữ liệu kinh doanh của cửa hàng (các món bán chạy, nhóm nguyên liệu dùng nhiều,...)
+              kết hợp với kiến thức về ngành F&B để đề xuất những món mới mà cửa hàng có thể đưa vào thực đơn.
+              <br />- Những gợi ý này chỉ mang tính chất hỗ trợ, giúp chủ cửa hàng:
+              <ul style={{ marginTop: 4, marginLeft: 10 }}>
+                <li>+ Mở rộng thực đơn dựa trên thế mạnh hiện tại,</li>
+                <li>+ Tận dụng nguyên liệu sẵn có để tối ưu chi phí,</li>
+                <li>+ Tăng khả năng thu hút khách hàng mới.</li>
+              </ul>
+            </Typography>
 
             {recommendedDishes.length > 0 ? (
               <Grid container spacing={2}>
@@ -497,6 +506,14 @@ const DashboardPage = () => {
           <CardContent>
             <Typography variant='h6' gutterBottom>
               Gợi ý món ăn theo danh mục
+            </Typography>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
+              Dựa trên từng danh mục món ăn mà cửa hàng đang kinh doanh, hệ thống đưa ra danh sách các món được đề xuất
+              phù hợp với mỗi danh mục. Điều này giúp bạn dễ dàng biết được danh mục nào đang thiếu món, có thể bổ sung
+              món gì để menu trở nên đa dạng và cân đối hơn.
+              <br />
+              Ví dụ: Nếu danh mục "Món chiên" đang ít món, hệ thống sẽ gợi ý thêm các món phù hợp như gà chiên sốt,
+              khoai tây lắc phô mai,...
             </Typography>
 
             {recommendedDishesByCategory.length > 0 ? (

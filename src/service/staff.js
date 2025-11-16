@@ -6,7 +6,7 @@ export const getAllStaff = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get all staff error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,7 +16,7 @@ export const getStaff = async ({ staffId }) => {
     return res.data;
   } catch (error) {
     console.error("Get staff error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -26,7 +26,7 @@ export const createStaff = async ({ storeId, staffData }) => {
     return res.data;
   } catch (error) {
     console.error("Create staff error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -36,7 +36,7 @@ export const updateStaff = async ({ userId, staffData }) => {
     return res.data;
   } catch (error) {
     console.error("Update staff error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -46,6 +46,6 @@ export const deleteStaff = async ({ storeId, userId }) => {
     return res.data;
   } catch (error) {
     console.error("Delete staff error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

@@ -47,7 +47,7 @@ export const getOwnStore = async () => {
     return data;
   } catch (error) {
     console.error("Get owner store error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -64,7 +64,7 @@ export const registerStoreOwner = async (storeOwnerData) => {
     return data;
   } catch (error) {
     console.error("Registration error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -76,7 +76,7 @@ export const checkStoreOwnerEmail = async (email) => {
     return data;
   } catch (error) {
     console.error("Email check error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -89,7 +89,7 @@ export const refreshAccessToken = async () => {
     return data;
   } catch (error) {
     console.error("Token refresh error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -101,7 +101,7 @@ export const changePassword = async (passwordData) => {
     return data;
   } catch (error) {
     console.error("Change password error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -113,7 +113,7 @@ export const resetPassword = async (resetData) => {
     return data;
   } catch (error) {
     console.error("Reset password error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -125,6 +125,6 @@ export const getOwnerStore = async () => {
     return data;
   } catch (error) {
     console.error("Get owner store error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

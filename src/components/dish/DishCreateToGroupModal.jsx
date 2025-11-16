@@ -132,6 +132,11 @@ const DishCreateToGroupModal = ({ open, onClose, storeId, dishGroup, onCreated }
       return;
     }
 
+    if (!formData.category) {
+      toast.error("Vui lòng chọn loại món ăn");
+      return;
+    }
+
     try {
       setLoading(true);
       const payload = {

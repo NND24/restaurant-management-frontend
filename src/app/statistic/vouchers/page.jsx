@@ -55,7 +55,7 @@ const page = () => {
   return (
     <div className='bg-gray-50 min-h-screen p-8 space-y-8 overflow-y-auto h-full'>
       <div>
-        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>🎟️ Thống kê Voucher</h1>
+        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>Thống kê Voucher</h1>
         <p className='text-gray-500'>
           Theo dõi hiệu quả và ảnh hưởng của các mã khuyến mãi trong khoảng thời gian nhất định
         </p>
@@ -103,12 +103,12 @@ const page = () => {
       </div>
 
       {loading ? (
-        <div className='text-center py-10 text-gray-500'>⏳ Đang tải dữ liệu...</div>
+        <div className='text-center py-10 text-gray-500'>Đang tải dữ liệu...</div>
       ) : (
         <>
           {/* Tổng quan sử dụng */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>📊 Tổng quan sử dụng</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Tổng quan sử dụng</h3>
             <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
               <SummaryCard
                 title='Số lượt sử dụng'
@@ -133,7 +133,7 @@ const page = () => {
 
           {/* Top Voucher */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>🏆 Top {limit} voucher được sử dụng nhiều nhất</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Top {limit} voucher được sử dụng nhiều nhất</h3>
             {topVouchers.length === 0 ? (
               <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 text-gray-500 text-center'>
                 Không có dữ liệu
@@ -164,7 +164,7 @@ const page = () => {
 
           {/* Ảnh hưởng doanh thu */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>💰 Ảnh hưởng doanh thu</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Ảnh hưởng doanh thu</h3>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
               <SummaryCard
                 title='Tổng giá trị giảm giá'

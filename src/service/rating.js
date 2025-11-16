@@ -7,7 +7,7 @@ export const getStoreRatings = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get store ratings error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -18,6 +18,6 @@ export const replyToRating = async (ratingId, storeReply) => {
     return res.data;
   } catch (error) {
     console.error("Reply to rating error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

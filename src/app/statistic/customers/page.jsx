@@ -67,7 +67,7 @@ const CustomerInsightPage = () => {
 
   return (
     <div className='overflow-y-auto h-full p-6 bg-gradient-to-br from-gray-50 to-gray-100'>
-      <h2 className='text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2'>👥 Phân tích hành vi khách hàng</h2>
+      <h2 className='text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2'>Phân tích hành vi khách hàng</h2>
 
       {/* Tổng quan */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8'>
@@ -93,7 +93,7 @@ const CustomerInsightPage = () => {
 
       {/* Biểu đồ Pie */}
       <div className='bg-white rounded-2xl shadow-md p-6 mb-8'>
-        <h3 className='text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2'>🎯 Tỷ lệ khách quay lại</h3>
+        <h3 className='text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2'>Tỷ lệ khách quay lại</h3>
         <div className='w-full h-72'>
           <ResponsiveContainer width='100%' height='100%'>
             <PieChart>

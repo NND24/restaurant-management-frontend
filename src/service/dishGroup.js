@@ -8,7 +8,7 @@ export const getStoreDishGroups = async (storeId, activeOnly = false, dishActive
     return response.data;
   } catch (error) {
     console.error("Get categories error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -18,7 +18,7 @@ export const getDishGroupById = async (dishGroupId) => {
     return response.data;
   } catch (error) {
     console.error("Get categories error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -28,7 +28,7 @@ export const createDishGroup = async ({ storeId, data }) => {
     return response.data;
   } catch (error) {
     console.error("Create category error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -38,7 +38,7 @@ export const updateDishGroupById = async ({ dishGroupId, data }) => {
     return response.data;
   } catch (error) {
     console.error("Update category error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -48,7 +48,7 @@ export const toggleActiveDishGroup = async (dishGroupId) => {
     return response.data;
   } catch (error) {
     console.error("Update category error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -58,6 +58,6 @@ export const deleteDishGroupById = async (dishGroupId) => {
     return response.data;
   } catch (error) {
     console.error("Delete category error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

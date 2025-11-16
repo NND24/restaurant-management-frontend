@@ -5,7 +5,7 @@ export const getAllShippingFee = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get all shipping fee error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 export const addShipingFee = async (storeId, shippingFeeData) => {

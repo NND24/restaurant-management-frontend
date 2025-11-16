@@ -405,7 +405,7 @@ const DashboardPage = () => {
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
               <Typography variant='h6'>
-                📊 Biểu đồ theo{" "}
+                Biểu đồ theo{" "}
                 {viewType === "day" ? "ngày" : viewType === "week" ? "tuần" : viewType === "month" ? "tháng" : "năm"}
               </Typography>
               <FormControl size='small' sx={{ minWidth: 160 }}>
@@ -453,7 +453,7 @@ const DashboardPage = () => {
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🔍 Giới thiệu phân tích
+              Giới thiệu phân tích
             </Typography>
             <Typography variant='body1' color='text.secondary' sx={{ mb: 1 }}>
               Hệ thống sẽ phân tích dữ liệu doanh thu sử dụng kỹ thuật <b>Time Series Decomposition</b> để tách thành 3
@@ -487,7 +487,7 @@ const DashboardPage = () => {
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              ⚙️ Giả lập kịch bản (Scenario Simulation)
+              Giả lập kịch bản (Scenario Simulation)
             </Typography>
             <Box display='flex' flexWrap='wrap' gap={2} mt={2}>
               <TextField
@@ -523,16 +523,16 @@ const DashboardPage = () => {
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📊 Biểu đồ doanh thu & lợi nhuận
+                Biểu đồ doanh thu & lợi nhuận
               </Typography>
 
               {decomposition && (
                 <Box mb={2} sx={{ backgroundColor: "#f0f7ff", borderRadius: 2, p: 2 }}>
                   <Typography variant='body1'>
-                    📈 <b>Xu hướng:</b> {trendMean > 0 ? "Đang tăng" : trendMean < 0 ? "Đang giảm" : "Ổn định"}
+                    <b>Xu hướng:</b> {trendMean > 0 ? "Đang tăng" : trendMean < 0 ? "Đang giảm" : "Ổn định"}
                   </Typography>
                   <Typography variant='body1'>
-                    🌀 <b>Tính mùa vụ:</b> {seasonalStrength} (dao động {seasonalAmplitude.toFixed(0)} ₫)
+                    <b>Tính mùa vụ:</b> {seasonalStrength} (dao động {seasonalAmplitude.toFixed(0)} ₫)
                   </Typography>
                 </Box>
               )}
@@ -540,7 +540,7 @@ const DashboardPage = () => {
               {scenarioData.length > 0 && (
                 <Box mt={2} sx={{ backgroundColor: "#fff8e1", borderRadius: 2, p: 2 }}>
                   <Typography variant='h6' gutterBottom>
-                    🧮 Kết quả giả lập
+                    Kết quả giả lập
                   </Typography>
                   <Typography>
                     Doanh thu dự kiến (kịch bản): <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
@@ -584,7 +584,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📈 Phân tích thành phần thời gian (Time Series Decomposition)
+                Phân tích thành phần thời gian (Time Series Decomposition)
               </Typography>
 
               <Box display='flex' flexWrap='wrap' gap={1}>
@@ -625,7 +625,7 @@ const DashboardPage = () => {
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📌 Dự đoán kỳ tới
+                Dự đoán kỳ tới
               </Typography>
               <Typography>
                 Doanh thu dự kiến: <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
@@ -677,7 +677,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                🍽️ Top món ăn bán chạy
+                Top món ăn bán chạy
               </Typography>
 
               <ResponsiveContainer width='100%' height={300}>
@@ -700,7 +700,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3, backgroundColor: "#f5f7fa" }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                💡 Nhận định chi tiết theo món
+                Nhận định chi tiết theo món
               </Typography>
               <Box display='flex' flexDirection='column' gap={1}>
                 {dishInsights.map((msg, i) => (

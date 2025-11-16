@@ -123,7 +123,7 @@ const page = () => {
 
   return (
     <div className='p-8 bg-gray-50 min-h-screen space-y-8 overflow-y-auto h-full'>
-      <h1 className='text-3xl font-semibold text-gray-800 mb-2'>📊 Thống kê đơn hàng</h1>
+      <h1 className='text-3xl font-semibold text-gray-800 mb-2'>Thống kê đơn hàng</h1>
 
       {/* Summary Cards */}
       {summary && (
@@ -136,7 +136,7 @@ const page = () => {
 
       {/* Date Filter */}
       <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-center gap-3'>
-        <h3 className='text-lg font-medium text-gray-700'>📅 Chọn khoảng thời gian</h3>
+        <h3 className='text-lg font-medium text-gray-700'>Chọn khoảng thời gian</h3>
         <DateRangePicker
           from={fromDate}
           to={toDate}
@@ -149,7 +149,7 @@ const page = () => {
 
       {/* Orders Over Time */}
       <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-        <h3 className='text-lg font-semibold mb-3 text-gray-800'>📈 Đơn hàng theo thời gian</h3>
+        <h3 className='text-lg font-semibold mb-3 text-gray-800'>Đơn hàng theo thời gian</h3>
         <div className='w-full h-80'>
           <ResponsiveContainer width='100%' height='100%'>
             <LineChart data={overTimeData}>
@@ -166,7 +166,7 @@ const page = () => {
       {/* Pie + Bar chart */}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-          <h3 className='text-lg font-semibold mb-3 text-gray-800'>✅ Tỷ lệ hoàn tất vs huỷ</h3>
+          <h3 className='text-lg font-semibold mb-3 text-gray-800'>Tỷ lệ hoàn tất vs huỷ</h3>
           <ResponsiveContainer width='100%' height={280}>
             <PieChart>
               <Pie data={pieChartData} dataKey='value' outerRadius={100} label>
@@ -181,7 +181,7 @@ const page = () => {
         </div>
 
         <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-          <h3 className='text-lg font-semibold mb-3 text-gray-800'>📊 Phân phối trạng thái đơn</h3>
+          <h3 className='text-lg font-semibold mb-3 text-gray-800'>Phân phối trạng thái đơn</h3>
           <ResponsiveContainer width='100%' height={280}>
             <BarChart data={barChartData}>
               <CartesianGrid strokeDasharray='3 3' stroke='#e5e7eb' />
@@ -201,7 +201,7 @@ const page = () => {
       {/* Orders by Time Slot */}
       {timeSlotData && timeSlotData.length > 0 && (
         <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-          <h3 className='text-lg font-semibold mb-3 text-gray-800'>🕒 Đơn hàng theo khung giờ</h3>
+          <h3 className='text-lg font-semibold mb-3 text-gray-800'>Đơn hàng theo khung giờ</h3>
           <div className='w-full h-80'>
             <ResponsiveContainer width='100%' height='100%'>
               <BarChart data={timeSlotData}>

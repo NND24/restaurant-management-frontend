@@ -315,7 +315,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 6 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>📈 Doanh thu theo Nhóm</Typography>
+              <Typography variant='h6'>Doanh thu theo Nhóm</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
                 <InputLabel>Hiển thị theo</InputLabel>
                 <Select value={pieGroupType} onChange={(e) => setPieGroupType(e.target.value)}>
@@ -354,7 +354,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>🍽️ Top Món Ăn Bán Chạy</Typography>
+              <Typography variant='h6'>Top Món Ăn Bán Chạy</Typography>
               <FormControl size='small' sx={{ minWidth: 120 }}>
                 <InputLabel>Hiển thị</InputLabel>
                 <Select value={itemLimit} onChange={(e) => setItemLimit(Number(e.target.value))}>
@@ -411,7 +411,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>📊 Tỷ lệ Theo Món</Typography>
+              <Typography variant='h6'>Tỷ lệ Theo Món</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
                 <InputLabel>Hiển thị theo</InputLabel>
                 <Select value={pieType} onChange={(e) => setPieType(e.target.value)}>
@@ -448,8 +448,9 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🍽️ Gợi ý món ăn mới
+              Gợi ý món ăn mới
             </Typography>
+            <p>Gợi ý món ăn mới dựa theo chuyên môn của nhà hàng</p>
 
             {recommendedDishes.length > 0 ? (
               <Grid container spacing={2}>
@@ -495,7 +496,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mt: 4 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🍱 Gợi ý món ăn theo danh mục
+              Gợi ý món ăn theo danh mục
             </Typography>
 
             {recommendedDishesByCategory.length > 0 ? (

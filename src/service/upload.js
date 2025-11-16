@@ -8,7 +8,7 @@ export const uploadImages = async (formData) => {
     return res.data;
   } catch (error) {
     console.error("Upload images error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -18,7 +18,7 @@ export const uploadRegisterImages = async (formData) => {
     return res.data;
   } catch (error) {
     console.error("Upload images error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -30,7 +30,7 @@ export const uploadAvatar = async (formData) => {
     return res.data;
   } catch (error) {
     console.error("Upload avatar error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -42,6 +42,6 @@ export const deleteFile = async ({ filePath }) => {
     return res.data;
   } catch (error) {
     console.error("Delete file error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

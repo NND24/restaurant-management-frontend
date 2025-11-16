@@ -13,7 +13,7 @@ export const getAllOrders = async ({ storeId, status }) => {
     return res.data;
   } catch (error) {
     console.error("Get all orders error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -23,7 +23,7 @@ export const getOrder = async ({ orderId }) => {
     return res.data;
   } catch (error) {
     console.error("Get order error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -33,6 +33,6 @@ export const updateOrder = async ({ orderId, updatedData }) => {
     return res.data;
   } catch (error) {
     console.error("Update order error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

@@ -5,7 +5,7 @@ export const getInformation = async () => {
     return res.data;
   } catch (error) {
     console.error("Get all information error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 export const toggleOpenStatus = async () => {

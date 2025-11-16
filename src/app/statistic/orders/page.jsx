@@ -140,7 +140,7 @@ const page = () => {
         <DateRangePicker
           from={fromDate}
           to={toDate}
-          onChange={(from, to) => {
+          onChange={({ from, to }) => {
             setFromDate(from);
             setToDate(to);
           }}
@@ -164,7 +164,7 @@ const page = () => {
       </div>
 
       {/* Pie + Bar chart */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
           <h3 className='text-lg font-semibold mb-3 text-gray-800'>Tỷ lệ hoàn tất vs huỷ</h3>
           <ResponsiveContainer width='100%' height={280}>
@@ -196,7 +196,7 @@ const page = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
 
       {/* Orders by Time Slot */}
       {timeSlotData && timeSlotData.length > 0 && (

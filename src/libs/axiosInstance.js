@@ -92,6 +92,8 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         console.error("Token refresh failed:", refreshError);
         // Optional: redirect to login
+        localStorageService.clearAll();
+        window.location.href = "/auth/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

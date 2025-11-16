@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { logoutUser } from "@/service/auth";
 import { useAuth } from "@/context/AuthContext";
 import { FiUser, FiKey, FiLogOut } from "react-icons/fi";
+import Swal from "sweetalert2";
 
 export default function SidebarLayout({ children }) {
   const router = useRouter();

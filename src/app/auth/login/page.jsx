@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import { loginUser, getOwnStore, logoutUser } from "@/service/auth";
 import localStorageService from "@/utils/localStorageService";
+import { useAuth } from "@/context/AuthContext";
 
 const Page = () => {
   const router = useRouter();
@@ -16,6 +17,7 @@ const Page = () => {
     password: yup.string().required("Vui lòng nhập mật khẩu!"),
   });
   const getRole = localStorageService.getRole();
+  const { user, setUser, setUserId } = useAuth();
 
   const checkStoreStatus = async () => {
     try {
@@ -43,6 +45,7 @@ const Page = () => {
 
   useEffect(() => {
     const checkStatus = async () => {
+      if (!user) return;
       const status = await checkStoreStatus();
       switch (status) {
         case "APPROVED":

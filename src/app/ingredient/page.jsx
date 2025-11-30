@@ -96,14 +96,14 @@ const page = () => {
       width: 160,
       renderCell: (params) => <span>{params.row?.categoryName || ""}</span>,
     },
-    {
-      field: "reorderLevel",
-      headerName: "Ngưỡng cảnh báo",
-      headerAlign: "center",
-      align: "center",
-      width: 150,
-      renderCell: (params) => <span>{params.row?.reorderLevel || ""}</span>,
-    },
+    // {
+    //   field: "reorderLevel",
+    //   headerName: "Ngưỡng cảnh báo",
+    //   headerAlign: "center",
+    //   align: "center",
+    //   width: 150,
+    //   renderCell: (params) => <span>{params.row?.reorderLevel || ""}</span>,
+    // },
     {
       field: "description",
       headerName: "Mô tả",

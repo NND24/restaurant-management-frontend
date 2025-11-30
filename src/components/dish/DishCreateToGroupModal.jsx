@@ -245,6 +245,15 @@ const DishCreateToGroupModal = ({ open, onClose, storeId, dishGroup, onCreated }
                 setSelectedIngredient(""); // reset khi đổi loại
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // chiều cao tối đa (có scroll)
+                    },
+                  },
+                },
+              }}
             >
               {allCategories.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
@@ -265,6 +274,15 @@ const DishCreateToGroupModal = ({ open, onClose, storeId, dishGroup, onCreated }
                 if (ing) addIngredient(ing);
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // chiều cao tối đa (có scroll)
+                    },
+                  },
+                },
+              }}
               disabled={!selectedCategory}
             >
               {ingredientsByCategory.map((ing) => (

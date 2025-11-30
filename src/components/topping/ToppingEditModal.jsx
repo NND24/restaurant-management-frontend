@@ -184,6 +184,15 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
                   setSelectedIngredient("");
                 }}
                 sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200,
+                      },
+                    },
+                  },
+                }}
               >
                 {allCategories.map((c) => (
                   <MenuItem key={c._id} value={c._id}>
@@ -203,6 +212,15 @@ const ToppingEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
                   if (ing) addIngredient(ing);
                 }}
                 sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200,
+                      },
+                    },
+                  },
+                }}
                 disabled={!selectedCategory}
               >
                 {ingredientsByCategory.map((ing) => (

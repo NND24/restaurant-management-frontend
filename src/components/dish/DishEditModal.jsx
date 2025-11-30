@@ -297,6 +297,15 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
                   setSelectedIngredient("");
                 }}
                 sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // chiều cao tối đa (có scroll)
+                      },
+                    },
+                  },
+                }}
               >
                 {allCategories.map((c) => (
                   <MenuItem key={c._id} value={c._id}>
@@ -316,6 +325,15 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
                   if (ing) addIngredient(ing);
                 }}
                 sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // chiều cao tối đa (có scroll)
+                      },
+                    },
+                  },
+                }}
                 disabled={!selectedCategory}
               >
                 {ingredientsByCategory.map((ing) => (

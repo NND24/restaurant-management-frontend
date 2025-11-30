@@ -166,6 +166,15 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 setSelectedIngredient(""); // reset khi đổi loại
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
             >
               {allCategories.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
@@ -186,6 +195,15 @@ const ToppingCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 if (ing) addIngredient(ing);
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
               disabled={!selectedCategory}
             >
               {ingredientsByCategory.map((ing) => (

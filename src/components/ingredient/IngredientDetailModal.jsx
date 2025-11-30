@@ -109,13 +109,13 @@ const IngredientDetailModal = ({ open, onClose, id }) => {
               />
             </Box>
 
-            <TextField
+            {/* <TextField
               label='Ngưỡng tồn kho cảnh báo'
               type='number'
               value={formData.reorderLevel}
               fullWidth
               InputProps={{ readOnly: true }}
-            />
+            /> */}
 
             <TextField
               label='Trạng thái'

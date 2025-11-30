@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/service/auth";
+import Heading from "@/components/Heading";
 
 const BlockedPage = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ const BlockedPage = () => {
 
   return (
     <div className='flex items-center justify-center h-screen bg-[#f9f9f9] px-4'>
+      <Heading title='Tài khoản bị khóa' description='' keywords='' />
       <div className='bg-white p-8 rounded-2xl shadow-lg max-w-md text-center'>
         <div className='flex justify-center mb-6'>
           <Image

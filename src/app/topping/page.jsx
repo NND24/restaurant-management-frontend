@@ -11,6 +11,7 @@ import ToppingDetailModal from "@/components/topping/ToppingDetailModal";
 import ToppingEditModal from "@/components/topping/ToppingEditModal";
 import Swal from "sweetalert2";
 import { getStoreToppings, deleteTopping } from "@/service/topping";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const getRole = localStorageService.getRole();
@@ -226,6 +227,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Món thêm' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món thêm</span>
 
         {!blockEdit && (

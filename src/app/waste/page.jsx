@@ -12,6 +12,7 @@ import { getWasteList } from "@/service/waste";
 import WasteDetailModal from "@/components/waste/WasteDetailModal";
 import WasteCreateModal from "@/components/waste/WasteCreateModal";
 import WasteEditModal from "@/components/waste/WasteEditModal";
+import Heading from "@/components/Heading";
 
 const WastePage = () => {
   const router = useRouter();
@@ -179,6 +180,7 @@ const WastePage = () => {
       )}
 
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
+        <Heading title='Nguyên liệu hỏng' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nguyên liệu hỏng</span>
 
         {!blockEdit && (

@@ -27,6 +27,7 @@ import {
 import DateRangePicker from "@/components/DateRangePicker";
 import dayjs from "dayjs";
 import { FaCalendarWeek, FaChartLine, FaMoneyBillWave } from "react-icons/fa";
+import Heading from "@/components/Heading";
 
 const STATUS_LABELS = {
   pending: "Chờ xử lý",
@@ -123,6 +124,7 @@ const page = () => {
 
   return (
     <div className='p-8 bg-gray-50 min-h-screen space-y-8 overflow-y-auto h-full'>
+      <Heading title='Thống kê đơn hàng' description='' keywords='' />
       <h1 className='text-3xl font-semibold text-gray-800 mb-2'>Thống kê đơn hàng</h1>
 
       {/* Summary Cards */}

@@ -13,6 +13,7 @@ import { getToppingGroupById, deleteTopping } from "@/service/topping";
 import { useParams } from "next/navigation";
 import ToppingGroupManageModal from "@/components/topping-group/ToppingGroupManageModal";
 import ToppingCreateToGroupModal from "@/components/topping/ToppingCreateToGroupModal";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const { toppingGroupId } = useParams();
@@ -245,6 +246,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title={`Món thêm của ${toppingGroup?.name ?? ""}`} description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món thêm của {toppingGroup?.name}</span>
 
         <div className='flex gap-2'>

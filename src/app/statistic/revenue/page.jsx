@@ -38,6 +38,7 @@ import { getRevenueSummary, revenueByPeriod, analyzeBusinessResult } from "@/ser
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import CountUp from "react-countup";
+import Heading from "../../../components/Heading";
 
 const DashboardPage = () => {
   dayjs.extend(isoWeek);
@@ -273,6 +274,7 @@ const DashboardPage = () => {
 
   return (
     <div className='overflow-y-scroll h-full'>
+      <Heading title='Báo cáo doanh thu & lợi nhuận' description='' keywords='' />
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
           Báo cáo doanh thu & lợi nhuận

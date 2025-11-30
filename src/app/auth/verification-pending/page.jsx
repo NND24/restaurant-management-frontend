@@ -2,12 +2,14 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Heading from "@/components/Heading";
 
 const StoreVerificationPending = () => {
   const router = useRouter();
 
   return (
     <div className='flex items-center justify-center h-screen bg-[#f9f9f9] px-4'>
+      <Heading title='Xác minh cửa hàng' description='' keywords='' />
       <div className='bg-white p-8 rounded-2xl shadow-lg max-w-xl text-center'>
         <div className='flex justify-center mb-6'>
           <Image

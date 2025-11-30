@@ -13,6 +13,7 @@ import { getDish } from "@/service/dish";
 import { useParams, useRouter } from "next/navigation";
 import DishManageModal from "@/components/dish/DishManageModal";
 import ToppingGroupCreateToDishModal from "@/components/topping-group/ToppingGroupCreateToDishModal";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const router = useRouter();
@@ -237,6 +238,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title={`Nhóm món thêm của món ${dish.name ?? ""}`} description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món thêm của món {dish.name}</span>
 
         <div className='flex gap-2'>

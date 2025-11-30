@@ -17,6 +17,7 @@ import StoreImages from "@/components/store-info/StoreImage";
 import { uploadImages } from "@/service/upload";
 import StorePaperwork from "@/components/store-info/StorePaperwork";
 import StoreAddress from "@/components/store-info/StoreAddress";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const [storeInfo, setStoreInfo] = useState(null);
@@ -237,7 +238,8 @@ const page = () => {
 
   return (
     <>
-      <div className='overflow-y-scroll h-full'>
+      <Heading title='Quản lý thông tin cửa hàng' description='' keywords='' />
+      <div className='overflow-y-scroll h-full p-5'>
         {storeInfo && (
           <div className='space-y-6'>
             {/* Giờ hoạt động cửa hàng */}

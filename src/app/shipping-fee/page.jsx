@@ -12,6 +12,7 @@ import { addShipingFee, deleteShippingFee, getAllShippingFee, updateShippingFee 
 
 import ShippingFeeModal from "@/components/popups/ShippingFee";
 import { viVN } from "@/utils/constants";
+import Heading from "@/components/Heading";
 
 const ShippingFeePage = () => {
   const [fees, setFees] = useState([]);
@@ -193,6 +194,7 @@ const ShippingFeePage = () => {
 
   return (
     <div className='p-5'>
+      <Heading title='Phí vận chuyển' description='' keywords='' />
       {/* Header */}
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Phí vận chuyển</span>

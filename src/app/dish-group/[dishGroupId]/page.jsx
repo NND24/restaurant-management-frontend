@@ -15,6 +15,7 @@ import DishCreateToGroupModal from "@/components/dish/DishCreateToGroupModal";
 import Image from "next/image";
 import DishDetailModal from "@/components/dish/DishDetailModal";
 import DishEditModal from "@/components/dish/DishEditModal";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const { dishGroupId } = useParams();
@@ -279,6 +280,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title={`Món ăn của nhóm ${dishGroup?.name ?? ""}`} description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món ăn của nhóm {dishGroup?.name}</span>
 
         <div className='flex gap-2'>

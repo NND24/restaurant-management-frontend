@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { getVoucherUsageSummary, getTopUsedVouchers, getVoucherRevenueImpact } from "@/service/statistic";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import Heading from "@/components/Heading";
 
 const SummaryCard = ({ title, value, color, icon }) => (
   <div className='flex items-center justify-between bg-white rounded-xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all'>
@@ -54,6 +55,7 @@ const page = () => {
 
   return (
     <div className='bg-gray-50 min-h-screen p-8 space-y-8 overflow-y-auto h-full'>
+      <Heading title='Thống kê giảm giá' description='' keywords='' />
       <div>
         <h1 className='text-3xl font-semibold text-gray-800 mb-1'>Thống kê giảm giá</h1>
         <p className='text-gray-500'>

@@ -13,6 +13,7 @@ import DishDetailModal from "@/components/dish/DishDetailModal";
 import DishEditModal from "@/components/dish/DishEditModal";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const router = useRouter();
@@ -285,6 +286,7 @@ const page = () => {
       )}
 
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
+        <Heading title='Món ăn' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món ăn</span>
 
         {!blockEdit && (

@@ -5,6 +5,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { getStoreRatings, replyToRating } from "@/service/rating";
 import Modal from "@/components/Modal";
 import { viVN } from "@/utils/constants";
+import Heading from "@/components/Heading";
 
 const StoreReviewPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -129,6 +130,7 @@ const StoreReviewPage = () => {
 
   return (
     <div className='p-5'>
+      <Heading title='Đánh giá cửa hàng' description='' keywords='' />
       <div style={{ height: "95vh", width: "100%" }}>
         <DataGrid
           rows={rows}

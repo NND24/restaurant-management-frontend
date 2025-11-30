@@ -11,6 +11,7 @@ import IngredientBatchDetailModal from "@/components/ingredient-batch/Ingredient
 import IngredientBatchEditModal from "@/components/ingredient-batch/IngredientBatchEditModal";
 import Swal from "sweetalert2";
 import { getBatchesByStore, deleteBatch } from "@/service/ingredientBatch";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const getRole = localStorageService.getRole();
@@ -228,6 +229,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Lô nguyên liệu' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Lô nguyên liệu</span>
 
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>

@@ -40,6 +40,7 @@ import {
 } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
+import Heading from "@/components/Heading";
 
 const COLORS = [
   "#0088FE",
@@ -217,6 +218,7 @@ const DashboardPage = () => {
 
   return (
     <div className='overflow-y-scroll h-full'>
+      <Heading title='Thống kê món ăn' description='' keywords='' />
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
           Thống kê món ăn

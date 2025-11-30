@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getReturningCustomerRate, getAverageSpendingPerOrder, getNewCustomers } from "@/service/statistic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Users, DollarSign, RotateCcw } from "lucide-react";
+import Heading from "@/components/Heading";
 
 const COLORS = ["#10b981", "#f87171"]; // Returning: green, New: red
 
@@ -67,6 +68,7 @@ const CustomerInsightPage = () => {
 
   return (
     <div className='overflow-y-auto h-full p-6 bg-gradient-to-br from-gray-50 to-gray-100'>
+      <Heading title='Phân tích hành vi khách hàng' description='' keywords='' />
       <h2 className='text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2'>Phân tích hành vi khách hàng</h2>
 
       {/* Tổng quan */}

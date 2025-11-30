@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { loginUser, getOwnStore, logoutUser } from "@/service/auth";
 import localStorageService from "@/utils/localStorageService";
 import { useAuth } from "@/context/AuthContext";
+import Heading from "@/components/Heading";
 
 const Page = () => {
   const router = useRouter();
@@ -118,6 +119,7 @@ const Page = () => {
 
   return (
     <div className='min-h-screen flex'>
+      <Heading title='Đăng nhập' description='' keywords='' />
       {/* Left Image */}
       <div className='hidden md:flex w-1/2 bg-gradient-to-br from-orange-200 to-orange-400 items-center justify-center'>
         <Image

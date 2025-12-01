@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { loginUser } from '../services/authService';
+import { useState } from "react";
+import { loginUser } from "../services/authService";
 
 export const useLogin = () => {
   const [loading, setLoading] = useState(false);
@@ -9,10 +9,11 @@ export const useLogin = () => {
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
+    console.log("Ádas");
     try {
       const data = await loginUser(credentials);
       setUser(data);
-      localStorage.setItem('token', JSON.stringify(data.token));
+      localStorage.setItem("token", JSON.stringify(data.token));
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {

@@ -8,6 +8,7 @@ import { addVoucher, deleteVoucher, getAllVoucher, toggleVoucherActive, updateVo
 import VoucherModal from "@/components/popups/Voucher";
 import { viVN } from "@/utils/constants";
 import { FaPlus } from "react-icons/fa";
+import Heading from "@/components/Heading";
 
 const VoucherPage = () => {
   const [vouchers, setVouchers] = useState([]);
@@ -247,6 +248,7 @@ const VoucherPage = () => {
 
   return (
     <div className='p-5'>
+      <Heading title='Phiếu giảm giá' description='' keywords='' />
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Phiếu giảm giá</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>

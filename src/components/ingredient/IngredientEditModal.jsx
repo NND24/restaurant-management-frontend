@@ -210,7 +210,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
               ))}
             </TextField>
 
-            <TextField
+            {/* <TextField
               label='Ngưỡng tồn kho cảnh báo'
               type='number'
               name='reorderLevel'
@@ -218,7 +218,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
               onChange={handleChange}
               fullWidth
               inputProps={{ min: 0 }}
-            />
+            /> */}
 
             <TextField
               select

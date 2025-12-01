@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import { changePassword } from "@/service/auth";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const [showPass, setShowPass] = useState(false);
@@ -39,6 +40,7 @@ const page = () => {
 
   return (
     <div className='pt-[30px] pb-[100px] px-[20px] md:pt-[75px] md:mt-[20px] md:px-0 bg-[#fff] md:bg-[#f9f9f9]'>
+      <Heading title='Đổi mật khẩu' description='' keywords='' />
       <div className='bg-[#fff] lg:w-[60%] md:w-[80%] md:mx-auto md:border md:border-[#a3a3a3a3] md:border-solid md:rounded-[10px] md:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] md:overflow-hidden md:p-[20px]'>
         <div className='flex flex-col items-center mt-[20px]'>
           <h3 className='text-[#4A4B4D] text-[26px] font-bold pb-[10px] hidden md:block'>Đổi mật khẩu</h3>

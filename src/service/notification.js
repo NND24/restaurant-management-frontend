@@ -6,7 +6,7 @@ export const getAllNotifications = async () => {
     return res.data;
   } catch (error) {
     console.error("Get all notifications error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,6 +16,6 @@ export const updateNotificationStatus = async (notificationId) => {
     return res.data;
   } catch (error) {
     console.error("Update notification status error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

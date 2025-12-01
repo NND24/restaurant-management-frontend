@@ -36,6 +36,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     description: "",
     ingredients: [],
     toppingGroups: [],
+    category: null,
     status: "ACTIVE", // ACTIVE | INACTIVE | OUT_OF_STOCK
   });
   const [allCategories, setAllCategories] = useState([]);
@@ -132,9 +133,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   }, [selectedCategory]);
 
   const addIngredient = (ingredient) => {
-    if (
-      !formData.ingredients.find((i) => i.ingredient._id === ingredient._id)
-    ) {
+    if (!formData.ingredients.find((i) => i.ingredient._id === ingredient._id)) {
       setFormData((prev) => ({
         ...prev,
         ingredients: [...prev.ingredients, { ingredient, quantity: 1 }],
@@ -153,9 +152,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     setFormData((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((i) =>
-        i.ingredient._id === id
-          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
-          : i
+        i.ingredient._id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
       ),
     }));
   };
@@ -228,6 +225,11 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
       return;
     }
 
+    if (!formData.category) {
+      toast.error("Vui lòng chọn loại món ăn");
+      return;
+    }
+
     try {
       setLoading(true);
       const payload = {
@@ -255,35 +257,23 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle
-        sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}
-      >
+    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
+      <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
         Thêm món ăn
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className="space-y-4">
+        <Box className='space-y-4'>
           {/* Form Fields */}
-          <Box display="flex" gap={2} flexWrap="wrap">
+          <Box display='flex' gap={2} flexWrap='wrap'>
+            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
             <TextField
-              label="Tên*"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Giá*"
-              name="price"
-              type="number"
+              label='Giá*'
+              name='price'
+              type='number'
               value={formData.price}
               onChange={handleChange}
               fullWidth
@@ -292,11 +282,11 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           {/* Image Upload */}
           <Box>
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography variant='subtitle1' gutterBottom>
               Hình ảnh
             </Typography>
             <Paper
-              variant="outlined"
+              variant='outlined'
               sx={{
                 width: 150,
                 height: 150,
@@ -311,49 +301,33 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
               {formData.image ? (
                 <img
                   src={URL.createObjectURL(formData.image)}
-                  alt="Preview"
+                  alt='Preview'
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
-                <FaRegImage size={32} color="#aaa" />
+                <FaRegImage size={32} color='#aaa' />
               )}
               <input
-                type="file"
-                id="imageUpload"
-                accept="image/*"
+                type='file'
+                id='imageUpload'
+                accept='image/*'
                 style={{ display: "none" }}
                 onChange={handleImageUpload}
               />
             </Paper>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="subtitle1">
-              Tự động gợi ý mô tả từ hình ảnh
-            </Typography>
-            <Switch
-              checked={autoDescribe}
-              onChange={(e) => setAutoDescribe(e.target.checked)}
-              color="primary"
-            />
+          <Box display='flex' alignItems='center' gap={1}>
+            <Typography variant='subtitle1'>Tự động gợi ý mô tả từ hình ảnh</Typography>
+            <Switch checked={autoDescribe} onChange={(e) => setAutoDescribe(e.target.checked)} color='primary' />
           </Box>
 
           <Box>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="subtitle1">
-                Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)
-              </Typography>
+            <Box display='flex' justifyContent='space-between' alignItems='center'>
+              <Typography variant='subtitle1'>Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)</Typography>
 
               {formData.description && (
-                <Button
-                  onClick={reGenerateCaptionFromFile}
-                  size="small"
-                  variant="outlined"
-                >
+                <Button onClick={reGenerateCaptionFromFile} size='small' variant='outlined'>
                   Mô tả khác
                 </Button>
               )}
@@ -383,11 +357,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             select
-            label="Loại món ăn"
+            label='Loại món ăn'
             value={formData.category || ""}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, category: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
             fullWidth
           >
             {allSystemCategories.map((cat) => (
@@ -401,13 +373,22 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             {/* Select loại nguyên liệu */}
             <TextField
               select
-              label="Loại nguyên liệu"
+              label='Loại nguyên liệu'
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
                 setSelectedIngredient(""); // reset khi đổi loại
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // chiều cao tối đa (có scroll)
+                    },
+                  },
+                },
+              }}
             >
               {allCategories.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
@@ -419,7 +400,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             {/* Select nguyên liệu theo loại */}
             <TextField
               select
-              label="Nguyên liệu"
+              label='Nguyên liệu'
               value={selectedIngredient}
               onChange={(e) => {
                 const ingId = e.target.value;
@@ -428,6 +409,15 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 if (ing) addIngredient(ing);
               }}
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // chiều cao tối đa (có scroll)
+                    },
+                  },
+                },
+              }}
               disabled={!selectedCategory}
             >
               {ingredientsByCategory.map((ing) => (
@@ -440,7 +430,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           {/* Nguyên liệu đã chọn */}
           {formData.ingredients.length > 0 && (
-            <Box className="border rounded-md space-y-1">
+            <Box className='border rounded-md space-y-1'>
               {formData.ingredients.map((i) => {
                 // Xác định bước tăng/giảm theo loại unit
                 let step = 1;
@@ -466,30 +456,25 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 return (
                   <Box
                     key={i.ingredient._id}
-                    className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                    className='flex justify-between items-center py-1 px-2 bg-gray-50 rounded'
                   >
-                    <span className="font-medium">{i.ingredient.name}</span>
-                    <Box className="flex items-center gap-1">
-                      <IconButton
-                        size="small"
-                        onClick={() => updateQuantity(i.ingredient._id, -step)}
-                      >
+                    <span className='font-medium'>{i.ingredient.name}</span>
+                    <Box className='flex items-center gap-1'>
+                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
                         <FaMinus />
                       </IconButton>
 
                       {/* Input để chỉnh số lượng trực tiếp */}
                       <TextField
-                        size="small"
-                        type="number"
+                        size='small'
+                        type='number'
                         value={i.quantity}
                         onChange={(e) => {
                           const val = Math.max(0, Number(e.target.value)); // không cho âm
                           setFormData((prev) => ({
                             ...prev,
                             ingredients: prev.ingredients.map((ing) =>
-                              ing.ingredient._id === i.ingredient._id
-                                ? { ...ing, quantity: val }
-                                : ing
+                              ing.ingredient._id === i.ingredient._id ? { ...ing, quantity: val } : ing
                             ),
                           }));
                         }}
@@ -499,17 +484,10 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
                       <span>{unitLabel}</span>
 
-                      <IconButton
-                        size="small"
-                        onClick={() => updateQuantity(i.ingredient._id, step)}
-                      >
+                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
                         <FaPlus />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => removeIngredient(i.ingredient._id)}
-                      >
+                      <IconButton size='small' color='error' onClick={() => removeIngredient(i.ingredient._id)}>
                         🗑️
                       </IconButton>
                     </Box>
@@ -524,9 +502,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             options={allToppingGroups}
             getOptionLabel={(option) => option.name}
             value={formData.toppingGroups}
-            onChange={(e, newValue) =>
-              setFormData((prev) => ({ ...prev, toppingGroups: newValue }))
-            }
+            onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppingGroups: newValue }))}
             disableCloseOnSelect
             renderOption={(props, option, { selected }) => (
               <li
@@ -541,7 +517,7 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 }}
               >
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={selected}
                   readOnly
                   style={{ width: 16, height: 16, accentColor: "#fc6011" }}
@@ -553,9 +529,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
             renderInput={(params) => (
               <TextField
                 {...params}
-                variant="outlined"
-                label="Chọn nhóm món thêm"
-                placeholder="Chọn nhóm món thêm..."
+                variant='outlined'
+                label='Chọn nhóm món thêm'
+                placeholder='Chọn nhóm món thêm...'
                 fullWidth
               />
             )}
@@ -588,12 +564,10 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
                   onDelete={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      toppingGroups: prev.toppingGroups.filter(
-                        (t) => t._id !== option._id
-                      ),
+                      toppingGroups: prev.toppingGroups.filter((t) => t._id !== option._id),
                     }))
                   }
-                  size="medium"
+                  size='medium'
                   sx={{
                     backgroundColor: "#fc6011",
                     color: "#fff",
@@ -608,30 +582,23 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             select
-            label="Trạng thái"
+            label='Trạng thái'
             value={formData.status}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, status: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
             fullWidth
           >
-            <MenuItem value="ACTIVE">Hoạt động</MenuItem>
-            <MenuItem value="INACTIVE">Ngưng</MenuItem>
-            <MenuItem value="OUT_OF_STOCK">Hết hàng</MenuItem>
+            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
+            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
           </TextField>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>
-        <Button onClick={onClose} color="error" variant="outlined">
+        <Button onClick={onClose} color='error' variant='outlined'>
           Hủy
         </Button>
-        <Button
-          onClick={handleSave}
-          color="primary"
-          variant="contained"
-          disabled={loading}
-        >
+        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
           {loading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>

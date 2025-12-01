@@ -6,7 +6,7 @@ export const createWaste = async ({ data }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,7 +16,7 @@ export const getWasteList = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -26,7 +26,7 @@ export const getWasteById = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -36,7 +36,7 @@ export const updateWaste = async ({ id, data }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -46,6 +46,6 @@ export const deleteWaste = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

@@ -5,7 +5,7 @@ export const getAllVoucher = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get all voucher error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 export const getVoucherById = async (storeId, voucherId) => {
@@ -14,7 +14,7 @@ export const getVoucherById = async (storeId, voucherId) => {
     return res.data;
   } catch (error) {
     console.error("Get all voucher error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 export const addVoucher = async (storeId, voucherData) => {
@@ -50,6 +50,6 @@ export const toggleVoucherActive = async (storeId, voucherId) => {
     const res = await axios.patch(`/voucher/stores/${storeId}/vouchers/${voucherId}/toggle-active`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { status: "error", message: "Toggle failed" };
+    throw error.response?.data || { status: "error", message: "Toggle failed" };
   }
 };

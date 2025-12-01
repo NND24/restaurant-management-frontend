@@ -131,6 +131,15 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 setFormData((prev) => ({ ...prev, ingredient: "" }));
               }}
               fullWidth
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
             >
               {allCategories.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
@@ -149,6 +158,15 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               fullWidth
               required
               disabled={!selectedCategory}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
             >
               {ingredientsByCategory.map((ing) => (
                 <MenuItem key={ing._id} value={ing._id}>

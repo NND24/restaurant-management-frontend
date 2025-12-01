@@ -11,6 +11,7 @@ import DishGroupDetailModal from "@/components/Dish-group/DishGroupDetailModal";
 import DishGroupEditModal from "@/components/Dish-group/DishGroupEditModal";
 import { getStoreDishGroups, deleteDishGroupById } from "@/service/dishGroup";
 import { useRouter } from "next/navigation";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const router = useRouter();
@@ -219,6 +220,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Nhóm món ăn' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món ăn</span>
 
         {!blockEdit && (

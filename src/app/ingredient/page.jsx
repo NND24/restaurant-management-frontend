@@ -11,6 +11,7 @@ import IngredientDetailModal from "@/components/ingredient/IngredientDetailModal
 import IngredientEditModal from "@/components/ingredient/IngredientEditModal";
 import Swal from "sweetalert2";
 import { getIngredientsByStore, deleteIngredient } from "@/service/ingredient";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const getRole = localStorageService.getRole();
@@ -96,14 +97,14 @@ const page = () => {
       width: 160,
       renderCell: (params) => <span>{params.row?.categoryName || ""}</span>,
     },
-    {
-      field: "reorderLevel",
-      headerName: "Ngưỡng cảnh báo",
-      headerAlign: "center",
-      align: "center",
-      width: 150,
-      renderCell: (params) => <span>{params.row?.reorderLevel || ""}</span>,
-    },
+    // {
+    //   field: "reorderLevel",
+    //   headerName: "Ngưỡng cảnh báo",
+    //   headerAlign: "center",
+    //   align: "center",
+    //   width: 150,
+    //   renderCell: (params) => <span>{params.row?.reorderLevel || ""}</span>,
+    // },
     {
       field: "description",
       headerName: "Mô tả",
@@ -249,6 +250,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Nguyên liệu' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nguyên liệu</span>
 
         {!blockEdit && (

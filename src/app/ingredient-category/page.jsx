@@ -11,6 +11,7 @@ import IngredientCategoryCreateModal from "@/components/ingredient-category/Ingr
 import IngredientCategoryDetailModal from "@/components/ingredient-category/IngredientCategoryDetailModal";
 import IngredientCategoryEditModal from "@/components/ingredient-category/IngredientCategoryEditModal";
 import { getIngredientCategoriesByStore, deleteIngredientCategory } from "@/service/ingredientCategory";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const getRole = localStorageService.getRole();
@@ -200,6 +201,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Loại nguyên liệu' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Loại nguyên liệu</span>
 
         {!blockEdit && (

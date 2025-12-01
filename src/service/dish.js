@@ -6,7 +6,7 @@ export const getAllDish = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get all dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,7 +16,7 @@ export const getDish = async (dishId) => {
     return res.data;
   } catch (error) {
     console.error("Get dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -26,7 +26,7 @@ export const getToppingFromDish = async (dishId) => {
     return res.data;
   } catch (error) {
     console.error("Get topping from dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -36,7 +36,7 @@ export const updateDish = async ({ dishId, data }) => {
     return res.data;
   } catch (error) {
     console.error("Update dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -46,7 +46,7 @@ export const deleteDish = async (dishId) => {
     return res.data;
   } catch (error) {
     console.error("Update dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -56,7 +56,7 @@ export const createDish = async ({ storeId, data }) => {
     return res.data;
   } catch (error) {
     console.error("Create dish error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -66,6 +66,6 @@ export const toggleSaleStatus = async ({ dishId }) => {
     return res.data;
   } catch (error) {
     console.error("Toggle sale status error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

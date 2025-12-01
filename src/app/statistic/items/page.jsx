@@ -40,6 +40,7 @@ import {
 } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
+import Heading from "@/components/Heading";
 
 const COLORS = [
   "#0088FE",
@@ -217,6 +218,7 @@ const DashboardPage = () => {
 
   return (
     <div className='overflow-y-scroll h-full'>
+      <Heading title='Thống kê món ăn' description='' keywords='' />
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
           Thống kê món ăn
@@ -261,7 +263,17 @@ const DashboardPage = () => {
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
                       <InputLabel>Tuần</InputLabel>
-                      <Select value={week} onChange={(e) => setWeek(Number(e.target.value))}>
+                      <Select
+                        value={week}
+                        onChange={(e) => setWeek(Number(e.target.value))}
+                        MenuProps={{
+                          PaperProps: {
+                            style: {
+                              maxHeight: 250,
+                            },
+                          },
+                        }}
+                      >
                         {Array.from({ length: 52 }, (_, i) => i + 1).map((w) => (
                           <MenuItem key={w} value={w}>
                             Tuần {w}
@@ -274,7 +286,17 @@ const DashboardPage = () => {
                     <>
                       <FormControl size='medium' sx={{ minWidth: 120 }}>
                         <InputLabel>Tháng</InputLabel>
-                        <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+                        <Select
+                          value={month}
+                          onChange={(e) => setMonth(Number(e.target.value))}
+                          MenuProps={{
+                            PaperProps: {
+                              style: {
+                                maxHeight: 250,
+                              },
+                            },
+                          }}
+                        >
                           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                             <MenuItem key={m} value={m}>
                               Tháng {m}
@@ -315,7 +337,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 6 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>📈 Doanh thu theo Nhóm</Typography>
+              <Typography variant='h6'>Doanh thu theo Nhóm</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
                 <InputLabel>Hiển thị theo</InputLabel>
                 <Select value={pieGroupType} onChange={(e) => setPieGroupType(e.target.value)}>
@@ -354,7 +376,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>🍽️ Top Món Ăn Bán Chạy</Typography>
+              <Typography variant='h6'>Top Món Ăn Bán Chạy</Typography>
               <FormControl size='small' sx={{ minWidth: 120 }}>
                 <InputLabel>Hiển thị</InputLabel>
                 <Select value={itemLimit} onChange={(e) => setItemLimit(Number(e.target.value))}>
@@ -411,7 +433,7 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>📊 Tỷ lệ Theo Món</Typography>
+              <Typography variant='h6'>Tỷ lệ Theo Món</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
                 <InputLabel>Hiển thị theo</InputLabel>
                 <Select value={pieType} onChange={(e) => setPieType(e.target.value)}>
@@ -448,7 +470,17 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🍽️ Gợi ý món ăn mới
+              Gợi ý món ăn mới
+            </Typography>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
+              Hệ thống sẽ phân tích dữ liệu kinh doanh của cửa hàng (các món bán chạy, nhóm nguyên liệu dùng nhiều,...)
+              kết hợp với kiến thức về ngành F&B để đề xuất những món mới mà cửa hàng có thể đưa vào thực đơn.
+              <br />- Những gợi ý này chỉ mang tính chất hỗ trợ, giúp chủ cửa hàng:
+              <ul style={{ marginTop: 4, marginLeft: 10 }}>
+                <li>+ Mở rộng thực đơn dựa trên thế mạnh hiện tại,</li>
+                <li>+ Tận dụng nguyên liệu sẵn có để tối ưu chi phí,</li>
+                <li>+ Tăng khả năng thu hút khách hàng mới.</li>
+              </ul>
             </Typography>
 
             {recommendedDishes.length > 0 ? (
@@ -495,7 +527,15 @@ const DashboardPage = () => {
         <Card sx={{ borderRadius: 3, boxShadow: 3, mt: 4 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🍱 Gợi ý món ăn theo danh mục
+              Gợi ý món ăn theo danh mục
+            </Typography>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
+              Dựa trên từng danh mục món ăn mà cửa hàng đang kinh doanh, hệ thống đưa ra danh sách các món được đề xuất
+              phù hợp với mỗi danh mục. Điều này giúp bạn dễ dàng biết được danh mục nào đang thiếu món, có thể bổ sung
+              món gì để menu trở nên đa dạng và cân đối hơn.
+              <br />
+              Ví dụ: Nếu danh mục "Món chiên" đang ít món, hệ thống sẽ gợi ý thêm các món phù hợp như gà chiên sốt,
+              khoai tây lắc phô mai,...
             </Typography>
 
             {recommendedDishesByCategory.length > 0 ? (

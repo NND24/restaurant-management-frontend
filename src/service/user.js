@@ -6,7 +6,7 @@ export const getCurrentUser = async (userId) => {
     return res.data;
   } catch (error) {
     console.error("Error fetching current user:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,6 +16,6 @@ export const updateUser = async (userData) => {
     return res.data;
   } catch (error) {
     console.error("Error updating user:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

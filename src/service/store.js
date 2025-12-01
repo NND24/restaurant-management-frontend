@@ -6,7 +6,7 @@ export const getStoreInformation = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error("Get store information error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -16,7 +16,7 @@ export const updateStoreInformation = async ({ storeId, updates }) => {
     return res.data;
   } catch (error) {
     console.error("Update store information error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -26,7 +26,7 @@ export const checkStoreName = async (name) => {
     return res.data;
   } catch (error) {
     console.error("Check store name error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -36,6 +36,6 @@ export const registerStore = async (storeData) => {
     return res.data;
   } catch (error) {
     console.error("Register store error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

@@ -11,6 +11,7 @@ import UnitCreateModal from "@/components/unit/UnitCreateModal";
 import UnitDetailModal from "@/components/unit/UnitDetailModal";
 import UnitEditModal from "@/components/unit/UnitEditModal";
 import { getUnits, deleteUnit } from "@/service/unit";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const getRole = localStorageService.getRole();
@@ -194,6 +195,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Đơn vị' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Đơn vị</span>
 
         {!blockEdit && (

@@ -5,6 +5,7 @@ import Tabs from "@/components/Tabs";
 import LatestTab from "@/components/tabs/LatestOrderTab";
 import VerifyTab from "@/components/tabs/VerifyOrderTab";
 import localStorageService from "@/utils/localStorageService";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const storeData = localStorageService.getStore();
@@ -38,6 +39,7 @@ const page = () => {
 
   return (
     <div className='p-5'>
+      <Heading title='Đơn hàng hiện tại' description='' keywords='' />
       <Tabs key={activeTab} tabs={tabData} defaultActiveTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );

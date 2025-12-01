@@ -7,7 +7,7 @@ export const createIngredient = async ({ name, unit, description, category, reor
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -17,7 +17,7 @@ export const getIngredientsByStore = async (storeId) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -27,7 +27,7 @@ export const getIngredientsByCategory = async ({ categoryId, storeId }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -37,7 +37,7 @@ export const getIngredientById = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -47,7 +47,7 @@ export const updateIngredient = async ({ id, data }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -57,6 +57,6 @@ export const deleteIngredient = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

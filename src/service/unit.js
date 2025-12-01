@@ -7,7 +7,7 @@ export const createUnit = async ({ name, type, isActive, storeId }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -19,7 +19,7 @@ export const getUnits = async (storeId, activeOnly = false) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -29,7 +29,7 @@ export const getUnitById = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -39,7 +39,7 @@ export const updateUnit = async ({ id, data }) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -49,6 +49,6 @@ export const deleteUnit = async (id) => {
     return res.data;
   } catch (error) {
     console.error(error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

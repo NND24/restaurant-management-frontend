@@ -7,6 +7,7 @@ import { getAllOrders } from "@/service/order";
 import { viVN } from "@/utils/constants";
 import generateOrderNumber from "@/utils/generateOrderNumber";
 import OrderDetailModal from "@/components/orders/OrderDetailModal";
+import Heading from "@/components/Heading";
 
 const formatVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", {
@@ -128,6 +129,7 @@ const page = () => {
 
   return (
     <div className='p-5'>
+      <Heading title='Lịch sử đơn hàng' description='' keywords='' />
       <div style={{ height: "95vh", width: "100%" }}>
         {openDetailOrder && (
           <OrderDetailModal

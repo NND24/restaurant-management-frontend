@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import localStorageService from "@/utils/localStorageService";
+import Heading from "@/components/Heading";
 
 const UnauthorizedPage = () => {
   const router = useRouter();
@@ -11,6 +12,7 @@ const UnauthorizedPage = () => {
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-100 px-4'>
+      <Heading title='Truy cập bị từ chối' description='' keywords='' />
       <div className='bg-white p-10 rounded-2xl shadow-xl max-w-md w-full text-center'>
         {/* Icon + Title */}
         <div className='flex flex-col items-center mb-4'>

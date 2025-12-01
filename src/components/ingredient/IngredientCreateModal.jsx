@@ -118,6 +118,15 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
               fullWidth
               required
               sx={{ flex: 1 }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
             >
               <MenuItem value='weight'>Khối lượng</MenuItem>
               <MenuItem value='volume'>Thể tích</MenuItem>
@@ -134,6 +143,15 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
               required
               sx={{ flex: 1 }}
               disabled={!formData.unitType} // disable nếu chưa chọn loại
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200,
+                    },
+                  },
+                },
+              }}
             >
               {allUnits
                 .filter((u) => u.type === formData.unitType)
@@ -154,10 +172,11 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             fullWidth
             required
             SelectProps={{
-              PaperProps: {
-                sx: {
-                  maxHeight: "200px !important", // override cứng
-                  overflowY: "auto",
+              MenuProps: {
+                PaperProps: {
+                  style: {
+                    maxHeight: 200,
+                  },
                 },
               },
             }}
@@ -169,7 +188,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             ))}
           </TextField>
 
-          <TextField
+          {/* <TextField
             label='Ngưỡng tồn kho cảnh báo'
             type='number'
             name='reorderLevel'
@@ -177,7 +196,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={handleChange}
             fullWidth
             inputProps={{ min: 0 }}
-          />
+          /> */}
 
           <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
             <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>

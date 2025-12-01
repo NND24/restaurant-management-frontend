@@ -11,7 +11,7 @@ export const getStoreToppingGroups = async (storeId) => {
     const res = await axios.get(`/topping/topping-group/store/${storeId}`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -20,7 +20,7 @@ export const getActiveStoreToppingGroups = async (storeId) => {
     const res = await axios.get(`/topping/topping-group/store/${storeId}/active`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -29,7 +29,7 @@ export const getToppingGroupById = async (groupId) => {
     const res = await axios.get(`/topping/topping-group/${groupId}`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -38,7 +38,7 @@ export const createToppingGroup = async ({ storeId, data }) => {
     const res = await axios.post(`/topping/topping-group/${storeId}`, data);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -47,7 +47,7 @@ export const addToppingsToGroup = async ({ groupId, data }) => {
     const res = await axios.post(`/topping/topping-group/${groupId}/toppings`, data);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -56,7 +56,7 @@ export const updateToppingGroup = async ({ groupId, data }) => {
     const res = await axios.put(`/topping/topping-group/${groupId}`, data);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -66,7 +66,7 @@ export const toggleActiveToppingGroup = async (groupId) => {
     return res.data;
   } catch (error) {
     console.error("Error updating topping:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -76,7 +76,7 @@ export const deleteToppingGroup = async (groupId) => {
     return res.data;
   } catch (error) {
     console.error("Error removing topping:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -91,7 +91,7 @@ export const getStoreToppings = async (storeId) => {
     const res = await axios.get(`/topping/store/${storeId}`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -100,7 +100,7 @@ export const getToppingById = async (toppingId) => {
     const res = await axios.get(`/topping/${toppingId}`);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -109,7 +109,7 @@ export const createTopping = async ({ storeId, data }) => {
     const res = await axios.post(`/topping/${storeId}`, data);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -118,7 +118,7 @@ export const updateTopping = async ({ toppingId, data }) => {
     const res = await axios.put(`/topping/${toppingId}`, data);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -128,7 +128,7 @@ export const toggleActiveTopping = async (toppingId) => {
     return res.data;
   } catch (error) {
     console.error("Error updating topping:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -138,6 +138,6 @@ export const deleteTopping = async (toppingId) => {
     return res.data;
   } catch (error) {
     console.error("Error removing topping:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

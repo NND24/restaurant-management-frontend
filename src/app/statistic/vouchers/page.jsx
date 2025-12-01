@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { getVoucherUsageSummary, getTopUsedVouchers, getVoucherRevenueImpact } from "@/service/statistic";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import Heading from "@/components/Heading";
 
 const SummaryCard = ({ title, value, color, icon }) => (
   <div className='flex items-center justify-between bg-white rounded-xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all'>
@@ -42,7 +43,7 @@ const page = () => {
       setTopVouchers(Array.isArray(topRes?.data) ? topRes.data : []);
       setRevenueImpact(revenueRes?.data || {});
     } catch (err) {
-      toast.error("Lỗi khi tải dữ liệu voucher");
+      toast.error("Lỗi khi tải dữ liệu giảm giá");
     } finally {
       setLoading(false);
     }
@@ -54,8 +55,9 @@ const page = () => {
 
   return (
     <div className='bg-gray-50 min-h-screen p-8 space-y-8 overflow-y-auto h-full'>
+      <Heading title='Thống kê giảm giá' description='' keywords='' />
       <div>
-        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>🎟️ Thống kê Voucher</h1>
+        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>Thống kê giảm giá</h1>
         <p className='text-gray-500'>
           Theo dõi hiệu quả và ảnh hưởng của các mã khuyến mãi trong khoảng thời gian nhất định
         </p>
@@ -83,7 +85,7 @@ const page = () => {
             />
           </div>
           <div>
-            <label className='block text-sm text-gray-600 mb-1'>Top voucher</label>
+            <label className='block text-sm text-gray-600 mb-1'>Top giảm giá</label>
             <input
               type='number'
               min='1'
@@ -103,12 +105,12 @@ const page = () => {
       </div>
 
       {loading ? (
-        <div className='text-center py-10 text-gray-500'>⏳ Đang tải dữ liệu...</div>
+        <div className='text-center py-10 text-gray-500'>Đang tải dữ liệu...</div>
       ) : (
         <>
           {/* Tổng quan sử dụng */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>📊 Tổng quan sử dụng</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Tổng quan sử dụng</h3>
             <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
               <SummaryCard
                 title='Số lượt sử dụng'
@@ -117,7 +119,7 @@ const page = () => {
                 icon={<i className='fa-solid fa-ticket text-xl' />}
               />
               <SummaryCard
-                title='Số voucher phát hành'
+                title='Số giảm giá phát hành'
                 value={usageSummary?.totalIssued || 0}
                 color='#10b981'
                 icon={<i className='fa-solid fa-bullhorn text-xl' />}
@@ -131,9 +133,9 @@ const page = () => {
             </div>
           </div>
 
-          {/* Top Voucher */}
+          {/* Top giảm giá */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>🏆 Top {limit} voucher được sử dụng nhiều nhất</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Top {limit} giảm giá được sử dụng nhiều nhất</h3>
             {topVouchers.length === 0 ? (
               <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 text-gray-500 text-center'>
                 Không có dữ liệu
@@ -144,7 +146,7 @@ const page = () => {
                   <thead className='bg-gray-100 text-gray-600 uppercase text-xs'>
                     <tr>
                       <th className='px-4 py-2'>#</th>
-                      <th className='px-4 py-2'>Mã Voucher</th>
+                      <th className='px-4 py-2'>Mã giảm giá</th>
                       <th className='px-4 py-2 text-right'>Số lượt sử dụng</th>
                     </tr>
                   </thead>
@@ -164,7 +166,7 @@ const page = () => {
 
           {/* Ảnh hưởng doanh thu */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>💰 Ảnh hưởng doanh thu</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Ảnh hưởng doanh thu</h3>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
               <SummaryCard
                 title='Tổng giá trị giảm giá'

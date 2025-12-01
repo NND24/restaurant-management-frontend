@@ -259,7 +259,17 @@ const DashboardPage = () => {
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
                       <InputLabel>Tuần</InputLabel>
-                      <Select value={week} onChange={(e) => setWeek(Number(e.target.value))}>
+                      <Select
+                        value={week}
+                        onChange={(e) => setWeek(Number(e.target.value))}
+                        MenuProps={{
+                          PaperProps: {
+                            style: {
+                              maxHeight: 250,
+                            },
+                          },
+                        }}
+                      >
                         {Array.from({ length: 52 }, (_, i) => i + 1).map((w) => (
                           <MenuItem key={w} value={w}>
                             Tuần {w}

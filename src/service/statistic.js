@@ -7,7 +7,7 @@ export const getRevenueSummary = async () => {
     return res.data;
   } catch (error) {
     console.error("Get revenue summary error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -19,7 +19,7 @@ export const revenueByPeriod = async (params) => {
     return res.data;
   } catch (error) {
     console.error("Get revenue by period error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -29,7 +29,7 @@ export const getRevenueByItem = async (params = {}) => {
     return res.data;
   } catch (error) {
     console.error("❌ Get revenue by item error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -39,7 +39,7 @@ export const getRevenueByDishGroup = async (params = {}) => {
     return res.data;
   } catch (error) {
     console.error("❌ Get revenue by dish group error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -51,7 +51,7 @@ export const analyzeBusinessResult = async (params) => {
     return res.data;
   } catch (error) {
     console.error("Get revenue by dish group error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -60,7 +60,7 @@ export const getRecommendedDishes = async () => {
     const res = await axios.get("/statistics/recommend-dish");
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -69,7 +69,7 @@ export const getRecommendedDishesByCategory = async () => {
     const res = await axios.get("/statistics/recommend-dish-category");
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -78,7 +78,7 @@ export const improveVietnameseDescription = async (caption) => {
     const res = await axios.post("/statistics/improve-description", caption);
     return res.data;
   } catch (error) {
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -89,7 +89,7 @@ export const getOrderStatusRate = async () => {
     return res.data;
   } catch (error) {
     console.error("Get order status rate error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -99,7 +99,7 @@ export const getOrderSummaryStats = async () => {
     return res.data;
   } catch (error) {
     console.error("Get order summary stats error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -111,7 +111,7 @@ export const getOrdersOverTime = async (from, to) => {
     return res.data;
   } catch (error) {
     console.error("Get orders over time error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -123,7 +123,7 @@ export const getOrderStatusDistribution = async (from, to) => {
     return res.data;
   } catch (error) {
     console.error("Get order status distribution error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -133,7 +133,7 @@ export const getOrdersByTimeSlot = async (limit) => {
     return res.data;
   } catch (error) {
     console.error("Get orders by time slot error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -146,7 +146,7 @@ export const getTopSellingItems = async (limit) => {
     return res.data;
   } catch (error) {
     console.error("Get top selling items error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -158,7 +158,7 @@ export const getRevenueContributionByItem = async (limit) => {
     return res.data;
   } catch (error) {
     console.error("Get revenue contribution by item error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -169,7 +169,7 @@ export const getNewCustomers = async () => {
     return res.data;
   } catch (error) {
     console.error("Get new customers error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -179,7 +179,7 @@ export const getReturningCustomerRate = async () => {
     return res.data;
   } catch (error) {
     console.error("Get returning customer rate error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -189,7 +189,7 @@ export const getAverageSpendingPerOrder = async () => {
     return res.data;
   } catch (error) {
     console.error("Get average spending per order error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -201,7 +201,7 @@ export const getVoucherUsageSummary = async (from, to) => {
     return res.data;
   } catch (error) {
     console.error("Get voucher usage summary error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -213,7 +213,7 @@ export const getTopUsedVouchers = async (limit, from, to) => {
     return res.data;
   } catch (error) {
     console.error("Get top used vouchers error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
 
@@ -225,6 +225,6 @@ export const getVoucherRevenueImpact = async (from, to) => {
     return res.data;
   } catch (error) {
     console.error("Get voucher revenue impact error:", error);
-    return error.response?.data || { message: "Unknown error occurred" };
+    throw error.response?.data || { message: "Unknown error occurred" };
   }
 };

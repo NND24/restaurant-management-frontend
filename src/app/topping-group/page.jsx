@@ -11,6 +11,7 @@ import ToppingGroupDetailModal from "@/components/topping-group/ToppingGroupDeta
 import ToppingGroupEditModal from "@/components/topping-group/ToppingGroupEditModal";
 import { getStoreToppingGroups, deleteToppingGroup } from "@/service/topping";
 import { useRouter } from "next/navigation";
+import Heading from "@/components/Heading";
 
 const page = () => {
   const router = useRouter();
@@ -219,6 +220,7 @@ const page = () => {
       )}
 
       <div className='flex align-center justify-between mb-2'>
+        <Heading title='Nhóm món thêm' description='' keywords='' />
         <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món thêm</span>
 
         {!blockEdit && (

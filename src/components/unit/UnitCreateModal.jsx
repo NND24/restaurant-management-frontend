@@ -51,6 +51,7 @@ const UnitCreateModal = ({ open, onClose, storeId, onCreated }) => {
       onCreated?.();
       onClose();
     } catch (err) {
+      toast.error(err.message);
       console.error(err);
     } finally {
       setLoading(false);

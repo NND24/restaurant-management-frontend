@@ -174,6 +174,10 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
       toast.info("Đang tải ảnh lên...");
       const form = new FormData();
       form.append("file", file);
+      form.append(
+        "ingredients",
+        formData.ingredients.map((i) => i.ingredient.name)
+      );
       const res = await uploadImages(form);
 
       if (!res || !res[0]?.url) throw new Error("Upload thất bại");

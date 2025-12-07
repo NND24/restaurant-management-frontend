@@ -50,31 +50,15 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
   // 🔹 Dùng cho AI caption từ FoodCaptioner
   const API_IMAGE = "http://localhost:8000/generate-caption-from-image";
-  const API_URL = "http://127.0.0.1:8000/caption";
 
   // 🟦 Tạo mô tả từ FILE
   const generateCaptionFromFile = async (formData) => {
     try {
-      const res = await axios.post(API_IMAGE, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      toast.success("Đã sinh mô tả từ hình ảnh!");
+      const res = await axios.post(API_IMAGE, formData);
       return res.data;
     } catch (e) {
       console.error(e);
-      toast.error("Không thể sinh mô tả từ ảnh");
-    }
-  };
-
-  // 🟦 Tạo mô tả từ URL ảnh
-  const generateCaptionFromUrl = async (url) => {
-    try {
-      const res = await axios.post(API_URL, null, { params: { url } });
-    } catch (e) {
-      console.error(e);
-      toast.error("Không thể sinh mô tả từ URL ảnh");
+      throw e;
     }
   };
 
@@ -133,7 +117,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   }, [selectedCategory]);
 
   const addIngredient = (ingredient) => {
-    if (!formData.ingredients.find((i) => i.ingredient._id === ingredient._id)) {
+    if (
+      !formData.ingredients.find((i) => i.ingredient._id === ingredient._id)
+    ) {
       setFormData((prev) => ({
         ...prev,
         ingredients: [...prev.ingredients, { ingredient, quantity: 1 }],
@@ -152,7 +138,9 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
     setFormData((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((i) =>
-        i.ingredient._id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
+        i.ingredient._id === id
+          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          : i
       ),
     }));
   };
@@ -165,43 +153,116 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    const toastId = toast.loading("Đang xử lý ảnh...", { autoClose: false });
+
     setFormData((prev) => ({ ...prev, image: file }));
 
+    const form = new FormData();
+    form.append("file", file);
+
+    const ingredientsArray = formData.ingredients.map((i) => i.ingredient.name);
+    form.append("ingredients", ingredientsArray.join(","));
+
     try {
-      toast.info("Đang tải ảnh lên...");
-      const form = new FormData();
-      form.append("file", file);
-      form.append(
-        "ingredients",
-        formData.ingredients.map((i) => i.ingredient.name)
-      );
-      const res = await uploadImages(form);
+      let successMessage = "Xử lý ảnh hoàn tất!";
 
-      if (!res || !res[0]?.url) throw new Error("Upload thất bại");
+      toast.update(toastId, {
+        render: "Đang tải ảnh lên...",
+        type: "info",
+        isLoading: true,
+      });
 
-      // 🟦 Gọi AI mô tả
-      if (autoDescribe) {
-        toast.info("Đang mô tả món ăn...");
-        const res = await generateCaptionFromFile(form);
-        setFormData((prev) => ({ ...prev, description: res.caption }));
-        console.log(res);
+      const uploadRes = await uploadImages(form);
+
+      if (!uploadRes || !uploadRes[0]?.url) {
+        throw new Error("Tải ảnh lên server lưu trữ thất bại");
       }
+
+      if (autoDescribe) {
+        toast.update(toastId, {
+          render: "Đang phân tích và tạo mô tả...",
+          type: "info",
+          isLoading: true,
+        });
+
+        const captionRes = await generateCaptionFromFile(form);
+
+        if (captionRes && captionRes.caption) {
+          setFormData((prev) => ({
+            ...prev,
+            description: captionRes.caption,
+          }));
+          successMessage = "Tải ảnh và tạo mô tả thành công!";
+        } else {
+          console.warn("Tạo mô tả AI thất bại hoặc không có dữ liệu mô tả.");
+          successMessage = "Tải ảnh thành công, nhưng không thể tạo mô tả.";
+        }
+      } else {
+        successMessage = "Tải ảnh hoàn tất!";
+      }
+
+      toast.update(toastId, {
+        render: successMessage,
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+      });
     } catch (err) {
       console.error(err);
-      toast.error("Không thể xử lý ảnh");
+      let errorMessage = "Không thể xử lý ảnh.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      toast.update(toastId, {
+        render: `Lỗi xử lý: ${errorMessage}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 8000,
+      });
+
+      setFormData((prev) => ({ ...prev, image: null }));
     }
   };
 
   const reGenerateCaptionFromFile = async () => {
+    const toastId = toast.loading("Đang xử lý ảnh...", { autoClose: false });
     try {
-      toast.info("Đang mô tả món ăn...");
+      toast.update(toastId, {
+        render: "Đang tạo mô tả món ăn...",
+        type: "info",
+        isLoading: true,
+      });
       const form = new FormData();
       form.append("file", formData.image);
+      form.append(
+        "ingredients",
+        formData.ingredients.map((i) => i.ingredient.name)
+      );
       const res = await generateCaptionFromFile(form);
       setFormData((prev) => ({ ...prev, description: res.caption }));
+      toast.update(toastId, {
+        render: "Đã tạo mô tả thành công!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+      });
     } catch (err) {
       console.error(err);
-      toast.error("Không thể xử lý ảnh");
+      let errorMessage = "Không thể xử lý ảnh.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      toast.update(toastId, {
+        render: `Lỗi xử lý: ${errorMessage}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 8000,
+      });
     }
   };
 
@@ -257,348 +318,416 @@ const DishCreateModal = ({ open, onClose, storeId, onCreated }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle
+        sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}
+      >
         Thêm món ăn
-        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
           <FaTimes />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          {/* Form Fields */}
-          <Box display='flex' gap={2} flexWrap='wrap'>
-            <TextField label='Tên*' name='name' value={formData.name} onChange={handleChange} fullWidth />
-            <TextField
-              label='Giá*'
-              name='price'
-              type='number'
-              value={formData.price}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Box>
-
-          {/* Image Upload */}
+        <Box display="flex" gap={4}>
           <Box>
-            <Typography variant='subtitle1' gutterBottom>
-              Hình ảnh
-            </Typography>
-            <Paper
-              variant='outlined'
-              sx={{
-                width: 150,
-                height: 150,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                cursor: "pointer",
-              }}
-              onClick={() => document.getElementById("imageUpload").click()}
-            >
-              {formData.image ? (
-                <img
-                  src={URL.createObjectURL(formData.image)}
-                  alt='Preview'
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <FaRegImage size={32} color='#aaa' />
-              )}
-              <input
-                type='file'
-                id='imageUpload'
-                accept='image/*'
-                style={{ display: "none" }}
-                onChange={handleImageUpload}
-              />
-            </Paper>
-          </Box>
-
-          <Box display='flex' alignItems='center' gap={1}>
-            <Typography variant='subtitle1'>Tự động gợi ý mô tả từ hình ảnh</Typography>
-            <Switch checked={autoDescribe} onChange={(e) => setAutoDescribe(e.target.checked)} color='primary' />
-          </Box>
-
-          <Box>
-            <Box display='flex' justifyContent='space-between' alignItems='center'>
-              <Typography variant='subtitle1'>Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)</Typography>
-
-              {formData.description && (
-                <Button onClick={reGenerateCaptionFromFile} size='small' variant='outlined'>
-                  Mô tả khác
-                </Button>
-              )}
-            </Box>
-
-            <textarea
-              value={formData.description}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }));
-              }}
-              rows={6}
-              style={{
-                width: "100%",
-                marginTop: 8,
-                padding: 12,
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                fontSize: 15,
-                fontFamily: "inherit",
-                background: "#fafafa",
-              }}
-            />
-          </Box>
-
-          <TextField
-            select
-            label='Loại món ăn'
-            value={formData.category || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-            fullWidth
-          >
-            {allSystemCategories.map((cat) => (
-              <MenuItem key={cat._id} value={cat._id}>
-                {cat.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            {/* Select loại nguyên liệu */}
-            <TextField
-              select
-              label='Loại nguyên liệu'
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setSelectedIngredient(""); // reset khi đổi loại
-              }}
-              sx={{ flex: 1 }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200, // chiều cao tối đa (có scroll)
-                    },
-                  },
-                },
-              }}
-            >
-              {allCategories.map((c) => (
-                <MenuItem key={c._id} value={c._id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Select nguyên liệu theo loại */}
-            <TextField
-              select
-              label='Nguyên liệu'
-              value={selectedIngredient}
-              onChange={(e) => {
-                const ingId = e.target.value;
-                setSelectedIngredient(ingId);
-                const ing = ingredientsByCategory.find((i) => i._id === ingId);
-                if (ing) addIngredient(ing);
-              }}
-              sx={{ flex: 1 }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200, // chiều cao tối đa (có scroll)
-                    },
-                  },
-                },
-              }}
-              disabled={!selectedCategory}
-            >
-              {ingredientsByCategory.map((ing) => (
-                <MenuItem key={ing._id} value={ing._id}>
-                  {ing.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-
-          {/* Nguyên liệu đã chọn */}
-          {formData.ingredients.length > 0 && (
-            <Box className='border rounded-md space-y-1'>
-              {formData.ingredients.map((i) => {
-                // Xác định bước tăng/giảm theo loại unit
-                let step = 1;
-                let unitLabel = i.ingredient.unit?.name || "";
-
-                switch (i.ingredient.unit?.type) {
-                  case "weight":
-                    step = 50; // 50g
-                    if (!unitLabel) unitLabel = "g";
-                    break;
-                  case "volume":
-                    step = 10; // 10ml
-                    if (!unitLabel) unitLabel = "ml";
-                    break;
-                  case "count":
-                    step = 1; // 1 cái
-                    if (!unitLabel) unitLabel = "cái";
-                    break;
-                  default:
-                    step = 1;
-                }
-
-                return (
-                  <Box
-                    key={i.ingredient._id}
-                    className='flex justify-between items-center py-1 px-2 bg-gray-50 rounded'
-                  >
-                    <span className='font-medium'>{i.ingredient.name}</span>
-                    <Box className='flex items-center gap-1'>
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, -step)}>
-                        <FaMinus />
-                      </IconButton>
-
-                      {/* Input để chỉnh số lượng trực tiếp */}
-                      <TextField
-                        size='small'
-                        type='number'
-                        value={i.quantity}
-                        onChange={(e) => {
-                          const val = Math.max(0, Number(e.target.value)); // không cho âm
-                          setFormData((prev) => ({
-                            ...prev,
-                            ingredients: prev.ingredients.map((ing) =>
-                              ing.ingredient._id === i.ingredient._id ? { ...ing, quantity: val } : ing
-                            ),
-                          }));
-                        }}
-                        inputProps={{ step }}
-                        sx={{ width: 70, textAlign: "center" }}
-                      />
-
-                      <span>{unitLabel}</span>
-
-                      <IconButton size='small' onClick={() => updateQuantity(i.ingredient._id, step)}>
-                        <FaPlus />
-                      </IconButton>
-                      <IconButton size='small' color='error' onClick={() => removeIngredient(i.ingredient._id)}>
-                        🗑️
-                      </IconButton>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-          )}
-
-          <Autocomplete
-            multiple
-            options={allToppingGroups}
-            getOptionLabel={(option) => option.name}
-            value={formData.toppingGroups}
-            onChange={(e, newValue) => setFormData((prev) => ({ ...prev, toppingGroups: newValue }))}
-            disableCloseOnSelect
-            renderOption={(props, option, { selected }) => (
-              <li
-                {...props}
-                style={{
+            {/* Image Upload */}
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Hình ảnh
+              </Typography>
+              <Paper
+                variant="outlined"
+                sx={{
+                  maxWidth: 300,
+                  minHeight: 150,
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  padding: "8px 12px",
-                  backgroundColor: selected ? "#fcf0e8" : "white",
+                  justifyContent: "center",
+                  position: "relative",
                   cursor: "pointer",
                 }}
+                onClick={() => document.getElementById("imageUpload").click()}
               >
+                {formData.image ? (
+                  <img
+                    src={
+                      formData.image instanceof File
+                        ? URL.createObjectURL(formData.image)
+                        : formData.image
+                    }
+                    alt="Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <FaRegImage size={32} color="#aaa" />
+                )}
                 <input
-                  type='checkbox'
-                  checked={selected}
-                  readOnly
-                  style={{ width: 16, height: 16, accentColor: "#fc6011" }}
+                  type="file"
+                  id="imageUpload"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleImageUpload}
                 />
-                {option.name}
-              </li>
-            )}
-            renderTags={() => null}
-            renderInput={(params) => (
+              </Paper>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="subtitle1">
+                Tự động gợi ý mô tả từ hình ảnh
+              </Typography>
+              <Switch
+                checked={autoDescribe}
+                onChange={(e) => setAutoDescribe(e.target.checked)}
+                color="primary"
+              />
+            </Box>
+          </Box>
+          <Box className="space-y-4 flex-1">
+            {/* Form Fields */}
+            <Box display="flex" gap={2} flexWrap="wrap">
               <TextField
-                {...params}
-                variant='outlined'
-                label='Chọn nhóm món thêm'
-                placeholder='Chọn nhóm món thêm...'
+                label="Tên*"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 fullWidth
               />
-            )}
-            PaperComponent={({ children }) => (
-              <Paper
-                elevation={3}
-                sx={{
-                  maxHeight: 240,
-                  overflowY: "auto",
-                  "&::-webkit-scrollbar": { width: 6 },
-                  "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: "#fc6011",
-                    borderRadius: 3,
+              <TextField
+                label="Giá*"
+                name="price"
+                type="number"
+                value={formData.price}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Box>
+
+            <TextField
+              select
+              label="Loại món ăn"
+              value={formData.category || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, category: e.target.value }))
+              }
+              fullWidth
+            >
+              {allSystemCategories.map((cat) => (
+                <MenuItem key={cat._id} value={cat._id}>
+                  {cat.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              {/* Select loại nguyên liệu */}
+              <TextField
+                select
+                label="Loại nguyên liệu"
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedIngredient(""); // reset khi đổi loại
+                }}
+                sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // chiều cao tối đa (có scroll)
+                      },
+                    },
                   },
                 }}
               >
-                {children}
-              </Paper>
-            )}
-            fullWidth
-          />
+                {allCategories.map((c) => (
+                  <MenuItem key={c._id} value={c._id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-          {/* Chip list hiển thị riêng dưới input */}
-          {formData.toppingGroups.length > 0 && (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-              {formData.toppingGroups.map((option) => (
-                <Chip
-                  key={option._id}
-                  label={option.name}
-                  onDelete={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      toppingGroups: prev.toppingGroups.filter((t) => t._id !== option._id),
-                    }))
-                  }
-                  size='medium'
-                  sx={{
-                    backgroundColor: "#fc6011",
-                    color: "#fff",
-                    fontWeight: 500,
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                  }}
-                />
-              ))}
+              {/* Select nguyên liệu theo loại */}
+              <TextField
+                select
+                label="Nguyên liệu"
+                value={selectedIngredient}
+                onChange={(e) => {
+                  const ingId = e.target.value;
+                  setSelectedIngredient(ingId);
+                  const ing = ingredientsByCategory.find(
+                    (i) => i._id === ingId
+                  );
+                  if (ing) addIngredient(ing);
+                }}
+                sx={{ flex: 1 }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // chiều cao tối đa (có scroll)
+                      },
+                    },
+                  },
+                }}
+                disabled={!selectedCategory}
+              >
+                {ingredientsByCategory.map((ing) => (
+                  <MenuItem key={ing._id} value={ing._id}>
+                    {ing.name}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Box>
-          )}
 
-          <TextField
-            select
-            label='Trạng thái'
-            value={formData.status}
-            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
-            fullWidth
-          >
-            <MenuItem value='ACTIVE'>Hoạt động</MenuItem>
-            <MenuItem value='INACTIVE'>Ngưng</MenuItem>
-            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
-          </TextField>
+            {/* Nguyên liệu đã chọn */}
+            {formData.ingredients.length > 0 && (
+              <Box className="border rounded-md space-y-1">
+                {formData.ingredients.map((i) => {
+                  // Xác định bước tăng/giảm theo loại unit
+                  let step = 1;
+                  let unitLabel = i.ingredient.unit?.name || "";
+
+                  switch (i.ingredient.unit?.type) {
+                    case "weight":
+                      step = 50; // 50g
+                      if (!unitLabel) unitLabel = "g";
+                      break;
+                    case "volume":
+                      step = 10; // 10ml
+                      if (!unitLabel) unitLabel = "ml";
+                      break;
+                    case "count":
+                      step = 1; // 1 cái
+                      if (!unitLabel) unitLabel = "cái";
+                      break;
+                    default:
+                      step = 1;
+                  }
+
+                  return (
+                    <Box
+                      key={i.ingredient._id}
+                      className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                    >
+                      <span className="font-medium">{i.ingredient.name}</span>
+                      <Box className="flex items-center gap-1">
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            updateQuantity(i.ingredient._id, -step)
+                          }
+                        >
+                          <FaMinus />
+                        </IconButton>
+
+                        {/* Input để chỉnh số lượng trực tiếp */}
+                        <TextField
+                          size="small"
+                          type="number"
+                          value={i.quantity}
+                          onChange={(e) => {
+                            const val = Math.max(0, Number(e.target.value)); // không cho âm
+                            setFormData((prev) => ({
+                              ...prev,
+                              ingredients: prev.ingredients.map((ing) =>
+                                ing.ingredient._id === i.ingredient._id
+                                  ? { ...ing, quantity: val }
+                                  : ing
+                              ),
+                            }));
+                          }}
+                          inputProps={{ step }}
+                          sx={{ width: 70, textAlign: "center" }}
+                        />
+
+                        <span>{unitLabel}</span>
+
+                        <IconButton
+                          size="small"
+                          onClick={() => updateQuantity(i.ingredient._id, step)}
+                        >
+                          <FaPlus />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => removeIngredient(i.ingredient._id)}
+                        >
+                          🗑️
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
+
+            <Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="subtitle1">
+                  Mô tả món ăn (AI gợi ý - có thể chỉnh sửa)
+                </Typography>
+
+                {formData.description && (
+                  <Button
+                    onClick={reGenerateCaptionFromFile}
+                    size="small"
+                    variant="outlined"
+                  >
+                    Mô tả khác
+                  </Button>
+                )}
+              </Box>
+
+              <textarea
+                value={formData.description}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }));
+                }}
+                rows={6}
+                style={{
+                  width: "100%",
+                  marginTop: 8,
+                  padding: 12,
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                  fontSize: 15,
+                  fontFamily: "inherit",
+                  background: "#fafafa",
+                }}
+              />
+            </Box>
+
+            <Autocomplete
+              multiple
+              options={allToppingGroups}
+              getOptionLabel={(option) => option.name}
+              value={formData.toppingGroups}
+              onChange={(e, newValue) =>
+                setFormData((prev) => ({ ...prev, toppingGroups: newValue }))
+              }
+              disableCloseOnSelect
+              renderOption={(props, option, { selected }) => (
+                <li
+                  {...props}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 12px",
+                    backgroundColor: selected ? "#fcf0e8" : "white",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    readOnly
+                    style={{ width: 16, height: 16, accentColor: "#fc6011" }}
+                  />
+                  {option.name}
+                </li>
+              )}
+              renderTags={() => null}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Chọn nhóm món thêm"
+                  placeholder="Chọn nhóm món thêm..."
+                  fullWidth
+                />
+              )}
+              PaperComponent={({ children }) => (
+                <Paper
+                  elevation={3}
+                  sx={{
+                    maxHeight: 240,
+                    overflowY: "auto",
+                    "&::-webkit-scrollbar": { width: 6 },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "#fc6011",
+                      borderRadius: 3,
+                    },
+                  }}
+                >
+                  {children}
+                </Paper>
+              )}
+              fullWidth
+            />
+
+            {/* Chip list hiển thị riêng dưới input */}
+            {formData.toppingGroups.length > 0 && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+                {formData.toppingGroups.map((option) => (
+                  <Chip
+                    key={option._id}
+                    label={option.name}
+                    onDelete={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        toppingGroups: prev.toppingGroups.filter(
+                          (t) => t._id !== option._id
+                        ),
+                      }))
+                    }
+                    size="medium"
+                    sx={{
+                      backgroundColor: "#fc6011",
+                      color: "#fff",
+                      fontWeight: 500,
+                      borderRadius: "16px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+
+            <TextField
+              select
+              label="Trạng thái"
+              value={formData.status}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, status: e.target.value }))
+              }
+              fullWidth
+            >
+              <MenuItem value="ACTIVE">Hoạt động</MenuItem>
+              <MenuItem value="INACTIVE">Ngưng</MenuItem>
+              <MenuItem value="OUT_OF_STOCK">Hết hàng</MenuItem>
+            </TextField>
+          </Box>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>
-        <Button onClick={onClose} color='error' variant='outlined'>
+        <Button onClick={onClose} color="error" variant="outlined">
           Hủy
         </Button>
-        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          disabled={loading}
+        >
           {loading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>

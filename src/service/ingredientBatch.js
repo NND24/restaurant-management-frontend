@@ -1,9 +1,8 @@
 import axios from "../libs/axiosInstance";
 
-export const createBatch = async ({ ingredient, quantity, costPerUnit, expiryDate, storeId }) => {
+export const createBatch = async (payload) => {
   try {
-    let data = { ingredient, quantity, costPerUnit, expiryDate, storeId };
-    const res = await axios.post(`/ingredient-batch/`, data);
+    const res = await axios.post(`/ingredient-batch/`, payload);
     return res.data;
   } catch (error) {
     console.error(error);
@@ -51,7 +50,7 @@ export const updateBatch = async ({ id, data }) => {
   }
 };
 
-export const deleteBatch = async ({ id }) => {
+export const deleteBatch = async (id) => {
   try {
     const res = await axios.delete(`/ingredient-batch/${id}`);
     return res.data;

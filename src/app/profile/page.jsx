@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 
 import { getCurrentUser, updateUser } from "@/service/user";
 import { changePassword } from "@/service/auth";
-
-import Header from "../../components/Header";
 import Loading from "../../components/Loading";
 
 import { toast } from "react-toastify";
@@ -102,7 +100,6 @@ const ProfilePage = () => {
 
   return (
     <>
-      <Header title='Hồ sơ cá nhân' goBack={true} />
       <Heading title='Hồ sơ cá nhân' description='' keywords='' />
       <div className='max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-2xl mt-20'>
         {/* User Information Section */}

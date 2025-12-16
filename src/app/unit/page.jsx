@@ -50,7 +50,7 @@ const page = () => {
   }, [storeId]);
 
   // 🗑 Xoá đơn vị
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, storeId) => {
     const result = await Swal.fire({
       title: "Bạn có chắc chắn muốn xoá?",
       text: "Đơn vị này sẽ bị xóa.",
@@ -64,7 +64,7 @@ const page = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteUnit(id);
+        await deleteUnit(id, storeId);
         Swal.fire("Đã xoá!", "Đơn vị đã được xóa.", "success");
         fetchData();
       } catch (err) {
@@ -78,9 +78,9 @@ const page = () => {
     {
       field: "name",
       headerName: "Tên đơn vị",
-      flex: 2,
+      flex: 1.5,
       headerAlign: "center",
-      renderCell: (params) => <span>{params.row?.name || ""}</span>,
+      align: "center",
     },
     {
       field: "type",
@@ -94,9 +94,21 @@ const page = () => {
           volume: "Thể tích",
           count: "Số lượng",
         };
-        return <span>{typeMap[params.row?.type] || params.row?.type}</span>;
+        return typeMap[params.row?.type] || params.row?.type;
       },
     },
+    {
+      field: "conversion",
+      headerName: "Quy đổi",
+      headerAlign: "center",
+      align: "center",
+      flex: 2,
+      valueGetter: (_, row) => {
+        if (!row.baseUnit && row.ratio === 1) return "Đơn vị gốc";
+        return `1 ${row.name} = ${row.ratio} ${row.baseUnit}`;
+      },
+    },
+
     {
       field: "isActive",
       headerName: "Trạng thái",
@@ -105,11 +117,11 @@ const page = () => {
       flex: 1,
       renderCell: (params) => (
         <span
-          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
-            params.row?.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
+          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+            params.row.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
           }`}
         >
-          {params.row?.isActive ? "Hoạt động" : "Ngưng"}
+          {params.row.isActive ? "Hoạt động" : "Ngưng"}
         </span>
       ),
     },
@@ -157,7 +169,7 @@ const page = () => {
               size='small'
               color='error'
               sx={{ width: 30, height: 30, fontSize: "16px" }}
-              onClick={() => handleDelete(params.row._id)}
+              onClick={() => handleDelete(params.row._id, storeId)}
             >
               🗑️
             </IconButton>
@@ -190,6 +202,7 @@ const page = () => {
           open={openEditUnit}
           onClose={() => setOpenEditUnit(false)}
           id={selectedUnitId}
+          storeId={storeId}
           onUpdated={fetchData}
         />
       )}

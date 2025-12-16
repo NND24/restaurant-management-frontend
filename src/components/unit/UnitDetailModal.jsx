@@ -20,7 +20,8 @@ const UnitDetailModal = ({ open, onClose, id }) => {
   const [formData, setFormData] = useState({
     name: "",
     type: "",
-    storeId: "",
+    baseUnit: "",
+    ratio: 1,
     isActive: true,
   });
 
@@ -68,35 +69,35 @@ const UnitDetailModal = ({ open, onClose, id }) => {
           </Box>
         ) : (
           <Box className='space-y-4'>
-            <TextField
-              label='Tên đơn vị'
-              name='name'
-              value={formData.name || ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
+            {/* Tên đơn vị */}
+            <TextField label='Tên đơn vị' value={formData.name || ""} fullWidth InputProps={{ readOnly: true }} />
 
-            <TextField
-              select
-              label='Loại đơn vị'
-              name='type'
-              value={formData.type || ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            >
+            {/* Loại đơn vị */}
+            <TextField select label='Loại đơn vị' value={formData.type || ""} fullWidth InputProps={{ readOnly: true }}>
               <MenuItem value='weight'>Khối lượng</MenuItem>
               <MenuItem value='volume'>Thể tích</MenuItem>
               <MenuItem value='count'>Số lượng</MenuItem>
             </TextField>
 
+            {/* Đơn vị gốc */}
             <TextField
-              select
-              label='Trạng thái'
-              name='isActive'
-              value={formData.isActive}
+              label='Đơn vị gốc'
+              value={formData.baseUnit || ""}
               fullWidth
               InputProps={{ readOnly: true }}
-            >
+              helperText='Tất cả quy đổi đều dựa trên đơn vị này'
+            />
+
+            {/* Tỷ lệ quy đổi */}
+            <TextField
+              label='Tỷ lệ quy đổi'
+              value={formData.baseUnit ? `1 ${formData.name} = ${formData.ratio} ${formData.baseUnit}` : formData.ratio}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+
+            {/* Trạng thái */}
+            <TextField select label='Trạng thái' value={formData.isActive} fullWidth InputProps={{ readOnly: true }}>
               <MenuItem value={true}>Hoạt động</MenuItem>
               <MenuItem value={false}>Ngưng hoạt động</MenuItem>
             </TextField>

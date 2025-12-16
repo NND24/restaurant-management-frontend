@@ -19,8 +19,12 @@ import { toast } from "react-toastify";
 const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
   const [formData, setFormData] = useState({
     batchCode: "",
-    ingredient: { _id: "", name: "", unit: { name: "" } },
-    quantity: 0,
+    ingredient: {
+      _id: "",
+      name: "",
+      unit: { name: "" },
+    },
+    quantity: 0, // base quantity
     remainingQuantity: 0,
     costPerUnit: 0,
     receivedDate: "",
@@ -28,30 +32,44 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
     supplierName: "",
     storageLocation: "",
     status: "active",
+    inputUnit: null, // 👈 thêm inputUnit
   });
 
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
+  /* ================= DERIVED ================= */
+  const inputUnit = formData.inputUnit;
+
+  // hiển thị số lượng theo đơn vị nhập
+  const displayQuantity =
+    inputUnit?.ratio && inputUnit.ratio > 1 ? formData.quantity / inputUnit.ratio : formData.quantity;
+
+  const totalCost = formData.quantity * formData.costPerUnit;
+
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
-    if (open && id) {
-      const fetchData = async () => {
-        setIsLoadingData(true);
-        try {
-          const res = await getBatchById(id);
-          if (res?.success) {
-            setFormData(res.data);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setIsLoadingData(false);
+    if (!open || !id) return;
+
+    const fetchData = async () => {
+      setIsLoadingData(true);
+      try {
+        const res = await getBatchById(id);
+        if (res?.success) {
+          setFormData(res.data);
         }
-      };
-      fetchData();
-    }
+      } catch (err) {
+        console.error(err);
+        toast.error("Không thể tải dữ liệu lô nguyên liệu");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
   }, [open, id]);
 
+  /* ================= HANDLERS ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -62,20 +80,32 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
 
   const handleSave = async () => {
     if (!id) return;
+
     try {
       setLoading(true);
-      await updateBatch({ id, data: formData });
+
+      // ⚠️ chỉ gửi field cho phép update
+      const payload = {
+        expiryDate: formData.expiryDate,
+        supplierName: formData.supplierName,
+        storageLocation: formData.storageLocation,
+        status: formData.status,
+      };
+
+      await updateBatch({ id, data: payload });
+
       toast.success("Cập nhật lô nguyên liệu thành công");
       onUpdated?.();
       onClose();
     } catch (err) {
-      console.error("Lỗi khi cập nhật batch:", err);
+      console.error(err);
       toast.error("Cập nhật thất bại");
     } finally {
       setLoading(false);
     }
   };
 
+  /* ================= RENDER ================= */
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle
@@ -101,9 +131,10 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
           </Box>
         ) : (
           <Box className='space-y-4'>
-            {/* batchCode */}
+            {/* Mã lô */}
             <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
 
+            {/* Nguyên liệu */}
             <TextField
               label='Nguyên liệu'
               value={formData.ingredient?.name || ""}
@@ -111,11 +142,19 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               InputProps={{ readOnly: true }}
             />
 
+            {/* Quy đổi đơn vị */}
+            {inputUnit?.ratio > 1 && (
+              <Box fontSize={12} color='gray'>
+                (Quy đổi: 1 {inputUnit.name} = {inputUnit.ratio} {inputUnit.baseUnit})
+              </Box>
+            )}
+
+            {/* Số lượng */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label='Số lượng nhập'
+                label={`Số lượng nhập (${inputUnit?.name || ""})`}
                 type='number'
-                value={formData.quantity}
+                value={displayQuantity}
                 fullWidth
                 InputProps={{ readOnly: true }}
               />
@@ -128,27 +167,22 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               />
             </Box>
 
+            {/* Giá */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label={`Giá / ${formData.ingredient?.unit?.name || "đơn vị"}`}
+                label={`Giá / ${inputUnit?.name || "đơn vị"}`}
                 type='number'
                 value={formData.costPerUnit}
                 fullWidth
                 InputProps={{ readOnly: true }}
               />
-              <TextField
-                label='Tổng giá'
-                type='number'
-                value={formData.quantity * formData.costPerUnit}
-                fullWidth
-                InputProps={{ readOnly: true }}
-              />
+              <TextField label='Tổng giá' type='number' value={totalCost} fullWidth InputProps={{ readOnly: true }} />
             </Box>
 
+            {/* Ngày */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 label='Ngày nhập'
-                type='text'
                 value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
                 fullWidth
                 InputProps={{ readOnly: true }}
@@ -166,6 +200,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               />
             </Box>
 
+            {/* Nhà cung cấp */}
             <TextField
               label='Nhà cung cấp'
               name='supplierName'
@@ -174,6 +209,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               fullWidth
             />
 
+            {/* Vị trí */}
             <TextField
               label='Vị trí lưu trữ'
               name='storageLocation'
@@ -182,6 +218,7 @@ const IngredientBatchEditModal = ({ open, onClose, id, onUpdated }) => {
               fullWidth
             />
 
+            {/* Trạng thái */}
             <TextField
               select
               label='Trạng thái'

@@ -16,38 +16,51 @@ import { getBatchById } from "@/service/ingredientBatch";
 
 const IngredientBatchDetailModal = ({ open, onClose, id }) => {
   const [isLoadingData, setIsLoadingData] = useState(false);
+
   const [formData, setFormData] = useState({
     batchCode: "",
     ingredient: { _id: "", name: "" },
-    quantity: 0,
+    quantity: 0, // luôn lưu theo BASE UNIT
     costPerUnit: 0,
-    totalCost: 0,
     receivedDate: "",
     expiryDate: "",
     supplierName: "",
     storageLocation: "",
     status: "active",
+    inputUnit: null, // 🔥 QUAN TRỌNG
   });
 
+  /* ================= DERIVED VALUES ================= */
+  const inputUnit = formData.inputUnit;
+
+  // hiển thị số lượng theo đơn vị đã nhập
+  const displayQuantity = inputUnit && inputUnit.ratio ? formData.quantity / inputUnit.ratio : formData.quantity;
+
+  // tính tổng giá an toàn
+  const totalCost = formData.quantity && formData.costPerUnit ? formData.quantity * formData.costPerUnit : 0;
+
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
-    if (open && id) {
-      const fetchData = async () => {
-        setIsLoadingData(true);
-        try {
-          const res = await getBatchById(id);
-          if (res?.success) {
-            setFormData(res.data);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setIsLoadingData(false);
+    if (!open || !id) return;
+
+    const fetchData = async () => {
+      setIsLoadingData(true);
+      try {
+        const res = await getBatchById(id);
+        if (res?.success) {
+          setFormData(res.data);
         }
-      };
-      fetchData();
-    }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
   }, [open, id]);
 
+  /* ================= RENDER ================= */
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle
@@ -73,9 +86,10 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
           </Box>
         ) : (
           <Box className='space-y-4'>
-            {/* batchCode */}
+            {/* Mã lô */}
             <TextField label='Mã lô' value={formData.batchCode || ""} fullWidth InputProps={{ readOnly: true }} />
 
+            {/* Nguyên liệu */}
             <TextField
               label='Nguyên liệu'
               value={formData.ingredient?.name || ""}
@@ -83,16 +97,25 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
               InputProps={{ readOnly: true }}
             />
 
+            {/* Quy đổi */}
+            {inputUnit?.ratio > 1 && inputUnit?.baseUnit && (
+              <Box fontSize={12} color='gray'>
+                (Quy đổi: 1 {inputUnit.name} = {inputUnit.ratio} {inputUnit.baseUnit})
+              </Box>
+            )}
+
+            {/* Số lượng + giá */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label='Số lượng nhập'
+                label={`Số lượng nhập (${inputUnit?.name || "đơn vị"})`}
                 type='number'
-                value={formData.quantity}
+                value={displayQuantity}
                 fullWidth
                 InputProps={{ readOnly: true }}
               />
+
               <TextField
-                label={`Giá / ${formData.ingredient?.unit?.name || "đơn vị"}`}
+                label={`Giá / ${inputUnit?.name || "đơn vị"}`}
                 type='number'
                 value={formData.costPerUnit}
                 fullWidth
@@ -100,44 +123,47 @@ const IngredientBatchDetailModal = ({ open, onClose, id }) => {
               />
             </Box>
 
-            <TextField
-              label='Tổng giá'
-              type='number'
-              value={formData.totalCost}
-              fullWidth
-              InputProps={{ readOnly: true }}
-            />
+            {/* Tổng giá */}
+            <TextField label='Tổng giá' type='number' value={totalCost} fullWidth InputProps={{ readOnly: true }} />
 
+            {/* Ngày */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 label='Ngày nhập'
-                type='text'
-                value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString() : ""}
+                value={formData.receivedDate ? new Date(formData.receivedDate).toLocaleDateString("vi-VN") : ""}
                 fullWidth
                 InputProps={{ readOnly: true }}
               />
+
               <TextField
                 label='Hạn sử dụng'
-                type='text'
-                value={formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString() : ""}
+                value={formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString("vi-VN") : ""}
                 fullWidth
                 InputProps={{ readOnly: true }}
               />
             </Box>
 
-            <TextField label='Nhà cung cấp' value={formData.supplierName} fullWidth InputProps={{ readOnly: true }} />
-
+            {/* Nhà cung cấp */}
             <TextField
-              label='Vị trí lưu trữ'
-              value={formData.storageLocation}
+              label='Nhà cung cấp'
+              value={formData.supplierName || ""}
               fullWidth
               InputProps={{ readOnly: true }}
             />
 
+            {/* Vị trí */}
+            <TextField
+              label='Vị trí lưu trữ'
+              value={formData.storageLocation || ""}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+
+            {/* Trạng thái */}
             <TextField
               label='Trạng thái'
               value={
-                formData.status === "active" ? "Hoạt động" : formData.status === "expired" ? "Hết hạn" : "Đã kết thúc"
+                formData.status === "active" ? "Hoạt động" : formData.status === "expired" ? "Hết hạn" : "Đã dùng hết"
               }
               fullWidth
               InputProps={{ readOnly: true }}

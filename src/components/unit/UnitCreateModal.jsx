@@ -10,74 +10,120 @@ import {
   Box,
   IconButton,
   MenuItem,
+  Typography,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
-import { createUnit } from "@/service/unit";
+import { createUnit, getBaseUnits } from "@/service/unit";
+import { toast } from "react-toastify";
 
 const UnitCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
     name: "",
     type: "",
+    baseUnit: "", // STRING: name của unit gốc
+    ratio: 1,
     isActive: true,
   });
+
+  const [baseUnits, setBaseUnits] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  /* ================= RESET FORM ================= */
   useEffect(() => {
-    if (open) {
-      setFormData({
-        name: "",
-        type: "",
-        isActive: true,
-      });
-    }
+    if (!open) return;
+    setFormData({
+      name: "",
+      type: "",
+      baseUnit: "",
+      ratio: 1,
+      isActive: true,
+    });
+    setBaseUnits([]);
   }, [open]);
 
+  /* ================= LOAD BASE UNITS ================= */
+  useEffect(() => {
+    if (!formData.type) return;
+
+    getBaseUnits(storeId, formData.type)
+      .then((res) => {
+        // chỉ lấy unit gốc (ratio === 1 hoặc baseUnit null)
+        setBaseUnits(res.data || []);
+      })
+      .catch(() => setBaseUnits([]));
+  }, [formData.type, storeId]);
+
+  /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => {
+      // đổi type → reset baseUnit & ratio
+      if (name === "type" && value !== prev.type) {
+        return {
+          ...prev,
+          type: value,
+          baseUnit: "",
+          ratio: 1,
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
 
+  const isBaseUnit = !formData.baseUnit;
+
+  /* ================= SAVE ================= */
   const handleSave = async () => {
-    if (!formData.name || !formData.type) return;
+    if (!formData.name || !formData.type) {
+      toast.error("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    if (!isBaseUnit && Number(formData.ratio) <= 0) {
+      toast.error("Tỉ lệ quy đổi phải > 0");
+      return;
+    }
+
+    const payload = {
+      storeId,
+      name: formData.name.trim(),
+      type: formData.type,
+      baseUnit: isBaseUnit ? null : formData.baseUnit, // STRING
+      ratio: isBaseUnit ? 1 : Number(formData.ratio),
+      isActive: true,
+    };
 
     try {
       setLoading(true);
-      await createUnit({
-        storeId,
-        name: formData.name,
-        type: formData.type,
-        isActive: formData.isActive,
-      });
+      await createUnit(payload);
+      toast.success("Tạo đơn vị thành công");
       onCreated?.();
       onClose();
     } catch (err) {
-      toast.error(err.message);
-      console.error(err);
+      toast.error(err?.message || "Có lỗi xảy ra");
     } finally {
       setLoading(false);
     }
   };
 
+  /* ================= RENDER ================= */
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle
-        sx={{
-          m: 0,
-          py: 1,
-          fontWeight: "bold",
-          fontSize: "1.25rem",
-          color: "#4a4b4d",
-          borderBottom: "1px solid #e0e0e0",
-        }}
-      >
+    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+      <DialogTitle sx={{ fontWeight: "bold" }}>
         Thêm đơn vị
-        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+        <IconButton onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
         <Box className='space-y-4'>
+          {/* ===== TÊN ===== */}
           <TextField
             label='Tên đơn vị'
             name='name'
@@ -85,10 +131,10 @@ const UnitCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={handleChange}
             fullWidth
             required
-            error={!formData.name}
-            helperText={!formData.name ? "Tên đơn vị là bắt buộc" : ""}
+            placeholder='vd: gram, kg, ml...'
           />
 
+          {/* ===== TYPE ===== */}
           <TextField
             select
             label='Loại đơn vị'
@@ -97,38 +143,59 @@ const UnitCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={handleChange}
             fullWidth
             required
-            error={!formData.type}
-            helperText={!formData.type ? "Chọn loại đơn vị" : ""}
           >
             <MenuItem value='weight'>Khối lượng</MenuItem>
             <MenuItem value='volume'>Thể tích</MenuItem>
             <MenuItem value='count'>Số lượng</MenuItem>
           </TextField>
 
-          <TextField
-            select
-            label='Trạng thái'
-            name='isActive'
-            value={formData.isActive}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                isActive: e.target.value === "true",
-              }))
-            }
-            fullWidth
-          >
-            <MenuItem value='true'>Hoạt động</MenuItem>
-            <MenuItem value='false'>Ngưng hoạt động</MenuItem>
-          </TextField>
+          {/* ===== BASE UNIT ===== */}
+          {formData.type && (
+            <TextField
+              select
+              label='Đơn vị gốc'
+              name='baseUnit'
+              value={formData.baseUnit}
+              onChange={handleChange}
+              fullWidth
+              helperText='Không chọn = đơn vị gốc'
+            >
+              <MenuItem value=''>— Đơn vị gốc —</MenuItem>
+              {baseUnits.map((u) => (
+                <MenuItem key={u._id} value={u.name}>
+                  {u.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+
+          {/* ===== RATIO ===== */}
+          {!isBaseUnit && (
+            <>
+              <TextField
+                label='Tỉ lệ quy đổi'
+                name='ratio'
+                type='number'
+                value={formData.ratio}
+                onChange={handleChange}
+                fullWidth
+                inputProps={{ min: 0.0001, step: 0.0001 }}
+                helperText='Ví dụ: 1 kg = 1000 gram'
+              />
+
+              <Typography variant='body2' color='text.secondary'>
+                ➜ 1 {formData.name || "?"} = {formData.ratio} {formData.baseUnit}
+              </Typography>
+            </>
+          )}
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3 }}>
+      <DialogActions>
         <Button onClick={onClose} color='error' variant='outlined'>
           Hủy
         </Button>
-        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
+        <Button onClick={handleSave} variant='contained' disabled={loading}>
           {loading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>

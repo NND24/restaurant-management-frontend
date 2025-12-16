@@ -33,10 +33,17 @@ const page = () => {
       setError(null);
       const unitData = await getBatchesByStore(storeId);
       const list = unitData?.data?.data || unitData?.data || [];
-      const transformed = list.map((item) => ({
-        ...item,
-        ingredientName: item.ingredient?.name || "",
-      }));
+      const transformed = list.map((item) => {
+        const inputUnit = item.inputUnit;
+
+        return {
+          ...item,
+          ingredientName: item.ingredient?.name || "",
+          inputUnitName: inputUnit?.name || "",
+          inputQuantity: inputUnit ? item.quantity / (inputUnit.ratio || 1) : item.quantity,
+        };
+      });
+
       setAllIngredientBatches(transformed);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
@@ -92,9 +99,21 @@ const page = () => {
     {
       field: "remainingQuantity",
       headerName: "Còn lại",
-      width: 120,
+      width: 160,
       headerAlign: "center",
       align: "center",
+      renderCell: (params) => {
+        const unit = params.row?.inputUnit;
+        if (!unit) return params.row.remainingQuantity;
+
+        const displayQty = params.row.remainingQuantity / (unit.ratio || 1);
+
+        return (
+          <span>
+            {displayQty} {unit.name}
+          </span>
+        );
+      },
     },
     {
       field: "totalCost",

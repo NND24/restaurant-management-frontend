@@ -119,7 +119,7 @@ const DishGroupCreateModal = ({ open, onClose, storeId, onCreated }) => {
             )}
             renderTags={() => null}
             renderInput={(params) => (
-              <TextField {...params} variant='outlined' label='Chọn món ăn' placeholder='Chọn topping...' fullWidth />
+              <TextField {...params} variant='outlined' label='Chọn món ăn' placeholder='Chọn món ăn...' fullWidth />
             )}
             PaperComponent={({ children }) => (
               <Paper

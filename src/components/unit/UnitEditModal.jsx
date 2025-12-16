@@ -11,72 +11,87 @@ import {
   IconButton,
   MenuItem,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { getUnitById, updateUnit } from "@/service/unit";
 import { toast } from "react-toastify";
 
-const UnitEditModal = ({ open, onClose, id, onUpdated }) => {
+const UnitEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const storeData = typeof window !== "undefined" && localStorage.getItem("store");
-  const storeId = storeData ? JSON.parse(storeData)?._id : "";
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     type: "",
-    storeId: storeId,
+    baseUnit: null,
+    ratio: 1,
     isActive: true,
+    storeId,
   });
-  const [loading, setLoading] = useState(false);
+
+  const isBaseUnit = !formData.baseUnit || formData.baseUnit === formData.name;
 
   useEffect(() => {
-    if (open && id) {
-      const fetchData = async () => {
-        setIsLoadingData(true);
-        try {
-          const res = await getUnitById(id);
-          if (res?.success === true) {
-            setFormData(res.data);
-          }
-        } catch (err) {
-          console.error(err);
-          toast.error("Lỗi khi tải dữ liệu đơn vị");
-        } finally {
-          setIsLoadingData(false);
+    if (!open || !id) return;
+
+    const fetchData = async () => {
+      setIsLoadingData(true);
+      try {
+        const res = await getUnitById(id);
+        if (res?.success) {
+          setFormData({
+            name: res.data.name,
+            type: res.data.type,
+            baseUnit: res.data.baseUnit || null,
+            ratio: res.data.ratio || 1,
+            isActive: res.data.isActive,
+          });
         }
-      };
-      fetchData();
-    }
+      } catch (err) {
+        toast.error("Lỗi khi tải dữ liệu đơn vị");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
   }, [open, id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "isActive" ? (value === "true" ? true : false) : value,
+      [name]: name === "isActive" ? value === "true" : value,
     }));
   };
 
   const handleSave = async () => {
-    if (!id) return;
-
     if (!formData.name.trim()) {
       toast.error("Tên đơn vị là bắt buộc");
       return;
     }
 
-    if (!formData.type) {
-      toast.error("Vui lòng chọn loại đơn vị");
+    if (!isBaseUnit && formData.ratio <= 0) {
+      toast.error("Tỉ lệ quy đổi phải lớn hơn 0");
       return;
     }
 
     try {
       setLoading(true);
-      await updateUnit({ id, data: formData });
-      toast.success("Cập nhật đơn vị thành công!");
+      await updateUnit({
+        id,
+        data: {
+          name: formData.name,
+          ratio: isBaseUnit ? 1 : Number(formData.ratio),
+          isActive: formData.isActive,
+          storeId,
+        },
+      });
+      toast.success("Cập nhật đơn vị thành công");
       onUpdated?.();
       onClose();
     } catch (err) {
-      console.error("Lỗi khi cập nhật đơn vị:", err);
       toast.error("Không thể cập nhật đơn vị");
     } finally {
       setLoading(false);
@@ -84,19 +99,10 @@ const UnitEditModal = ({ open, onClose, id, onUpdated }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle
-        sx={{
-          m: 0,
-          py: 1,
-          fontWeight: "bold",
-          fontSize: "1.25rem",
-          color: "#4a4b4d",
-          borderBottom: "1px solid #e0e0e0",
-        }}
-      >
+    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+      <DialogTitle sx={{ fontWeight: "bold" }}>
         Chỉnh sửa đơn vị
-        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+        <IconButton onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
       </DialogTitle>
@@ -104,11 +110,10 @@ const UnitEditModal = ({ open, onClose, id, onUpdated }) => {
       <DialogContent dividers>
         {isLoadingData ? (
           <Box className='flex justify-center items-center h-40'>
-            <CircularProgress color='warning' />
+            <CircularProgress />
           </Box>
         ) : (
           <Box className='space-y-4'>
-            {/* Tên đơn vị */}
             <TextField
               label='Tên đơn vị'
               name='name'
@@ -118,7 +123,6 @@ const UnitEditModal = ({ open, onClose, id, onUpdated }) => {
               required
             />
 
-            {/* Loại đơn vị */}
             <TextField
               select
               label='Loại đơn vị'
@@ -127,33 +131,52 @@ const UnitEditModal = ({ open, onClose, id, onUpdated }) => {
               onChange={handleChange}
               fullWidth
               required
+              disabled
             >
               <MenuItem value='weight'>Khối lượng</MenuItem>
               <MenuItem value='volume'>Thể tích</MenuItem>
               <MenuItem value='count'>Số lượng</MenuItem>
             </TextField>
 
-            {/* Trạng thái */}
+            {!isBaseUnit && (
+              <>
+                <TextField
+                  label='Tỉ lệ quy đổi'
+                  name='ratio'
+                  type='number'
+                  value={formData.ratio}
+                  onChange={handleChange}
+                  fullWidth
+                  inputProps={{ min: 0.0001, step: 0.0001 }}
+                  InputProps={{ readOnly: true }}
+                />
+
+                <Typography variant='body2' color='text.secondary'>
+                  ➜ 1 {formData.name} = {formData.ratio} {formData.baseUnit}
+                </Typography>
+              </>
+            )}
+
             <TextField
               select
               label='Trạng thái'
               name='isActive'
-              value={formData.isActive}
+              value={String(formData.isActive)}
               onChange={handleChange}
               fullWidth
             >
-              <MenuItem value={true}>Hoạt động</MenuItem>
-              <MenuItem value={false}>Ngưng</MenuItem>
+              <MenuItem value='true'>Hoạt động</MenuItem>
+              <MenuItem value='false'>Ngưng</MenuItem>
             </TextField>
           </Box>
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3 }}>
+      <DialogActions>
         <Button onClick={onClose} color='error' variant='outlined'>
           Hủy
         </Button>
-        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
+        <Button onClick={handleSave} variant='contained' disabled={loading}>
           {loading ? "Đang lưu..." : "Lưu"}
         </Button>
       </DialogActions>

@@ -10,11 +10,14 @@ import {
   Box,
   IconButton,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
+
 import { createBatch } from "@/service/ingredientBatch";
 import { getActiveIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import { getIngredientsByCategory } from "@/service/ingredient";
+import { getUnitsByBaseUnit } from "@/service/unit";
 
 const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
   const [formData, setFormData] = useState({
@@ -26,129 +29,116 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
     expiryDate: "",
     supplierName: "",
     storageLocation: "",
-    status: "active",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [allCategories, setAllCategories] = useState([]);
-  const [ingredientsByCategory, setIngredientsByCategory] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-
-  // Lấy danh sách category khi mở modal
-  useEffect(() => {
-    if (open) {
-      const fetchCategories = async () => {
-        const res = await getActiveIngredientCategoriesByStore(storeId);
-        setAllCategories(res?.data || []);
-      };
-      fetchCategories();
-
-      // reset form
-      setFormData({
-        ingredient: "",
-        quantity: 0,
-        costPerUnit: 0,
-        totalCost: 0,
-        receivedDate: new Date().toISOString().slice(0, 10),
-        expiryDate: "",
-        supplierName: "",
-        storageLocation: "",
-        status: "active",
-      });
-      setSelectedCategory("");
-      setIngredientsByCategory([]);
-    }
-  }, [open, storeId]);
-
-  // Khi chọn category thì load nguyên liệu
-  useEffect(() => {
-    if (!selectedCategory) return setIngredientsByCategory([]);
-    const fetchIngredients = async () => {
-      const res = await getIngredientsByCategory({ storeId, categoryId: selectedCategory });
-      setIngredientsByCategory(res?.data || []);
-    };
-    fetchIngredients();
-  }, [selectedCategory, storeId]);
-
   const [selectedIngredient, setSelectedIngredient] = useState(null);
 
+  const [units, setUnits] = useState([]);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+
+  /* ===================== INIT ===================== */
+  useEffect(() => {
+    if (!open) return;
+
+    getActiveIngredientCategoriesByStore(storeId).then((res) => setCategories(res?.data || []));
+
+    setFormData((p) => ({
+      ...p,
+      ingredient: "",
+      quantity: 0,
+      costPerUnit: 0,
+      totalCost: 0,
+    }));
+
+    setSelectedCategory("");
+    setIngredients([]);
+    setUnits([]);
+    setSelectedUnit(null);
+  }, [open, storeId]);
+
+  /* ===================== LOAD INGREDIENT ===================== */
+  useEffect(() => {
+    if (!selectedCategory) return setIngredients([]);
+
+    getIngredientsByCategory({ storeId, categoryId: selectedCategory }).then((res) => setIngredients(res?.data || []));
+  }, [selectedCategory, storeId]);
+
+  /* ===================== LOAD UNIT ===================== */
+  useEffect(() => {
+    if (!selectedIngredient?.unit?.name) return;
+
+    const baseUnitName = selectedIngredient.unit.baseUnit || selectedIngredient.unit.name;
+
+    getUnitsByBaseUnit(storeId, baseUnitName, true).then((res) => {
+      const list = res?.data || [];
+      setUnits(list);
+
+      const defaultUnit = list.find((u) => u._id === selectedIngredient.unit._id) || list[0];
+
+      setSelectedUnit(defaultUnit);
+    });
+  }, [selectedIngredient, storeId]);
+
+  /* ===================== HANDLER ===================== */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let newValue = value;
-    if (["quantity", "costPerUnit"].includes(name)) {
-      newValue = parseFloat(value) || 0;
-    }
+    const numValue = ["quantity", "costPerUnit"].includes(name) && value !== "" ? Number(value) : value;
 
     if (name === "ingredient") {
-      const ing = ingredientsByCategory.find((item) => item._id === value);
+      const ing = ingredients.find((i) => i._id === value);
       setSelectedIngredient(ing || null);
     }
 
     setFormData((prev) => {
-      const updated = { ...prev, [name]: newValue };
-      if (name === "quantity" || name === "costPerUnit") {
-        updated.totalCost = updated.quantity * updated.costPerUnit;
-      }
+      const updated = { ...prev, [name]: numValue };
+      updated.totalCost = updated.quantity * updated.costPerUnit;
       return updated;
     });
   };
 
   const handleSave = async () => {
-    try {
-      setLoading(true);
-      await createBatch({
-        storeId,
-        ...formData,
-      });
-      onCreated?.();
-      onClose();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    await createBatch({
+      storeId,
+      ...formData,
+      inputUnit: selectedUnit?._id,
+    });
+    onCreated?.();
+    onClose();
   };
 
+  const isValid = formData.ingredient && selectedUnit && formData.quantity > 0 && formData.costPerUnit > 0;
+
+  /* ===================== UI ===================== */
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Nhập lô nguyên liệu mới
-        <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+      <DialogTitle>
+        Nhập lô nguyên liệu
+        <IconButton onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box className='space-y-4'>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            {/* chọn loại nguyên liệu */}
+        <Box display='flex' flexDirection='column' gap={2}>
+          {/* Category + Ingredient */}
+          <Box display='flex' gap={2}>
             <TextField
               select
               label='Loại nguyên liệu'
               value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setFormData((prev) => ({ ...prev, ingredient: "" }));
-              }}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               fullWidth
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200,
-                    },
-                  },
-                },
-              }}
             >
-              {allCategories.map((c) => (
+              {categories.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
                   {c.name}
                 </MenuItem>
               ))}
             </TextField>
 
-            {/* chọn nguyên liệu theo loại */}
             <TextField
               select
               label='Nguyên liệu'
@@ -156,67 +146,71 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               value={formData.ingredient}
               onChange={handleChange}
               fullWidth
-              required
               disabled={!selectedCategory}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200,
-                    },
-                  },
-                },
-              }}
             >
-              {ingredientsByCategory.map((ing) => (
-                <MenuItem key={ing._id} value={ing._id}>
-                  {ing.name}
+              {ingredients.map((i) => (
+                <MenuItem key={i._id} value={i._id}>
+                  {i.name}
                 </MenuItem>
               ))}
             </TextField>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          {/* Unit */}
+          <TextField
+            select
+            label='Đơn vị nhập'
+            value={selectedUnit?._id || ""}
+            onChange={(e) => setSelectedUnit(units.find((u) => u._id === e.target.value))}
+            fullWidth
+            disabled={!units.length}
+          >
+            {units.map((u) => (
+              <MenuItem key={u._id} value={u._id}>
+                {u.name}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          {selectedUnit?.ratio > 1 && (
+            <Box fontSize={12} color='gray'>
+              1 {selectedUnit.name} = {selectedUnit.ratio} {selectedUnit.baseUnit}
+            </Box>
+          )}
+
+          {/* Quantity + Price */}
+          <Box display='flex' gap={2}>
             <TextField
-              label='Số lượng nhập'
+              label='Số lượng'
               type='number'
               name='quantity'
               value={formData.quantity}
               onChange={handleChange}
               fullWidth
-              inputProps={{ min: 0 }}
-              required
             />
             <TextField
-              label={`Giá / ${selectedIngredient?.unit?.name || "đơn vị"}`}
+              label={`Giá / ${selectedUnit?.name || "đơn vị"}`}
               type='number'
               name='costPerUnit'
               value={formData.costPerUnit}
               onChange={handleChange}
               fullWidth
-              inputProps={{ min: 0 }}
-              required
             />
           </Box>
 
-          <TextField
-            label='Tổng giá'
-            type='number'
-            name='totalCost'
-            value={formData.totalCost}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+          <TextField label='Tổng tiền' value={formData.totalCost} InputProps={{ readOnly: true }} fullWidth />
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Divider />
+
+          <Box display='flex' gap={2}>
             <TextField
               label='Ngày nhập'
               type='date'
               name='receivedDate'
               value={formData.receivedDate}
               onChange={handleChange}
-              fullWidth
               InputLabelProps={{ shrink: true }}
+              fullWidth
             />
             <TextField
               label='Hạn sử dụng'
@@ -224,11 +218,8 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
               name='expiryDate'
               value={formData.expiryDate}
               onChange={handleChange}
-              fullWidth
               InputLabelProps={{ shrink: true }}
-              inputProps={{
-                min: new Date().toISOString().slice(0, 10),
-              }}
+              fullWidth
             />
           </Box>
 
@@ -247,12 +238,6 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
             onChange={handleChange}
             fullWidth
           />
-
-          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
-            <MenuItem value='active'>Hoạt động</MenuItem>
-            <MenuItem value='expired'>Hết hạn</MenuItem>
-            <MenuItem value='finished'>Đã dùng hết</MenuItem>
-          </TextField>
         </Box>
       </DialogContent>
 
@@ -260,8 +245,8 @@ const IngredientBatchCreateModal = ({ open, onClose, storeId, onCreated }) => {
         <Button onClick={onClose} color='error' variant='outlined'>
           Hủy
         </Button>
-        <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu"}
+        <Button onClick={handleSave} variant='contained' disabled={!isValid}>
+          Lưu
         </Button>
       </DialogActions>
     </Dialog>

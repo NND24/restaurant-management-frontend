@@ -51,9 +51,11 @@ export const updateIngredient = async ({ id, data }) => {
   }
 };
 
-export const deleteIngredient = async (id) => {
+export const deleteIngredient = async (id, storeId) => {
   try {
-    const res = await axios.delete(`/ingredient/${id}`);
+    const res = await axios.delete(`/ingredient/${id}`, {
+      data: { storeId },
+    });
     return res.data;
   } catch (error) {
     console.error(error);

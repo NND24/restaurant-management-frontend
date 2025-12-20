@@ -8,6 +8,7 @@ import { viVN } from "@/utils/constants";
 import generateOrderNumber from "@/utils/generateOrderNumber";
 import OrderDetailModal from "@/components/orders/OrderDetailModal";
 import Heading from "@/components/Heading";
+import { useSocket } from "@/context/SocketContext";
 
 const formatVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", {
@@ -35,6 +36,7 @@ const page = () => {
   const [loading, setLoading] = useState(true);
   const [openDetailOrder, setOpenDetailOrder] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const { notifications } = useSocket();
 
   const fetchOrders = async () => {
     try {
@@ -53,7 +55,7 @@ const page = () => {
 
   useEffect(() => {
     if (storeId) fetchOrders();
-  }, [storeId]);
+  }, [storeId, notifications]);
 
   const columns = [
     {

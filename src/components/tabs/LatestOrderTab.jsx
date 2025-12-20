@@ -34,7 +34,7 @@ const LatestOrder = ({ storeId }) => {
   const [openDetailOrder, setOpenDetailOrder] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  const { sendNotification } = useSocket();
+  const { sendNotification, notifications } = useSocket();
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -53,7 +53,7 @@ const LatestOrder = ({ storeId }) => {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, [fetchOrders, notifications]);
 
   const handleConfirm = async (order) => {
     try {

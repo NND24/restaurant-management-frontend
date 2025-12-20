@@ -51,7 +51,7 @@ const page = () => {
     fetchData();
   }, [storeId]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, storeId) => {
     const result = await Swal.fire({
       title: "Bạn có chắc chắn?",
       text: "Nguyên liệu này sẽ bị xóa vĩnh viễn.",
@@ -65,7 +65,7 @@ const page = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteIngredient(id);
+        await deleteIngredient(id, storeId);
         Swal.fire("Đã xóa!", "Nguyên liệu đã được xóa.", "success");
         fetchData();
       } catch (err) {
@@ -208,7 +208,7 @@ const page = () => {
                   fontSize: "16px",
                 }}
                 onClick={() => {
-                  handleDelete(params.row._id);
+                  handleDelete(params.row._id, storeId);
                 }}
               >
                 🗑️

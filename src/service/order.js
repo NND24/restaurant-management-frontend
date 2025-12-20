@@ -36,3 +36,12 @@ export const updateOrder = async ({ orderId, updatedData }) => {
     throw error.response?.data || { message: "Unknown error occurred" };
   }
 };
+
+export const assignDelivery = async ({ orderId, data }) => {
+  try {
+    const res = await axios.put(`/order/${orderId}/assign-delivery`, data);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Unknown error occurred" };
+  }
+};

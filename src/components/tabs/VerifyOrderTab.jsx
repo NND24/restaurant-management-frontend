@@ -9,6 +9,7 @@ import { Button } from "@mui/material";
 import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
 import OrderDetailModal from "../orders/OrderDetailModal";
+import DeliveryAssignModal from "./DeliveryAssignModal";
 
 const statusTypes = {
   pending: "Đang chờ",
@@ -36,16 +37,18 @@ export default function VerifyOrderTab({ storeId }) {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDetailOrder, setOpenDetailOrder] = useState(false);
+  const [openAssignDelivery, setOpenAssignDelivery] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const { sendNotification } = useSocket();
+  const { sendNotification, notifications } = useSocket();
 
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await getAllOrders({
         storeId,
-        status: ["confirmed", "finished"],
+        status: ["confirmed", "finished", "delivering"],
       });
       setOrders(res.data || []);
     } catch (err) {
@@ -57,7 +60,7 @@ export default function VerifyOrderTab({ storeId }) {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, [fetchOrders, notifications]);
 
   const handleUpdateOrder = async (order, status) => {
     try {
@@ -133,7 +136,7 @@ export default function VerifyOrderTab({ storeId }) {
       sortable: false,
       renderCell: (params) => {
         const order = params.row.raw;
-        if (order.status === "finished") {
+        if (order.status === "delivering") {
           return (
             <Button
               variant='contained'
@@ -141,10 +144,12 @@ export default function VerifyOrderTab({ storeId }) {
               size='small'
               onClick={(e) => {
                 e.stopPropagation();
-                handleUpdateOrder(order, "taken");
+                setSelectedId(order.id);
+                setSelectedOrder(order);
+                setOpenAssignDelivery(true);
               }}
             >
-              Giao tài xế
+              Cập nhật người giao
             </Button>
           );
         }
@@ -154,11 +159,14 @@ export default function VerifyOrderTab({ storeId }) {
             color='primary'
             size='small'
             onClick={(e) => {
+              console.log(order);
               e.stopPropagation();
-              handleUpdateOrder(order, "finished");
+              setSelectedId(order.id);
+              setSelectedOrder(order);
+              setOpenAssignDelivery(true);
             }}
           >
-            Thông báo tài xế
+            Bàn giao đơn hàng
           </Button>
         );
       },
@@ -175,6 +183,21 @@ export default function VerifyOrderTab({ storeId }) {
             fetchOrders();
           }}
           orderId={selectedId}
+        />
+      )}
+
+      {openAssignDelivery && (
+        <DeliveryAssignModal
+          open={openAssignDelivery}
+          onClose={() => setOpenAssignDelivery(false)}
+          storeId={storeId}
+          orderId={selectedId}
+          order={selectedOrder}
+          shipInfo={selectedOrder?.shippingInfo}
+          onSuccess={() => {
+            setOpenDetailOrder(false);
+            fetchOrders();
+          }}
         />
       )}
 

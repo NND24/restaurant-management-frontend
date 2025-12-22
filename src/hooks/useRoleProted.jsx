@@ -34,14 +34,10 @@ export default function Protected({ role, children }) {
         }
 
         const isBlocked = store?.status === "BLOCKED";
-        const isAuthorized =
-          userId &&
-          token &&
-          Array.isArray(roleArray) &&
-          roleArray.some((r) => role.includes(r)); // ✅ allow if any role matches
+        const isAuthorized = userId && token && Array.isArray(roleArray) && roleArray.some((r) => role.includes(r)); // ✅ allow if any role matches
 
         if (isBlocked) {
-          router.replace("/blocked");
+          router.replace("/auth/blocked");
         } else if (!isAuthorized) {
           router.replace("/unauthorize");
         } else {

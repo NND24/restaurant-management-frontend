@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
@@ -9,6 +9,23 @@ import Heading from "@/components/Heading";
 const UnauthorizedPage = () => {
   const router = useRouter();
   const getRole = localStorageService.getRole();
+
+  const handleResetStore = async () => {
+    // Clear all relevant data from localStorage
+    await logoutUser();
+    localStorage.clear();
+
+    // Redirect to login page
+    router.push("/auth/login");
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleResetStore();
+    }, 30000); // 30s
+
+    return () => clearTimeout(timer); // cleanup khi unmount
+  }, []);
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-100 px-4'>

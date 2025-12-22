@@ -128,7 +128,7 @@ export default function VerifyOrderTab({ storeId }) {
       align: "center",
       renderCell: (params) => <span>{new Date(params.value).toLocaleString("vi-VN") || ""}</span>,
     },
-    { field: "status", headerName: "Trạng thái", width: 160, headerAlign: "center" },
+    { field: "status", headerName: "Trạng thái", width: 160, headerAlign: "center", align: "center" },
     {
       field: "actions",
       headerName: "Thao tác",
@@ -159,7 +159,6 @@ export default function VerifyOrderTab({ storeId }) {
             color='primary'
             size='small'
             onClick={(e) => {
-              console.log(order);
               e.stopPropagation();
               setSelectedId(order.id);
               setSelectedOrder(order);
@@ -195,7 +194,7 @@ export default function VerifyOrderTab({ storeId }) {
           order={selectedOrder}
           shipInfo={selectedOrder?.shippingInfo}
           onSuccess={() => {
-            setOpenDetailOrder(false);
+            setOpenAssignDelivery(false);
             fetchOrders();
           }}
         />

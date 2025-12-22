@@ -44,35 +44,6 @@ const Page = () => {
     }
   };
 
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (!user) return;
-      const status = await checkStoreStatus();
-      switch (status) {
-        case "APPROVED":
-          router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current");
-          break;
-        case "PENDING":
-          router.push("/auth/verification-pending");
-          break;
-        case "BLOCKED":
-          router.push("/auth/blocked");
-          break;
-        case "NOT_REGISTERED":
-          localStorageService.clearAll();
-          await logoutUser();
-          router.push("/auth/register");
-          break;
-        case "NONE":
-          // No action (let user login)
-          break;
-        default:
-          break;
-      }
-    };
-    checkStatus();
-  }, []);
-
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -91,7 +62,7 @@ const Page = () => {
         switch (status) {
           case "APPROVED":
             toast.success("Đăng nhập thành công!");
-            router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current");
+            router.push(loginResult?.role.includes("staff") ? "/orders/current" : "/statistic/revenue");
             break;
           case "PENDING":
             toast.success("Đăng nhập thành công!");

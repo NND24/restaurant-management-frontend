@@ -59,7 +59,7 @@ const page = () => {
 
   const columns = [
     {
-      field: "id",
+      field: "_id",
       headerName: "Mã đơn",
       width: 80,
       headerAlign: "center",
@@ -138,7 +138,6 @@ const page = () => {
             open={openDetailOrder}
             onClose={() => {
               setOpenDetailOrder(false);
-              fetchOrders();
             }}
             orderId={selectedId}
           />
@@ -149,7 +148,7 @@ const page = () => {
           columns={columns}
           getRowId={(row) => row._id}
           onRowClick={(params) => {
-            setSelectedId(params.row.id);
+            setSelectedId(params.row._id);
             setOpenDetailOrder(true);
           }}
           pagination

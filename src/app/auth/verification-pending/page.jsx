@@ -1,11 +1,28 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Heading from "@/components/Heading";
 
 const StoreVerificationPending = () => {
   const router = useRouter();
+
+  const handleResetStore = async () => {
+    // Clear all relevant data from localStorage
+    await logoutUser();
+    localStorage.clear();
+
+    // Redirect to login page
+    router.push("/auth/login");
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleResetStore();
+    }, 30000); // 30s
+
+    return () => clearTimeout(timer); // cleanup khi unmount
+  }, []);
 
   return (
     <div className='flex items-center justify-center h-screen bg-[#f9f9f9] px-4'>

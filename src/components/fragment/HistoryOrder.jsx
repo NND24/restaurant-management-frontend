@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { haversineDistance, calculateTravelTime } from "@/utils/functions";
 import localStorageService from "@/utils/localStorageService";
 import OrderSummary from "../orders/OrderSummary";
+import { Box } from "@mui/material";
 const paymentTypes = {
   cash: "Thanh toán khi nhận hàng",
   vnpay: "Thanh toán qua VNPay",
@@ -25,6 +26,53 @@ const formatVND = (n) =>
     currency: "VND",
     maximumFractionDigits: 0,
   });
+
+const CurrentDelivererInfo = ({ shippingInfo }) => {
+  if (!shippingInfo) return null;
+
+  const { deliverer, deliveryType } = shippingInfo;
+
+  return (
+    <div className='bg-white p-4 rounded-lg shadow-md mb-4'>
+      <h3 className='text-[#4A4B4D] text-[18px] font-bold'>Người giao hiện tại</h3>
+
+      <p className='text-sm text-gray-600'>
+        Hình thức giao hàng: <b>{deliveryType === "IN_STORE" ? "Cửa hàng giao" : "Thuê người giao hàng"}</b>
+      </p>
+
+      {deliverer?.name ? (
+        <>
+          <p className='text-sm text-gray-600'>
+            Tên người giao: <b>{deliverer.name}</b>
+          </p>
+          <p className='text-sm text-gray-600'>SĐT: {deliverer.phone}</p>
+        </>
+      ) : (
+        <p className='italic text-gray-500'>Chưa gán người giao</p>
+      )}
+    </div>
+  );
+};
+
+const DeliveryHistory = ({ history }) => {
+  if (!history || history.length === 0) return null;
+
+  return (
+    <div className='bg-white p-4 rounded-lg shadow-md mb-4'>
+      <h3 className='text-[#4A4B4D] text-[18px] font-bold'>Lịch sử giao hàng</h3>
+
+      {history.map((item, index) => (
+        <Box key={index} sx={{ mb: 1 }}>
+          <p className='text-sm text-gray-600'>
+            {item.type === "ASSIGN" ? "Gán" : "Đổi"} người giao:
+            <b> {item.deliverer?.name}</b>
+          </p>
+          <p className='text-sm text-gray-600'>Thời gian: {new Date(item.assignedAt).toLocaleString()}</p>
+        </Box>
+      ))}
+    </div>
+  );
+};
 
 const HistoryOrder = ({ order }) => {
   const router = useRouter();
@@ -101,6 +149,9 @@ const HistoryOrder = ({ order }) => {
                         </h3>
                     </div>
                 </div> */}
+
+      <CurrentDelivererInfo shippingInfo={order?.shipInfo}></CurrentDelivererInfo>
+      <DeliveryHistory history={order?.shipInfo?.deliveryHistory} />
 
       <OrderSummary
         detailItems={order?.items}

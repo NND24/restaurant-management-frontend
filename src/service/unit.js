@@ -68,7 +68,9 @@ export const updateUnit = async ({ id, data }) => {
 
 export const deleteUnit = async (id, storeId) => {
   try {
-    const res = await axios.delete(`/unit/${id}`, { storeId });
+    const res = await axios.delete(`/unit/${id}`, {
+      data: { storeId },
+    });
     return res.data;
   } catch (error) {
     console.error(error);

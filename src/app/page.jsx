@@ -6,7 +6,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/statistics");
+    router.replace("/statistics/revenue/summary");
   }, [router]);
 
   return null;

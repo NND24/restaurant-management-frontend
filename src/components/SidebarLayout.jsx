@@ -17,6 +17,8 @@ export default function SidebarLayout({ children }) {
   const pathname = usePathname(); // 👈 Lấy route hiện tại
 
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const { user, setUser, setUserId } = useAuth();
 
   const { notifications } = useSocket();
@@ -60,8 +62,22 @@ export default function SidebarLayout({ children }) {
 
   return (
     <div className='flex h-screen'>
+      <button
+        className='md:hidden position-absolute left-[25px] text-[20px]'
+        onClick={(e) => {
+          e.stopPropagation();
+          setSidebarOpen(true);
+        }}
+      >
+        ☰
+      </button>
       {/* Sidebar */}
-      <Sidebar breakPoint='md' collapsedWidth='64px' className='shadow-lg'>
+      <Sidebar
+        toggled={sidebarOpen}
+        onBackdropClick={() => setSidebarOpen(false)}
+        breakPoint='md'
+        className='shadow-lg bg-white'
+      >
         {/* Header */}
         <header className='bg-white border-b px-4 py-3 flex items-center justify-between'>
           <h1 className='text-lg font-bold text-[#fc6011] max-w-[150px] truncate'>{storeName}</h1>

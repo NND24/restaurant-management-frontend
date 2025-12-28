@@ -50,7 +50,7 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
       case "confirmed":
       case "finished":
       case "delivering":
-        return <ConfirmedOrder order={order} setRefetch={setRefetch} />;
+        return <ConfirmedOrder order={order} setRefetch={setRefetch} onClose={onClose} />;
       default:
         return <HistoryOrder order={order} />;
     }

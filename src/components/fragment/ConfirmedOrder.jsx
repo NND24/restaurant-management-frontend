@@ -6,6 +6,7 @@ import { useSocket } from "@/context/SocketContext";
 import OrderSummary from "../orders/OrderSummary";
 import DeliveryAssignModal from "../tabs/DeliveryAssignModal";
 import { Box } from "@mui/material";
+import { toast } from "react-toastify";
 
 const formatVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", {
@@ -61,7 +62,7 @@ const DeliveryHistory = ({ history }) => {
   );
 };
 
-const ConfirmedOrder = ({ order }) => {
+const ConfirmedOrder = ({ order, setRefetch, onClose }) => {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [openAssignDelivery, setOpenAssignDelivery] = useState(false);
@@ -75,7 +76,8 @@ const ConfirmedOrder = ({ order }) => {
         updatedData: { ...order, status: "cancelled" },
       });
       setShowModal(false);
-      router.back();
+      onClose();
+      toast.success("Hủy đơn hàng thành công!");
     } catch (err) {
       console.error("Update failed:", err);
     }

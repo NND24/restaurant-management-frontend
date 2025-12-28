@@ -56,6 +56,10 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
       toast.error("Cần chọn lý do");
       return;
     }
+    if (Number(formData.quantity) > formData.ingredientBatch.remainingQuantity) {
+      toast.error("Số lượng hỏng vượt quá tồn kho hiện tại");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -78,6 +82,12 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
     }
   };
 
+  const batch = formData.ingredientBatch;
+
+  const displayUnit = batch?.inputUnit || batch?.ingredient?.unit || null;
+
+  const selectableBatches = allBatches.filter((b) => b.remainingQuantity > 0);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
@@ -91,7 +101,7 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
         <Box className='space-y-4'>
           {/* Autocomplete chọn lô nguyên liệu */}
           <Autocomplete
-            options={allBatches}
+            options={selectableBatches}
             value={formData.ingredientBatch}
             onChange={(e, newValue) => setFormData((prev) => ({ ...prev, ingredientBatch: newValue }))}
             getOptionLabel={(option) => `${option.ingredient?.name || "N/A"} - Lô ${option.batchCode}`}
@@ -99,6 +109,12 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
               const { key, ...rest } = props;
               const expired = option.expiryDate && new Date(option.expiryDate) < new Date();
               const outOfStock = option.remainingQuantity <= 0;
+
+              const inputUnit = option.inputUnit;
+              const baseUnit = option.ingredient?.unit;
+
+              // ⭐ QUY ĐỔI
+              const displayQuantity = inputUnit ? option.remainingQuantity / inputUnit.ratio : option.remainingQuantity;
 
               return (
                 <li
@@ -115,8 +131,16 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
                     {option.ingredient?.name} - Lô {option.batchCode}
                   </span>
                   <small>
-                    Còn lại: {option.remainingQuantity} • HSD:{" "}
-                    {option.expiryDate ? new Date(option.expiryDate).toLocaleDateString("vi-VN") : "Không có"}
+                    Còn lại:{" "}
+                    <b>
+                      {displayQuantity} {inputUnit?.name || baseUnit?.name}
+                    </b>
+                    {inputUnit && (
+                      <span style={{ color: "#888", marginLeft: 6 }}>
+                        ({option.remainingQuantity} {inputUnit.baseUnit})
+                      </span>
+                    )}
+                    • HSD: {option.expiryDate ? new Date(option.expiryDate).toLocaleDateString("vi-VN") : "Không có"}
                   </small>
                 </li>
               );
@@ -125,12 +149,25 @@ const WasteCreateModal = ({ open, onClose, storeId, onCreated }) => {
           />
 
           <TextField
-            label='Số lượng hỏng'
+            label={`Số lượng hỏng ${displayUnit ? `(${displayUnit.name})` : ""}`}
             type='number'
             value={formData.quantity}
             onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
             fullWidth
           />
+
+          {displayUnit && Number(formData.quantity) > 0 && displayUnit.ratio > 1 && displayUnit.baseUnit && (
+            <Box sx={{ fontSize: 13, color: "gray" }}>
+              Quy đổi:{" "}
+              <b>
+                {formData.quantity} {displayUnit.name}
+              </b>{" "}
+              ={" "}
+              <b>
+                {formData.quantity * displayUnit.ratio} {displayUnit.baseUnit}
+              </b>
+            </Box>
+          )}
 
           <TextField
             select

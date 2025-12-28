@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,7 +15,6 @@ import {
 import { Autocomplete } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { getBatchesByStore } from "@/service/ingredientBatch";
 import { getWasteById, updateWaste } from "@/service/waste";
 
 const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
@@ -25,9 +24,10 @@ const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
     reason: "",
     otherReason: "",
   });
-  const [allBatches, setAllBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [displayUnit, setDisplayUnit] = useState(null);
+  const [waste, setWaste] = useState(null);
 
   // load data khi mở modal
   useEffect(() => {
@@ -35,14 +35,14 @@ const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
       setIsLoadingData(true);
       const fetchData = async () => {
         try {
-          // load batches
-          const res = await getBatchesByStore(storeId);
-          setAllBatches(res?.data || []);
-
           // load waste detail
           const wasteRes = await getWasteById(id);
           if (wasteRes?.success) {
             const data = wasteRes.data;
+            setWaste(data);
+
+            const displayUnit = data?.ingredientBatchId?.inputUnit || data?.ingredientBatchId?.ingredient?.unit || null;
+            setDisplayUnit(displayUnit);
             setFormData({
               ingredientBatch: data.ingredientBatchId, // populate từ backend
               quantity: data.quantity,
@@ -74,6 +74,10 @@ const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
       toast.error("Cần chọn lý do");
       return;
     }
+    if (Number(formData.quantity) > formData.ingredientBatch.remainingQuantity) {
+      toast.error("Số lượng hỏng vượt quá tồn kho hiện tại");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -95,6 +99,7 @@ const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
     }
   };
 
+  const ingredient = waste?.ingredientBatchId?.ingredient;
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
@@ -111,49 +116,33 @@ const WasteEditModal = ({ open, onClose, storeId, id, onUpdated }) => {
           </Box>
         ) : (
           <Box className='space-y-4'>
-            {/* Autocomplete chọn lô nguyên liệu */}
-            <Autocomplete
-              options={allBatches}
-              value={formData.ingredientBatch}
-              onChange={(e, newValue) => setFormData((prev) => ({ ...prev, ingredientBatch: newValue }))}
-              isOptionEqualToValue={(option, value) => option._id === value._id}
-              getOptionLabel={(option) => `${option.ingredient?.name || "N/A"} - Lô ${option.batchCode}`}
-              renderOption={(props, option) => {
-                const { key, ...rest } = props;
-                const expired = option.expiryDate && new Date(option.expiryDate) < new Date();
-                const outOfStock = option.remainingQuantity <= 0;
-
-                return (
-                  <li
-                    key={key}
-                    {...props}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      opacity: outOfStock ? 0.5 : 1,
-                      color: expired ? "red" : "inherit",
-                    }}
-                  >
-                    <span>
-                      {option.ingredient?.name} - Lô {option.batchCode}
-                    </span>
-                    <small>
-                      Còn lại: {option.remainingQuantity} • HSD:{" "}
-                      {option.expiryDate ? new Date(option.expiryDate).toLocaleDateString("vi-VN") : "Không có"}
-                    </small>
-                  </li>
-                );
-              }}
-              renderInput={(params) => <TextField {...params} label='Chọn lô nguyên liệu' fullWidth />}
+            <TextField
+              label='Nguyên liệu'
+              value={ingredient?.name || "Không xác định"}
+              fullWidth
+              InputProps={{ readOnly: true }}
             />
 
             <TextField
-              label='Số lượng hỏng'
+              label={`Số lượng hỏng ${displayUnit ? `(${displayUnit.name})` : ""}`}
               type='number'
               value={formData.quantity}
               onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
               fullWidth
             />
+
+            {displayUnit && Number(formData.quantity) > 0 && displayUnit.ratio > 1 && displayUnit.baseUnit && (
+              <Box sx={{ fontSize: 13, color: "gray" }}>
+                Quy đổi:{" "}
+                <b>
+                  {formData.quantity} {displayUnit.name}
+                </b>{" "}
+                ={" "}
+                <b>
+                  {formData.quantity * displayUnit.ratio} {displayUnit.baseUnit}
+                </b>
+              </Box>
+            )}
 
             <TextField
               select

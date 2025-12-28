@@ -82,6 +82,7 @@ const WastePage = () => {
       headerName: "Lý do",
       flex: 1,
       headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         if (params.value === "other") {
           return params.row?.otherReason || "Khác";
@@ -94,6 +95,7 @@ const WastePage = () => {
       headerName: "Nhân viên ghi nhận",
       flex: 1,
       headerAlign: "center",
+      align: "center",
       renderCell: (params) => params.row?.staff?.name || "Hệ thống ghi nhận",
     },
     {

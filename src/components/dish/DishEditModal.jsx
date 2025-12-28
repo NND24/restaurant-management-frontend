@@ -253,6 +253,10 @@ const DishEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
       toast.error("Vui lòng chọn loại món ăn");
       return;
     }
+    if (formData.price === 0) {
+      toast.error("Giá món ăn phải lớn hơn 0");
+      return;
+    }
 
     try {
       setLoading(true);

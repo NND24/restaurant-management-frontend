@@ -8,8 +8,7 @@ import { getAllTopping, addToppingGroupOnly } from "@/service/topping";
 import Loading from "@/components/Loading";
 import localStorageService from "@/utils/localStorageService";
 
-// MUI DataGrid
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 
 const ToppingMenuTab = () => {
   const router = useRouter();
@@ -57,7 +56,6 @@ const ToppingMenuTab = () => {
     }
   };
 
-  // filter accent-insensitive
   const normalized = (s) =>
     s
       ?.toLowerCase()
@@ -65,7 +63,6 @@ const ToppingMenuTab = () => {
       .replace(/[\u0300-\u036f]/g, "");
   const filteredGroups = toppingGroups.filter((g) => !search || normalized(g.name).includes(normalized(search)));
 
-  // DataGrid columns
   const columns = [
     {
       field: "name",
@@ -115,7 +112,7 @@ const ToppingMenuTab = () => {
         )}
       </div>
 
-      <div className='mt-6 bg-white rounded-md shadow-md'>
+      <div className='responsive-grid-table mt-6 rounded-md bg-white shadow-md'>
         <DataGrid
           autoHeight
           rows={filteredGroups.map((g) => ({ ...g, id: g._id }))}
@@ -131,3 +128,4 @@ const ToppingMenuTab = () => {
 };
 
 export default ToppingMenuTab;
+

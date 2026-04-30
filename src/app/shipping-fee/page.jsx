@@ -193,11 +193,11 @@ const ShippingFeePage = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       <Heading title='Phí vận chuyển' description='' keywords='' />
       {/* Header */}
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Phí vận chuyển</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>Phí vận chuyển</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
             onClick={() => setShowForm(true)}
@@ -210,7 +210,7 @@ const ShippingFeePage = () => {
       </div>
 
       {/* DataGrid */}
-      <Box sx={{ height: 525, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 525 }, width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -247,3 +247,4 @@ const ShippingFeePage = () => {
 };
 
 export default ShippingFeePage;
+

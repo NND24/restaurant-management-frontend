@@ -17,29 +17,29 @@ const Tabs = ({
 
   return (
     <div className='w-full'>
-      {/* Navigation Tabs */}
-      <div
-        className={`grid border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm`}
-        style={{
-          gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))`,
-        }}
-      >
-        {tabs.map((tab, index) => (
-          <button
-            key={index}
-            onClick={() => handleTabClick(index)}
-            className={`
-              ${tabClassName} 
-              ${activeTab === index ? activeTabClassName : "text-gray-500 hover:text-[#fc6011] hover:bg-gray-50"}
-            `}
-          >
-            {tab.icon && <span className='mr-2 text-lg'>{tab.icon}</span>}
-            <span>{tab.label}</span>
-          </button>
-        ))}
+      <div className='sticky top-0 z-10 overflow-x-auto border-b border-gray-200 bg-white shadow-sm'>
+        <div
+          className='grid min-w-max md:min-w-0'
+          style={{
+            gridTemplateColumns: `repeat(${tabs.length}, minmax(130px, 1fr))`,
+          }}
+        >
+          {tabs.map((tab, index) => (
+            <button
+              key={index}
+              onClick={() => handleTabClick(index)}
+              className={`
+                ${tabClassName} 
+                ${activeTab === index ? activeTabClassName : "text-gray-500 hover:text-[#fc6011] hover:bg-gray-50"}
+              `}
+            >
+              {tab.icon && <span className='mr-2 text-lg'>{tab.icon}</span>}
+              <span className='truncate'>{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Content Area */}
       <div className='py-4'>{tabs[activeTab]?.component}</div>
     </div>
   );

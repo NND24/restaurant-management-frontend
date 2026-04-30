@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { useRouter, useSearchParams } from "next/navigation";
 import { getAllOrders, updateOrder } from "@/service/order";
 import generateOrderNumber from "../../utils/generateOrderNumber";
 import { Button } from "@mui/material";
@@ -32,8 +31,6 @@ const formatVND = (n) =>
   });
 
 export default function VerifyOrderTab({ storeId }) {
-  const router = useRouter();
-
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openDetailOrder, setOpenDetailOrder] = useState(false);
@@ -82,7 +79,7 @@ export default function VerifyOrderTab({ storeId }) {
     }
   };
 
-  const rows = orders.map((o, idx) => ({
+  const rows = orders.map((o) => ({
     id: o._id,
     orderNo: `#${generateOrderNumber(o._id)}`,
     customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
@@ -173,7 +170,7 @@ export default function VerifyOrderTab({ storeId }) {
   ];
 
   return (
-    <div style={{ height: 525, width: "100%" }}>
+    <div className='responsive-grid-table' style={{ height: "min(70vh, 560px)" }}>
       {openDetailOrder && (
         <OrderDetailModal
           open={openDetailOrder}
@@ -219,3 +216,4 @@ export default function VerifyOrderTab({ storeId }) {
     </div>
   );
 }
+

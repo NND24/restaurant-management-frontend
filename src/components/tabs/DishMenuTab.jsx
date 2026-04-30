@@ -57,7 +57,6 @@ const DishMenuTab = () => {
     }
   };
 
-  // chuẩn hóa search
   function normalize(str = "") {
     return str
       .toLowerCase()
@@ -73,7 +72,6 @@ const DishMenuTab = () => {
     return dishName.includes(s) || catName.includes(s);
   });
 
-  // Cấu hình cột cho DataGrid
   const columns = [
     {
       field: "image",
@@ -149,7 +147,7 @@ const DishMenuTab = () => {
         )}
       </div>
 
-      <Box sx={{ height: 600, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 600 }, width: "100%" }}>
         <DataGrid
           rows={filteredDishes}
           columns={columns}
@@ -167,3 +165,4 @@ const DishMenuTab = () => {
 };
 
 export default DishMenuTab;
+

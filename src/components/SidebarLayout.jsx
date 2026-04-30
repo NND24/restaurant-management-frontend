@@ -10,16 +10,17 @@ import { useEffect, useState } from "react";
 import { logoutUser } from "@/service/auth";
 import { useAuth } from "@/context/AuthContext";
 import { FiUser, FiKey, FiLogOut } from "react-icons/fi";
+import { HiOutlineMenuAlt2 } from "react-icons/hi";
 import Swal from "sweetalert2";
 
 export default function SidebarLayout({ children }) {
   const router = useRouter();
-  const pathname = usePathname(); // 👈 Lấy route hiện tại
+  const pathname = usePathname();
 
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { user, setUser, setUserId } = useAuth();
+  const { setUser, setUserId } = useAuth();
 
   const { notifications } = useSocket();
   const storeName = localStorageService.getStore()?.name ?? "Cửa hàng";
@@ -30,6 +31,7 @@ export default function SidebarLayout({ children }) {
 
   const handleMenuClick = (path) => {
     router.push(path);
+    setSidebarOpen(false);
   };
 
   useEffect(() => {
@@ -61,25 +63,37 @@ export default function SidebarLayout({ children }) {
   };
 
   return (
-    <div className='flex h-screen'>
-      <button
-        className='md:hidden position-absolute left-[25px] text-[20px]'
-        onClick={(e) => {
-          e.stopPropagation();
-          setSidebarOpen(true);
-        }}
-      >
-        ☰
-      </button>
-      {/* Sidebar */}
+    <div className='flex h-screen bg-gray-50'>
+      <div className='fixed top-0 left-0 right-0 z-40 flex items-center justify-between border-b bg-white px-4 py-3 shadow-sm md:hidden'>
+        <button
+          className='text-xl text-gray-700'
+          aria-label='Mở menu'
+          onClick={(e) => {
+            e.stopPropagation();
+            setSidebarOpen(true);
+          }}
+        >
+          <HiOutlineMenuAlt2 />
+        </button>
+        <h1 className='max-w-[65vw] truncate text-base font-semibold text-[#fc6011]'>{storeName}</h1>
+        <Link href='/notifications' className='relative'>
+          <Image src='/assets/notification.png' alt='Notifications' width={22} height={22} className='cursor-pointer' />
+          {unreadCount > 0 && (
+            <span className='absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-[#fc6011] text-xs font-semibold text-white'>
+              {unreadCount}
+            </span>
+          )}
+        </Link>
+      </div>
+
       <Sidebar
         toggled={sidebarOpen}
         onBackdropClick={() => setSidebarOpen(false)}
         breakPoint='md'
-        className='shadow-lg bg-white'
+        width='270px'
+        className='h-full border-r border-gray-100 bg-white shadow-lg'
       >
-        {/* Header */}
-        <header className='bg-white border-b px-4 py-3 flex items-center justify-between'>
+        <header className='flex items-center justify-between border-b bg-white px-4 py-3'>
           <h1 className='text-lg font-bold text-[#fc6011] max-w-[150px] truncate'>{storeName}</h1>
 
           <div className='flex items-center space-x-5'>
@@ -142,7 +156,6 @@ export default function SidebarLayout({ children }) {
           </div>
         </header>
 
-        {/* Menu */}
         <Menu
           menuItemStyles={{
             button: ({ active }) => ({
@@ -287,8 +300,7 @@ export default function SidebarLayout({ children }) {
         </Menu>
       </Sidebar>
 
-      {/* Content */}
-      <main className='flex-1 bg-gray-50 overflow-y-hidden'>{children}</main>
+      <main className='flex-1 overflow-y-auto pt-[64px] md:pt-0'>{children}</main>
     </div>
   );
 }

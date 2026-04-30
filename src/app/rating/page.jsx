@@ -129,9 +129,9 @@ const StoreReviewPage = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       <Heading title='Đánh giá cửa hàng' description='' keywords='' />
-      <div style={{ height: "95vh", width: "100%" }}>
+      <div className='responsive-grid-table' style={{ height: "calc(100vh - 160px)" }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -167,3 +167,4 @@ const StoreReviewPage = () => {
 };
 
 export default StoreReviewPage;
+

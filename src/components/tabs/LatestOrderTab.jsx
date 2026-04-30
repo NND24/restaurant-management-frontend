@@ -85,7 +85,7 @@ const LatestOrder = ({ storeId }) => {
     }
   };
 
-  const rows = orders.map((o, idx) => ({
+  const rows = orders.map((o) => ({
     id: o._id,
     orderNo: `#${generateOrderNumber(o._id)}`,
     customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
@@ -159,7 +159,7 @@ const LatestOrder = ({ storeId }) => {
   ];
 
   return (
-    <div style={{ height: 525, width: "100%" }}>
+    <div className='responsive-grid-table' style={{ height: "min(70vh, 560px)" }}>
       {openDetailOrder && (
         <OrderDetailModal
           open={openDetailOrder}
@@ -192,3 +192,4 @@ const LatestOrder = ({ storeId }) => {
 };
 
 export default LatestOrder;
+

@@ -31,14 +31,14 @@ const page = () => {
 
   if (!storeId) {
     return (
-      <div className='flex justify-center items-center h-screen w-screen'>
+      <div className='flex min-h-screen w-full items-center justify-center'>
         <ThreeDots visible={true} height='80' width='80' color='#fc6011' radius='9' ariaLabel='three-dots-loading' />
       </div>
     );
   }
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       <Heading title='Đơn hàng hiện tại' description='' keywords='' />
       <Tabs key={activeTab} tabs={tabData} defaultActiveTab={activeTab} onTabChange={handleTabChange} />
     </div>

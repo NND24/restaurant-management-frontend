@@ -123,16 +123,16 @@ const page = () => {
 
   if (!storeId) {
     return (
-      <div className='flex justify-center items-center h-screen w-screen'>
+      <div className='flex min-h-screen w-full items-center justify-center'>
         <ThreeDots visible={true} height='80' width='80' color='#fc6011' radius='9' ariaLabel='three-dots-loading' />
       </div>
     );
   }
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       <Heading title='Lịch sử đơn hàng' description='' keywords='' />
-      <div style={{ height: "95vh", width: "100%" }}>
+      <div className='responsive-grid-table' style={{ height: "calc(100vh - 160px)" }}>
         {openDetailOrder && (
           <OrderDetailModal
             open={openDetailOrder}

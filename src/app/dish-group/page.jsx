@@ -191,7 +191,7 @@ const page = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       {openCreateDishGroup && (
         <DishGroupCreateModal
           open={openCreateDishGroup}
@@ -219,9 +219,9 @@ const page = () => {
         />
       )}
 
-      <div className='flex align-center justify-between mb-2'>
+      <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
         <Heading title='Nhóm món ăn' description='' keywords='' />
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nhóm món ăn</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>Nhóm món ăn</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -236,7 +236,7 @@ const page = () => {
         )}
       </div>
 
-      <Box sx={{ height: 525, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 525 }, width: "100%" }}>
         <DataGrid
           rows={allDishGroups}
           columns={columns}
@@ -256,3 +256,4 @@ const page = () => {
 };
 
 export default page;
+

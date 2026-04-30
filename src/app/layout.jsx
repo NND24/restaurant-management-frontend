@@ -8,7 +8,6 @@ import SidebarLayout from "@/components/SidebarLayout";
 import { usePathname } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 
 export default function RootLayout({ children }) {

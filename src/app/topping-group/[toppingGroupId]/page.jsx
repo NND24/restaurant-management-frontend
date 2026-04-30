@@ -209,7 +209,7 @@ const page = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       {openCreateTopping && (
         <ToppingCreateToGroupModal
           open={openCreateTopping}
@@ -245,9 +245,9 @@ const page = () => {
         />
       )}
 
-      <div className='flex align-center justify-between mb-2'>
+      <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
         <Heading title={`Món thêm của ${toppingGroup?.name ?? ""}`} description='' keywords='' />
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Món thêm của {toppingGroup?.name}</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>Món thêm của {toppingGroup?.name}</span>
 
         <div className='flex gap-2'>
           {!blockEdit && (
@@ -276,7 +276,7 @@ const page = () => {
         </div>
       </div>
 
-      <Box sx={{ height: 525, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 525 }, width: "100%" }}>
         <DataGrid
           rows={allToppings}
           columns={columns}

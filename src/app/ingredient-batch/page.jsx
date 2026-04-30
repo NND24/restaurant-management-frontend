@@ -219,7 +219,7 @@ const page = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       {openCreateIngredient && (
         <IngredientBatchCreateModal
           open={openCreateIngredient}
@@ -247,9 +247,9 @@ const page = () => {
         />
       )}
 
-      <div className='flex align-center justify-between mb-2'>
+      <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
         <Heading title='Lô nguyên liệu' description='' keywords='' />
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Lô nguyên liệu</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>Lô nguyên liệu</span>
 
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
@@ -262,7 +262,7 @@ const page = () => {
         </div>
       </div>
 
-      <Box sx={{ height: 525, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 525 }, width: "100%" }}>
         <DataGrid
           rows={allIngredientBatches}
           columns={columns}
@@ -282,3 +282,4 @@ const page = () => {
 };
 
 export default page;
+

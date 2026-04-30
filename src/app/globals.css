@@ -22,7 +22,6 @@
   list-style-type: none;
   text-decoration: none;
   box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
 body {
@@ -186,4 +185,30 @@ a {
 
 .admin-container-content {
   flex: 4;
+}
+
+/* Responsive helpers for management pages */
+.page-shell {
+  padding: 12px;
+}
+
+@media (min-width: 768px) {
+  .page-shell {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page-shell {
+    padding: 24px;
+  }
+}
+
+.responsive-grid-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.responsive-grid-table .MuiDataGrid-root {
+  min-width: 760px;
 }

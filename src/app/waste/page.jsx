@@ -157,7 +157,7 @@ const WastePage = () => {
   ];
 
   return (
-    <div className='p-5'>
+    <div className='page-shell'>
       {openCreateWaste && (
         <WasteCreateModal
           open={openCreateWaste}
@@ -183,7 +183,7 @@ const WastePage = () => {
 
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
         <Heading title='Nguyên liệu hỏng' description='' keywords='' />
-        <span className='font-semibold text-[20px] color-[#4a4b4d]'>Nguyên liệu hỏng</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>Nguyên liệu hỏng</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -198,7 +198,7 @@ const WastePage = () => {
         )}
       </div>
 
-      <Box sx={{ height: 525, width: "100%" }}>
+      <Box className='responsive-grid-table' sx={{ height: { xs: 480, md: 525 }, width: "100%" }}>
         <DataGrid
           rows={allWastes}
           columns={columns}
@@ -218,3 +218,4 @@ const WastePage = () => {
 };
 
 export default WastePage;
+

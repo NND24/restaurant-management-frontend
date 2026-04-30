@@ -477,41 +477,7 @@ const DashboardPage = () => {
             <Typography variant='h6' gutterBottom>
               Giới thiệu phân tích
             </Typography>
-
-            <Typography variant='body1' color='text.secondary' sx={{ mb: 1 }}>
-              Hệ thống sử dụng kỹ thuật <b>Time Series Decomposition</b> để phân tích dữ liệu doanh thu theo thời gian.
-              Mục tiêu của phân tích này là giúp bạn hiểu rõ:
-              <br />– Doanh thu đang thay đổi theo xu hướng nào?
-              <br />– Có xuất hiện các mẫu lặp lại theo ngày/tuần/tháng hay không?
-              <br />– Phần biến động nào là bất thường và không thể dự đoán trước?
-            </Typography>
-
-            <ul style={{ marginTop: 0 }}>
-              <li>
-                <b>Trend (Xu hướng)</b> – thể hiện chiều hướng thay đổi của doanh thu trong thời gian dài.
-                <br />
-                Ví dụ: Doanh thu đang tăng dần qua các tháng, hay giảm dần?
-              </li>
-
-              <li style={{ marginTop: 8 }}>
-                <b>Seasonality (Tính mùa vụ)</b> – các mẫu lặp lại theo chu kỳ, thường do thói quen khách hàng.
-                <br />
-                Ví dụ: Cuối tuần doanh thu tăng, giữa tuần giảm; mùa lễ hội doanh thu tăng mạnh,...
-              </li>
-
-              <li style={{ marginTop: 8 }}>
-                <b>Residual (Nhiễu / sai lệch ngẫu nhiên)</b> – phần biến động không nằm trong xu hướng hoặc mùa vụ.
-                <br />
-                Đây thường là những yếu tố bất thường: thời tiết xấu, sự kiện đột xuất, lỗi hệ thống, hoặc dao động tự
-                nhiên.
-              </li>
-            </ul>
-
-            <Typography variant='body1' color='text.secondary' sx={{ mt: 1 }}>
-              Việc phân tích ba thành phần này giúp chủ cửa hàng nhìn rõ nguyên nhân biến động doanh thu và đưa ra quyết
-              định kinh doanh chính xác hơn.
-            </Typography>
-
+            
             <Button
               variant='contained'
               color='primary'
@@ -529,35 +495,6 @@ const DashboardPage = () => {
           <CardContent>
             <Typography variant='h6' gutterBottom>
               Giả lập kịch bản
-            </Typography>
-            <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
-              Tính năng <b>giả lập kịch bản</b> cho phép bạn thử thay đổi một số yếu tố quan trọng và xem hệ thống dự
-              đoán doanh thu – lợi nhuận sẽ thay đổi như thế nào. Đây là công cụ hữu ích giúp chủ cửa hàng lập kế hoạch
-              kinh doanh và kiểm tra các tình huống “nếu… thì sao?” mà không ảnh hưởng tới dữ liệu thật.
-              <br />
-              <br />
-              Bạn có thể điều chỉnh 3 thành phần:
-              <ul style={{ marginTop: 4 }}>
-                <li>
-                  <b>% Điều chỉnh Trend</b> – mô phỏng việc doanh thu tăng/giảm dài hạn.
-                  <br />
-                  Ví dụ: tăng 10% để xem nếu cửa hàng quảng bá tốt hơn thì ảnh hưởng ra sao.
-                </li>
-
-                <li style={{ marginTop: 8 }}>
-                  <b>% Điều chỉnh Seasonality</b> – mô phỏng việc thay đổi theo mùa vụ.
-                  <br />
-                  Ví dụ: mùa lễ hội nhu cầu tăng mạnh → tăng 20% để xem doanh thu khả năng tăng bao nhiêu.
-                </li>
-
-                <li style={{ marginTop: 8 }}>
-                  <b>% Giảm chi phí</b> – mô phỏng việc tối ưu chi phí vận hành.
-                  <br />
-                  Ví dụ: giảm 5% chi phí nguyên liệu để xem lợi nhuận có cải thiện như thế nào.
-                </li>
-              </ul>
-              Sau khi nhập các thay đổi, nhấn nút <b>“Tạo kịch bản giả lập”</b> để hệ thống sinh ra kết quả dự đoán cho
-              kịch bản bạn muốn thử nghiệm.
             </Typography>
 
             <Box display='flex' flexWrap='wrap' gap={2} mt={2}>

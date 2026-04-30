@@ -14,6 +14,7 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith("/auth");
   const isSupportPage = pathname.startsWith("/support");
+  const isAdminPage = pathname.startsWith("/admin");
 
   return (
     <html lang='en'>
@@ -21,7 +22,7 @@ export default function RootLayout({ children }) {
         <HelmetProvider>
           <SocketProvider>
             <AuthProvider>
-              {isAuthPage || isSupportPage ? children : <SidebarLayout>{children}</SidebarLayout>}
+              {isAuthPage || isSupportPage || isAdminPage ? children : <SidebarLayout>{children}</SidebarLayout>}
               <ToastContainer position='top-right' autoClose={5000} />
               <Tooltip
                 id='dish-tooltip'

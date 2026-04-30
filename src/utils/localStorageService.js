@@ -11,84 +11,77 @@ const ACTIVE_TAB_KEY = 'activeTab';
 const ACTIVE_CONFIRMED_TAB_FILTER = 'confirmedTabFilter';
 const ACTIVE_MENU_TAB = 'activeMenuTab';
 
+const safeParse = (val) => {
+  if (!val || val === "undefined" || val === "null") return null;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return null;
+  }
+};
+
+const safeSet = (key, value) => {
+  if (!isBrowser) return;
+  if (value === undefined || value === null) {
+    localStorage.removeItem(key);
+  } else {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+};
+
 const localStorageService = {
   // Setters
-  setUserId: (userId) => {
-    if (isBrowser) localStorage.setItem(USER_ID_KEY, JSON.stringify(userId));
-  },
-  setToken: (token) => {
-    if (isBrowser) localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-  },
-  setRole: (role) => {
-    if (isBrowser) localStorage.setItem(ROLE_KEY, JSON.stringify(role));
-  },
-  setStoreId: (storeId) => {
-    if (isBrowser) localStorage.setItem(STORE_ID_KEY, JSON.stringify(storeId));
-  },
-  setStore: (store) => {
-    if (isBrowser) localStorage.setItem(STORE_KEY, JSON.stringify(store));
-  },
-  setActiveTab: (tab) => {
-    if (isBrowser) localStorage.setItem(ACTIVE_TAB_KEY, JSON.stringify(tab));
-  },
-  setActiveFilter: (filter) => {
-    if (isBrowser) localStorage.setItem(ACTIVE_CONFIRMED_TAB_FILTER, JSON.stringify(filter));
-  },
-  setActiveMenuTab: (filter) => {
-    if (isBrowser) localStorage.setItem(ACTIVE_MENU_TAB, JSON.stringify(filter));
-  },
+  setUserId: (userId) => safeSet(USER_ID_KEY, userId),
+  setToken: (token) => safeSet(TOKEN_KEY, token),
+  setRole: (role) => safeSet(ROLE_KEY, role),
+  setStoreId: (storeId) => safeSet(STORE_ID_KEY, storeId),
+  setStore: (store) => safeSet(STORE_KEY, store),
+  setActiveTab: (tab) => safeSet(ACTIVE_TAB_KEY, tab),
+  setActiveFilter: (filter) => safeSet(ACTIVE_CONFIRMED_TAB_FILTER, filter),
+  setActiveMenuTab: (filter) => safeSet(ACTIVE_MENU_TAB, filter),
 
   // Getters
   getUserId: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(USER_ID_KEY);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(USER_ID_KEY));
   },
   getToken: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(TOKEN_KEY);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(TOKEN_KEY));
   },
   getRole: () => {
     if (!isBrowser) return null;
-    
-    const val = localStorage.getItem(ROLE_KEY);
-    if (!val) return null;
-  
-    const roles = JSON.parse(val); // assuming this is an array of roles
-    if (!Array.isArray(roles)) return roles; // if it's just a string, return as is
-  
+
+    const roles = safeParse(localStorage.getItem(ROLE_KEY));
+    if (!roles) return null;
+    if (!Array.isArray(roles)) return roles;
+
     // Sort roles by their index in `rolePriority` and pick the highest
-    const highestRole = roles.sort((a, b) => 
+    const highestRole = roles.sort((a, b) =>
       rolePriority.indexOf(b) - rolePriority.indexOf(a)
     )[0];
-  
+
     return highestRole || null;
   },
   getStoreId: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(STORE_ID_KEY);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(STORE_ID_KEY));
   },
   getStore: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(STORE_KEY);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(STORE_KEY));
   },
   getActiveTab: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(ACTIVE_TAB_KEY);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(ACTIVE_TAB_KEY));
   },
   getActiveFilter: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(ACTIVE_CONFIRMED_TAB_FILTER);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(ACTIVE_CONFIRMED_TAB_FILTER));
   },
   getActiveMenuTab: () => {
     if (!isBrowser) return null;
-    const val = localStorage.getItem(ACTIVE_MENU_TAB);
-    return val ? JSON.parse(val) : null;
+    return safeParse(localStorage.getItem(ACTIVE_MENU_TAB));
   },
 
   // Clear All

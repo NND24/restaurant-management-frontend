@@ -58,6 +58,14 @@ const Page = () => {
           return;
         }
 
+        // Admin users bypass store status check
+        const roles = Array.isArray(loginResult.role) ? loginResult.role : [loginResult.role].filter(Boolean);
+        if (roles.includes("admin")) {
+          toast.success("Đăng nhập thành công!");
+          router.push("/admin/stores");
+          return;
+        }
+
         const status = await checkStoreStatus();
         switch (status) {
           case "APPROVED":

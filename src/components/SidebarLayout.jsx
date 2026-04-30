@@ -1,5 +1,5 @@
 "use client";
-import { FaBoxes, FaChartBar, FaShoppingCart, FaStore, FaUtensils } from "react-icons/fa";
+import { FaBoxes, FaChartBar, FaComments, FaShoppingCart, FaStore, FaUtensils } from "react-icons/fa";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";
@@ -267,6 +267,14 @@ export default function SidebarLayout({ children }) {
               </MenuItem>
             </SubMenu>
           )}
+
+          <MenuItem
+            icon={<FaComments />}
+            active={pathname.startsWith("/message")}
+            onClick={() => handleMenuClick("/message")}
+          >
+            Tin nhắn
+          </MenuItem>
 
           <SubMenu
             icon={<FaBoxes />}

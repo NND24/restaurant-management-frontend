@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const Tabs = ({
   tabs,
@@ -8,6 +9,7 @@ const Tabs = ({
   tabClassName = "py-3 px-4 text-sm font-medium flex justify-center items-center transition-colors duration-200",
   activeTabClassName = "text-[#fc6011] border-b-2 border-[#fc6011] bg-orange-50",
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
   const handleTabClick = (index) => {
@@ -29,7 +31,7 @@ const Tabs = ({
               key={index}
               onClick={() => handleTabClick(index)}
               className={`
-                ${tabClassName} 
+                ${tabClassName}
                 ${activeTab === index ? activeTabClassName : "text-gray-500 hover:text-[#fc6011] hover:bg-gray-50"}
               `}
             >

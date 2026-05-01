@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
@@ -7,6 +8,7 @@ import localStorageService from "@/utils/localStorageService";
 import Heading from "@/components/Heading";
 
 const UnauthorizedPage = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const getRole = localStorageService.getRole();
 
@@ -29,19 +31,19 @@ const UnauthorizedPage = () => {
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-100 px-4'>
-      <Heading title='Truy cập bị từ chối' description='' keywords='' />
+      <Heading title={t("unauthorize.title")} description='' keywords='' />
       <div className='bg-white p-10 rounded-2xl shadow-xl max-w-md w-full text-center'>
         {/* Icon + Title */}
         <div className='flex flex-col items-center mb-4'>
           <AlertTriangle className='text-red-500 w-12 h-12 mb-2' />
-          <h1 className='text-2xl font-bold text-red-600'>Truy cập bị từ chối</h1>
+          <h1 className='text-2xl font-bold text-red-600'>{t("unauthorize.title")}</h1>
         </div>
 
         {/* Description */}
         <p className='text-gray-600 mb-8 leading-relaxed'>
-          Bạn không có quyền truy cập vào trang này.
+          {t("unauthorize.description")}
           <br />
-          Vui lòng đăng nhập lại hoặc quay về trang chủ.
+          {t("unauthorize.instruction")}
         </p>
 
         {/* Actions */}
@@ -50,13 +52,13 @@ const UnauthorizedPage = () => {
             onClick={() => router.push(getRole !== "staff" ? "/statistic/revenue" : "/orders/current")}
             className='px-6 py-2 rounded-lg bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-300 text-white font-semibold transition'
           >
-            Về trang chủ
+            {t("unauthorize.go_home")}
           </button>
           <button
             onClick={() => router.push("/auth/login")}
             className='px-6 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
-            Đăng nhập lại
+            {t("unauthorize.login_again")}
           </button>
         </div>
       </div>

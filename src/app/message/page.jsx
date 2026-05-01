@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ThreeDots } from "react-loader-spinner";
 import ChatItem from "@/components/message/ChatItem";
 import { getAllChats } from "@/service/chat";
@@ -7,6 +8,7 @@ import Heading from "@/components/Heading";
 import { IoChatbubblesOutline } from "react-icons/io5";
 
 const MessagesPage = () => {
+  const { t } = useTranslation();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,13 +38,13 @@ const MessagesPage = () => {
 
   return (
     <div className="page-shell">
-      <Heading title="Tin nhắn khách hàng" description="" keywords="" />
-      <h1 className="text-xl font-bold text-gray-800 mb-5">Tin nhắn khách hàng</h1>
+      <Heading title={t("message.title")} description="" keywords="" />
+      <h1 className="text-xl font-bold text-gray-800 mb-5">{t("message.title")}</h1>
 
       {chats.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
           <IoChatbubblesOutline className="text-5xl text-gray-300" />
-          <p className="text-base">Chưa có cuộc trò chuyện nào</p>
+          <p className="text-base">{t("message.no_conversations")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

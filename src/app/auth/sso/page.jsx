@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import localStorageService from "@/utils/localStorageService";
+import { useTranslation } from "react-i18next";
 
 const parseRole = (rawRole) => {
   try {
@@ -15,9 +16,10 @@ const parseRole = (rawRole) => {
   }
 };
 
-export default function SSOPage() {
+function SSOContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -47,7 +49,15 @@ export default function SSOPage() {
 
   return (
     <div className='h-screen w-full flex items-center justify-center'>
-      <p className='text-gray-600'>Đang chuyển hướng...</p>
+      <p className='text-gray-600'>{t("common.loading")}</p>
     </div>
+  );
+}
+
+export default function SSOPage() {
+  return (
+    <Suspense fallback={<div className='h-screen w-full flex items-center justify-center'><p className='text-gray-600'>...</p></div>}>
+      <SSOContent />
+    </Suspense>
   );
 }

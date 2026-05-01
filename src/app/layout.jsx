@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { HelmetProvider } from "react-helmet-async";
+import I18nProvider from "@/components/I18nProvider";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <body className=''>
+        <I18nProvider>
         <HelmetProvider>
           <SocketProvider>
             <AuthProvider>
@@ -39,6 +41,7 @@ export default function RootLayout({ children }) {
             </AuthProvider>
           </SocketProvider>
         </HelmetProvider>
+        </I18nProvider>
       </body>
     </html>
   );

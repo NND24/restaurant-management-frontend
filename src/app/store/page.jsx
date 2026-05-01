@@ -10,6 +10,7 @@ import {
 } from "@/service/storeInfo";
 import { getAllSystemCategories } from "@/service/systemCategory";
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import StoreTime from "@/components/store-info/StoreTime";
 import StoreInfo from "@/components/store-info/StoreInfo";
@@ -20,6 +21,7 @@ import StoreAddress from "@/components/store-info/StoreAddress";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const [storeInfo, setStoreInfo] = useState(null);
   const [categories, setCategories] = useState([]);
 
@@ -28,7 +30,7 @@ const page = () => {
     if (res.success) {
       setStoreInfo(res.data); // set toàn bộ object vào luôn
     } else {
-      console.error("Lỗi khi lấy thông tin cửa hàng:", res.message);
+      console.error(t("store.fetch_error"), res.message);
     }
   };
 
@@ -42,7 +44,7 @@ const page = () => {
         const data = await getAllSystemCategories();
         setCategories(data);
       } catch (error) {
-        console.error("Không thể tải danh mục cửa hàng:", error);
+        console.error(t("store.fetch_categories_error"), error);
       }
     };
 
@@ -59,10 +61,10 @@ const page = () => {
           openStatus: res.data.openStatus,
         }));
       } else {
-        toast.error("Lỗi khi chuyển trạng thái");
+        toast.error(t("store.toggle_status_error"));
       }
     } catch (error) {
-      toast.error("Không thể thay đổi trạng thái mở cửa:", error.message);
+      toast.error(t("store.toggle_status_failed") + error.message);
     }
   };
 
@@ -72,12 +74,12 @@ const page = () => {
       if (res && res.success === true) {
         // Gọi lại API để lấy dữ liệu mới
         await fetchStore();
-        toast.success("Cập nhật giờ thành công");
+        toast.success(t("store.update_hours_success"));
       } else {
-        toast.error("Lỗi khi cập nhật giờ hoạt động");
+        toast.error(t("store.update_hours_error"));
       }
     } catch (error) {
-      toast.error("Không thể cập nhật giờ:", error.message);
+      toast.error(t("store.update_hours_failed") + error.message);
     }
   };
 
@@ -86,12 +88,12 @@ const page = () => {
       const res = await upadteInfo(data); // gọi API update
       if (res && res.success === true) {
         await fetchStore();
-        toast.success("Cập nhật thông tin cửa hàng thành công");
+        toast.success(t("store.update_info_success"));
       } else {
-        toast.error("Cập nhật thất bại");
+        toast.error(t("store.update_failed"));
       }
     } catch (err) {
-      toast.error("Lỗi khi cập nhật:", err.message);
+      toast.error(t("store.update_error") + err.message);
     }
   };
 
@@ -131,13 +133,13 @@ const page = () => {
 
       if (updateRes?.success) {
         await fetchStore(); // làm mới dữ liệu hiển thị
-        toast.success("Cập nhật thông tin cửa hàng thành công");
+        toast.success(t("store.update_info_success"));
       } else {
-        toast.error("Cập nhật thất bại");
+        toast.error(t("store.update_failed"));
       }
     } catch (err) {
-      console.error("Lỗi khi cập nhật:", err);
-      toast.error("Lỗi khi cập nhật: " + err.message);
+      console.error(t("store.update_error"), err);
+      toast.error(t("store.update_error") + err.message);
     }
   };
 
@@ -161,7 +163,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           IC_front_url = res[0].url;
         } else {
-          throw new Error("Upload CMND mặt trước thất bại");
+          throw new Error(t("store.upload_ic_front_failed"));
         }
       }
 
@@ -172,7 +174,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           IC_back_url = res[0].url;
         } else {
-          throw new Error("Upload CMND mặt sau thất bại");
+          throw new Error(t("store.upload_ic_back_failed"));
         }
       }
 
@@ -183,7 +185,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           businessLicense_url = res[0].url;
         } else {
-          throw new Error("Upload giấy phép kinh doanh thất bại");
+          throw new Error(t("store.upload_business_license_failed"));
         }
       }
 
@@ -194,7 +196,7 @@ const page = () => {
         if (Array.isArray(res) && res.length > 0) {
           storePicture_urls = res.map((img) => img.url);
         } else {
-          throw new Error("Upload hình ảnh cửa hàng thất bại");
+          throw new Error(t("store.upload_store_picture_failed"));
         }
       }
 
@@ -211,13 +213,13 @@ const page = () => {
 
       if (updateRes?.success) {
         await fetchStore(); // làm mới UI
-        toast.success("Cập nhật giấy tờ thành công");
+        toast.success(t("store.update_paperwork_success"));
       } else {
-        toast.error("Cập nhật giấy tờ thất bại");
+        toast.error(t("store.update_paperwork_failed"));
       }
     } catch (err) {
-      console.error("Lỗi khi cập nhật giấy tờ:", err);
-      toast.error("Lỗi: " + err.message);
+      console.error(t("store.update_paperwork_error"), err);
+      toast.error(t("common.error") + ": " + err.message);
     }
   };
 
@@ -227,18 +229,18 @@ const page = () => {
       if (res && res.success === true) {
         // Gọi lại API để lấy dữ liệu mới
         await fetchStore();
-        toast.success("Cập nhật địa chỉ thành công");
+        toast.success(t("store.update_address_success"));
       } else {
-        toast.error("Lỗi khi cập nhật địa chỉ");
+        toast.error(t("store.update_address_error"));
       }
     } catch (error) {
-      toast.error("Không thể cập nhật địa chỉ:", error.message);
+      toast.error(t("store.update_address_failed") + error.message);
     }
   };
 
   return (
     <>
-      <Heading title='Quản lý thông tin cửa hàng' description='' keywords='' />
+      <Heading title={t("store.title")} description='' keywords='' />
       <div className='overflow-y-scroll h-full p-5'>
         {storeInfo && (
           <div className='space-y-6'>

@@ -6,8 +6,10 @@ import { getStoreRatings, replyToRating } from "@/service/rating";
 import Modal from "@/components/Modal";
 import { viVN } from "@/utils/constants";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const StoreReviewPage = () => {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -55,14 +57,14 @@ const StoreReviewPage = () => {
     ratingValue: r.ratingValue,
     comment: r.comment,
     storeReply: r.storeReply,
-    status: r.storeReply ? "Đã phản hồi" : "Chưa phản hồi",
+    status: r.storeReply ? t("rating.replied") : t("rating.not_replied"),
     raw: r,
   }));
 
   const columns = [
     {
       field: "avatar",
-      headerName: "Khách hàng",
+      headerName: t("rating.customer"),
       width: 200,
       headerAlign: "center",
       renderCell: (params) => (
@@ -74,7 +76,7 @@ const StoreReviewPage = () => {
     },
     {
       field: "ratingValue",
-      headerName: "Đánh giá",
+      headerName: t("rating.rating_value"),
       width: 120,
       headerAlign: "center",
       align: "center",
@@ -84,34 +86,34 @@ const StoreReviewPage = () => {
         </div>
       ),
     },
-    { field: "comment", headerName: "Bình luận", headerAlign: "center", width: 220 },
+    { field: "comment", headerName: t("rating.comment"), headerAlign: "center", width: 220 },
     {
       field: "storeReply",
-      headerName: "Phản hồi",
+      headerName: t("rating.reply"),
       width: 220,
       headerAlign: "center",
       renderCell: (params) =>
         params.row.storeReply ? (
           <span className='text-gray-700'>{params.row.storeReply}</span>
         ) : (
-          <span className='text-gray-400 italic'>Chưa phản hồi</span>
+          <span className='text-gray-400 italic'>{t("rating.not_replied")}</span>
         ),
     },
     {
       field: "status",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       width: 120,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <span className={params.value === "Đã phản hồi" ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+        <span className={params.value === t("rating.replied") ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
           {params.value}
         </span>
       ),
     },
     {
       field: "action",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       width: 180,
       sortable: false,
       filterable: false,
@@ -122,7 +124,7 @@ const StoreReviewPage = () => {
           onClick={() => handleReplyOpen(params.row.raw)}
           className='px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm'
         >
-          {params.row.storeReply ? "Chỉnh sửa phản hồi" : "Phản hồi"}
+          {params.row.storeReply ? t("rating.edit_reply") : t("rating.reply_action")}
         </button>
       ),
     },
@@ -130,7 +132,7 @@ const StoreReviewPage = () => {
 
   return (
     <div className='page-shell'>
-      <Heading title='Đánh giá cửa hàng' description='' keywords='' />
+      <Heading title={t("rating.title")} description='' keywords='' />
       <div className='responsive-grid-table' style={{ height: "calc(100vh - 160px)" }}>
         <DataGrid
           rows={rows}
@@ -150,14 +152,14 @@ const StoreReviewPage = () => {
       <Modal
         open={!!selectedReview}
         onClose={() => setSelectedReview(null)}
-        title='Phản hồi khách hàng'
-        confirmTitle='Lưu phản hồi'
+        title={t("rating.reply_to_customer")}
+        confirmTitle={t("rating.save_reply")}
         onConfirm={handleReplySave}
       >
         <textarea
           className='w-full px-3 py-2 border bg-[#f5f5f5] border-gray-300 rounded-lg shadow-sm h-[100px] resize-none transition'
           rows={4}
-          placeholder='Nhập phản hồi của bạn tại đây...'
+          placeholder={t("rating.reply_placeholder")}
           value={replyText}
           onChange={(e) => setReplyText(e.target.value)}
         />
@@ -167,4 +169,3 @@ const StoreReviewPage = () => {
 };
 
 export default StoreReviewPage;
-

@@ -17,8 +17,10 @@ import { getIngredientById, updateIngredient } from "@/service/ingredient";
 import { getUnits } from "@/service/unit";
 import { getIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
+  const { t } = useTranslation();
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -27,7 +29,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     unit: "",
     category: "",
     reorderLevel: 0,
-    status: "ACTIVE", // thay vì isActive
+    status: "ACTIVE",
   });
 
   const [allUnits, setAllUnits] = useState([]);
@@ -87,24 +89,24 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
     if (!id) return;
 
     if (!formData.name || formData.name.trim() === "") {
-      toast.error("Tên nguyên liệu là bắt buộc");
+      toast.error(t("ingredient.validation_name_required"));
       return;
     }
 
     if (!formData.unit || !formData.category) {
-      toast.error("Đơn vị tính và loại nguyên liệu là bắt buộc");
+      toast.error(t("ingredient.validation_unit_category_required"));
       return;
     }
 
     try {
       setLoading(true);
       await updateIngredient({ id, data: formData });
-      toast.success("Cập nhật nguyên liệu thành công");
+      toast.success(t("ingredient.update_success"));
       onUpdated?.();
       onClose();
     } catch (err) {
       console.error("Lỗi khi cập nhật nguyên liệu:", err);
-      toast.error("Cập nhật thất bại");
+      toast.error(t("common.update_failed"));
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        Chỉnh sửa nguyên liệu
+        {t("ingredient.edit_title")}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -136,7 +138,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
         ) : (
           <Box className='space-y-4'>
             <TextField
-              label='Tên nguyên liệu'
+              label={t("ingredient.name")}
               name='name'
               value={formData.name}
               onChange={handleChange}
@@ -145,7 +147,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             />
 
             <TextField
-              label='Mô tả'
+              label={t("common.description")}
               name='description'
               value={formData.description}
               onChange={handleChange}
@@ -157,7 +159,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 select
-                label='Loại đơn vị'
+                label={t("ingredient.unit_type")}
                 name='unitType'
                 value={formData.unitType}
                 onChange={(e) =>
@@ -170,14 +172,14 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
                 fullWidth
                 required
               >
-                <MenuItem value='weight'>Khối lượng</MenuItem>
-                <MenuItem value='volume'>Thể tích</MenuItem>
-                <MenuItem value='count'>Đếm</MenuItem>
+                <MenuItem value='weight'>{t("ingredient.unit_type_weight")}</MenuItem>
+                <MenuItem value='volume'>{t("ingredient.unit_type_volume")}</MenuItem>
+                <MenuItem value='count'>{t("ingredient.unit_type_count")}</MenuItem>
               </TextField>
 
               <TextField
                 select
-                label='Đơn vị tính'
+                label={t("ingredient.unit")}
                 name='unit'
                 value={formData.unit}
                 onChange={handleChange}
@@ -196,7 +198,7 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
 
             <TextField
               select
-              label='Loại nguyên liệu'
+              label={t("ingredient.category")}
               name='category'
               value={formData.category}
               onChange={handleChange}
@@ -222,15 +224,15 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
 
             <TextField
               select
-              label='Trạng thái'
+              label={t("common.status")}
               name='status'
               value={formData.status}
               onChange={handleChange}
               fullWidth
             >
-              <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
-              <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
-              <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
+              <MenuItem value='ACTIVE'>{t("ingredient.status_in_use")}</MenuItem>
+              <MenuItem value='OUT_OF_STOCK'>{t("common.out_of_stock")}</MenuItem>
+              <MenuItem value='INACTIVE'>{t("ingredient.status_inactive")}</MenuItem>
             </TextField>
           </Box>
         )}
@@ -238,10 +240,10 @@ const IngredientEditModal = ({ open, onClose, id, storeId, onUpdated }) => {
 
       <DialogActions sx={{ px: 3 }}>
         <Button onClick={onClose} color='error' variant='outlined'>
-          Hủy
+          {t("common.cancel")}
         </Button>
         <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu"}
+          {loading ? t("common.saving") : t("common.save")}
         </Button>
       </DialogActions>
     </Dialog>

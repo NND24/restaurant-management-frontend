@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, Tooltip, IconButton } from "@mui/material";
@@ -14,6 +15,7 @@ import { getIngredientCategoriesByStore, deleteIngredientCategory } from "@/serv
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
@@ -48,23 +50,23 @@ const page = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Loại nguyên liệu này sẽ bị xóa vĩnh viễn.",
+      title: t("ingredient_category.delete_confirm_title"),
+      text: t("ingredient_category.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteIngredientCategory(id);
-        Swal.fire("Đã xóa!", "Loại nguyên liệu đã được xóa.", "success");
+        Swal.fire(t("ingredient_category.delete_success_title"), t("ingredient_category.delete_success_text"), "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa loại nguyên liệu thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("ingredient_category.delete_error_text"), "error");
       }
     }
   };
@@ -72,7 +74,7 @@ const page = () => {
   const columns = [
     {
       field: "name",
-      headerName: "Tên loại nguyên liệu",
+      headerName: t("ingredient_category.name"),
       width: 250,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.name || ""}</span>,
@@ -80,14 +82,14 @@ const page = () => {
 
     {
       field: "description",
-      headerName: "Mô tả",
+      headerName: t("common.description"),
       headerAlign: "center",
       flex: 1,
       renderCell: (params) => <span>{params.row?.description || ""}</span>,
     },
     {
       field: "isActive",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       headerAlign: "center",
       align: "center",
       width: 130,
@@ -97,13 +99,13 @@ const page = () => {
             params.row?.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
           }`}
         >
-          {params.row?.isActive ? "Hoạt động" : "Ngưng"}
+          {params.row?.isActive ? t("common.active") : t("common.inactive")}
         </span>
       ),
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -113,7 +115,7 @@ const page = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -132,7 +134,7 @@ const page = () => {
           {!blockEdit && (
             <IconButton
               data-tooltip-id='dish-tooltip'
-              data-tooltip-content='Chỉnh sửa'
+              data-tooltip-content={t("common.edit")}
               size='small'
               color='info'
               sx={{
@@ -152,7 +154,7 @@ const page = () => {
           {!blockEdit && (
             <IconButton
               data-tooltip-id='dish-tooltip'
-              data-tooltip-content='Xoá'
+              data-tooltip-content={t("common.delete")}
               size='small'
               color='error'
               sx={{
@@ -201,8 +203,8 @@ const page = () => {
       )}
 
       <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
-        <Heading title='Loại nguyên liệu' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Loại nguyên liệu</span>
+        <Heading title={t("ingredient_category.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("ingredient_category.title")}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -211,7 +213,7 @@ const page = () => {
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
-              <span>Thêm</span>
+              <span>{t("common.add")}</span>
             </button>
           </div>
         )}
@@ -237,4 +239,3 @@ const page = () => {
 };
 
 export default page;
-

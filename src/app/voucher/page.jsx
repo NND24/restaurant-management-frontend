@@ -9,8 +9,10 @@ import VoucherModal from "@/components/popups/Voucher";
 import { viVN } from "@/utils/constants";
 import { FaPlus } from "react-icons/fa";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const VoucherPage = () => {
+  const { t } = useTranslation();
   const [vouchers, setVouchers] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
@@ -73,23 +75,23 @@ const VoucherPage = () => {
 
   const handleDeleteVoucher = async (voucherId) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Voucher này sẽ bị xóa vĩnh viễn.",
+      title: t("common.are_you_sure"),
+      text: t("voucher.delete_confirm"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteVoucher(storeId, voucherId);
-        Swal.fire("Đã xóa!", "Voucher đã được xóa.", "success");
+        Swal.fire(t("common.deleted"), t("voucher.deleted_msg"), "success");
         fetchVouchers();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa voucher thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("common.error"), "error");
       }
     }
   };
@@ -122,7 +124,7 @@ const VoucherPage = () => {
   const columns = [
     {
       field: "code",
-      headerName: "Mã giảm giá",
+      headerName: t("voucher.code"),
       flex: 1,
       headerAlign: "center",
       align: "center",
@@ -130,15 +132,17 @@ const VoucherPage = () => {
     },
     {
       field: "discountType",
-      headerName: "Loại giảm",
+      headerName: t("voucher.discount_type"),
       headerAlign: "center",
       align: "center",
       width: 140,
-      renderCell: (params) => <span>{params.row?.discountType === "PERCENTAGE" ? "Phần trăm" : "Tiền mặt"}</span>,
+      renderCell: (params) => (
+        <span>{params.row?.discountType === "PERCENTAGE" ? t("voucher.percentage") : t("voucher.cash")}</span>
+      ),
     },
     {
       field: "discountValue",
-      headerName: "Giá trị",
+      headerName: t("voucher.value"),
       width: 140,
       headerAlign: "center",
       align: "center",
@@ -154,15 +158,15 @@ const VoucherPage = () => {
     },
     {
       field: "usageLimit",
-      headerName: "Số lượng",
+      headerName: t("voucher.usage_limit"),
       headerAlign: "center",
       align: "center",
       width: 140,
     },
-    { field: "usedCount", headerName: "Đã dùng", headerAlign: "center", align: "center", width: 140 },
+    { field: "usedCount", headerName: t("voucher.used_count"), headerAlign: "center", align: "center", width: 140 },
     {
       field: "isActive",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       headerAlign: "center",
       align: "center",
       width: 140,
@@ -173,13 +177,13 @@ const VoucherPage = () => {
           }`}
           onClick={() => handleToggleActive(params.row?._id)}
         >
-          {params.value ? "Hoạt động" : "Ngưng"}
+          {params.value ? t("voucher.active") : t("voucher.inactive")}
         </span>
       ),
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -189,7 +193,7 @@ const VoucherPage = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -209,7 +213,7 @@ const VoucherPage = () => {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
+            data-tooltip-content={t("common.edit")}
             size='small'
             color='info'
             sx={{
@@ -229,7 +233,7 @@ const VoucherPage = () => {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xoá'
+            data-tooltip-content={t("common.delete")}
             size='small'
             color='error'
             sx={{
@@ -248,16 +252,16 @@ const VoucherPage = () => {
 
   return (
     <div className='page-shell'>
-      <Heading title='Phiếu giảm giá' description='' keywords='' />
+      <Heading title={t("voucher.title")} description='' keywords='' />
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Phiếu giảm giá</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("voucher.title")}</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
             onClick={() => setShowForm(true)}
             className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
             <FaPlus className='text-lg' />
-            <span>Thêm</span>
+            <span>{t("common.add")}</span>
           </button>
         </div>
       </div>
@@ -298,4 +302,3 @@ const VoucherPage = () => {
 };
 
 export default VoucherPage;
-

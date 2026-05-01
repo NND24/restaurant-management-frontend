@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Dropzone from "react-dropzone";
 import { toast } from "react-toastify";
 import * as yup from "yup";
@@ -11,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const [avatarFile, setAvatarFile] = useState(null);
 
   const { user, fetchUser } = useAuth();
@@ -39,10 +41,10 @@ const page = () => {
   }, [avatarFile]);
 
   const schema = yup.object().shape({
-    name: yup.string().required("Vui lòng nhập tên!"),
-    email: yup.string().email("Email không hợp lệ!").required("Vui lòng nhập Email!"),
-    phonenumber: yup.string().required("Vui lòng nhập số điện thoại!"),
-    gender: yup.string().required("Vui lòng chọn giới tính!"),
+    name: yup.string().required(t("profile.validation_name_required")),
+    email: yup.string().email(t("profile.validation_email_invalid")).required(t("profile.validation_email_required")),
+    phonenumber: yup.string().required(t("profile.validation_phone_required")),
+    gender: yup.string().required(t("profile.validation_gender_required")),
   });
 
   const formik = useFormik({
@@ -56,7 +58,7 @@ const page = () => {
     onSubmit: async (values) => {
       try {
         await updateUser(values);
-        toast.success("Cập nhật thành công!");
+        toast.success(t("profile.update_success"));
         await fetchUser(user?._id);
       } catch (error) {
         console.error(error);
@@ -67,7 +69,7 @@ const page = () => {
 
   return (
     <div className='overflow-y-scroll h-full pt-[30px] pb-[100px] px-[20px] md:px-0 bg-[#fff] md:bg-[#f9f9f9]'>
-      <Heading title='Thông tin cá nhân' description='' keywords='' />
+      <Heading title={t("profile.title")} description='' keywords='' />
       <div className='bg-[#fff] lg:w-[60%] md:w-[80%] md:mx-auto md:border md:border-[#a3a3a3a3] md:border-solid md:rounded-[10px] md:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] md:overflow-hidden md:p-[20px]'>
         <div className='flex flex-col items-center mt-[20px]'>
           <div className='relative w-[110px] pt-[110px] mt-[20px] '>
@@ -111,20 +113,20 @@ const page = () => {
             </Dropzone>
           </div>
           <div className='py-[10px]'>
-            <span className='text-[#fc6011] text-[14px] font-bold'>Chỉnh sửa thông tin</span>
+            <span className='text-[#fc6011] text-[14px] font-bold'>{t("common.edit")} {t("profile.info_label")}</span>
           </div>
-          <h3 className='text-[#4A4B4D] text-[26px] font-bold pb-[10px] text-center'>Xin chào {user?.name}</h3>
+          <h3 className='text-[#4A4B4D] text-[26px] font-bold pb-[10px] text-center'>{t("profile.greeting")} {user?.name}</h3>
         </div>
 
         <form onSubmit={formik.handleSubmit} className='flex flex-col gap-[20px] md:gap-[10px]'>
           <div className='relative flex items-center bg-[#f5f5f5] text-[#636464] w-full rounded-[12px] gap-[8px] overflow-hidden'>
-            <span className='absolute top-[12px] left-[20px] text-[13px] md:text-[11px]'>Họ và tên</span>
+            <span className='absolute top-[12px] left-[20px] text-[13px] md:text-[11px]'>{t("profile.label_name")}</span>
             <input
               type='text'
               name='name'
               onChange={formik.handleChange("name")}
               onBlur={formik.handleBlur("name")}
-              placeholder='Nhập tên'
+              placeholder={t("profile.placeholder_name")}
               className='bg-[#f5f5f5] text-[18px] w-full px-[20px] pt-[28px] pb-[12px]'
               value={formik.values.name}
             />
@@ -138,20 +140,20 @@ const page = () => {
             <input
               type='email'
               name='email'
-              placeholder='Nhập email của bạn'
+              placeholder={t("profile.placeholder_email")}
               value={formik.values.email}
               className='bg-[#f5f5f5] text-[18px] w-full px-[20px] pt-[28px] pb-[12px]'
             />
           </div>
 
           <div className='relative flex items-center bg-[#f5f5f5] text-[#636464] w-full rounded-[12px] gap-[8px] overflow-hidden'>
-            <span className='absolute top-[12px] left-[20px] text-[13px] md:text-[11px]'>Số điện thoại</span>
+            <span className='absolute top-[12px] left-[20px] text-[13px] md:text-[11px]'>{t("profile.label_phone")}</span>
             <input
               type='text'
               name='phonenumber'
               onChange={formik.handleChange("phonenumber")}
               onBlur={formik.handleBlur("phonenumber")}
-              placeholder='Nhập số điện thoại'
+              placeholder={t("profile.placeholder_phone")}
               value={formik.values.phonenumber}
               className='bg-[#f5f5f5] text-[18px] w-full px-[20px] pt-[28px] pb-[12px]'
             />
@@ -168,7 +170,7 @@ const page = () => {
                 }`}
                 htmlFor='female'
               >
-                Nữ
+                {t("profile.gender_female")}
                 <input
                   type='radio'
                   name='gender'
@@ -188,7 +190,7 @@ const page = () => {
                 onChange={formik.handleChange("gender")}
                 onBlur={formik.handleBlur("gender")}
               >
-                Nam
+                {t("profile.gender_male")}
                 <input
                   type='radio'
                   name='gender'
@@ -208,7 +210,7 @@ const page = () => {
                 onChange={formik.handleChange("gender")}
                 onBlur={formik.handleBlur("gender")}
               >
-                Khác
+                {t("profile.gender_other")}
                 <input
                   type='radio'
                   name='gender'
@@ -231,7 +233,7 @@ const page = () => {
               formik.isValid && formik.dirty ? "bg-[#fc6011] cursor-pointer" : "bg-[#f5854d] cursor-not-allowed"
             }`}
           >
-            Lưu
+            {t("common.save")}
           </button>
         </form>
       </div>

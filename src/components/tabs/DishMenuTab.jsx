@@ -5,11 +5,13 @@ import { DataGrid } from "@mui/x-data-grid";
 import { getAllDish, toggleSaleStatus } from "@/service/dish";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 import LabelWithIcon from "../../components/LableWithIcon";
 import localStorageService from "@/utils/localStorageService";
 import { Switch, Box, Typography } from "@mui/material";
 
 const DishMenuTab = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
@@ -31,7 +33,7 @@ const DishMenuTab = () => {
         setAllDishes(list);
       } catch (err) {
         console.error("Failed to fetch dishes", err);
-        setError("Lỗi tải danh sách món");
+        setError(t("dishes.load_error"));
       } finally {
         setIsLoading(false);
       }
@@ -61,13 +63,13 @@ const DishMenuTab = () => {
     return str
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(/[̀-ͯ]/g, "");
   }
 
   const filteredDishes = allDishes.filter((dish) => {
     if (!search) return true;
     const dishName = normalize(dish.name);
-    const catName = normalize(dish.category?.name || "Khác");
+    const catName = normalize(dish.category?.name || t("dishes.uncategorized"));
     const s = normalize(search);
     return dishName.includes(s) || catName.includes(s);
   });
@@ -75,7 +77,7 @@ const DishMenuTab = () => {
   const columns = [
     {
       field: "image",
-      headerName: "Ảnh",
+      headerName: t("dishes.col_image"),
       width: 80,
       renderCell: (params) => (
         <Image
@@ -91,7 +93,7 @@ const DishMenuTab = () => {
     },
     {
       field: "name",
-      headerName: "Tên món",
+      headerName: t("dishes.col_name"),
       flex: 1,
       renderCell: (params) => (
         <Typography sx={{ cursor: "pointer", fontWeight: 600 }} onClick={() => router.push(`menu/${params.row?._id}`)}>
@@ -101,19 +103,19 @@ const DishMenuTab = () => {
     },
     {
       field: "category",
-      headerName: "Danh mục",
+      headerName: t("dishes.col_category"),
       width: 150,
-      valueGetter: (params) => params.row?.category?.name || "Khác",
+      valueGetter: (params) => params.row?.category?.name || t("dishes.uncategorized"),
     },
     {
       field: "price",
-      headerName: "Giá",
+      headerName: t("dishes.col_price"),
       width: 120,
       valueGetter: (params) => (params.row?.price ? params.row?.price.toLocaleString() + "₫" : "0₫"),
     },
     {
       field: "status",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       width: 130,
       renderCell: (params) => (
         <Switch
@@ -131,15 +133,15 @@ const DishMenuTab = () => {
         <input
           type='text'
           className='w-full border rounded-lg px-4 py-2'
-          placeholder='Tìm món ăn hoặc danh mục...'
+          placeholder={t("dishes.search_placeholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
-            <LabelWithIcon title='Thêm' iconPath='/assets/plus.png' onClick={() => router.push("menu/add")} />
+            <LabelWithIcon title={t("common.add")} iconPath='/assets/plus.png' onClick={() => router.push("menu/add")} />
             <LabelWithIcon
-              title='Chỉnh sửa danh mục'
+              title={t("dishes.edit_categories_btn")}
               iconPath='/assets/editing.png'
               onClick={() => router.push("menu/category")}
             />
@@ -165,4 +167,3 @@ const DishMenuTab = () => {
 };
 
 export default DishMenuTab;
-

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Card,
@@ -41,6 +42,7 @@ import CountUp from "react-countup";
 import Heading from "../../../components/Heading";
 
 const DashboardPage = () => {
+  const { t } = useTranslation();
   dayjs.extend(isoWeek);
 
   const [summary, setSummary] = useState({
@@ -157,7 +159,7 @@ const DashboardPage = () => {
 
   let trendMean = 0;
   let seasonalAmplitude = 0;
-  let seasonalStrength = "yếu";
+  let seasonalStrength = t("statistic.weak");
 
   if (decomposition && analysis.length > 1) {
     // 1️⃣ Tính trung bình độ dốc của trend
@@ -175,7 +177,7 @@ const DashboardPage = () => {
       const maxVal = Math.max(...seasonalVals);
       const minVal = Math.min(...seasonalVals);
       seasonalAmplitude = maxVal - minVal;
-      seasonalStrength = seasonalAmplitude > 0.1 * (Math.max(...analysis.map((a) => a.revenue)) || 1) ? "mạnh" : "yếu";
+      seasonalStrength = seasonalAmplitude > 0.1 * (Math.max(...analysis.map((a) => a.revenue)) || 1) ? t("statistic.strong") : t("statistic.weak");
     }
   }
 
@@ -194,13 +196,13 @@ const DashboardPage = () => {
     setScenarioData([
       ...baseData,
       {
-        label: "Dự đoán",
+        label: t("statistic.forecast_label"),
         revenue: forecast.predictedRevenue,
         profit: forecast.predictedProfit,
         isForecast: true,
       },
       {
-        label: "Kịch bản giả lập",
+        label: t("statistic.scenario_label"),
         revenue: scenarioRevenue,
         profit: scenarioProfit,
         isScenario: true,
@@ -244,19 +246,19 @@ const DashboardPage = () => {
 
   const summaryCards = [
     {
-      label: "Hôm nay",
+      label: t("statistic.today"),
       data: summary.today,
       icon: <FaMoneyBillWave size={28} />,
       bg: "linear-gradient(135deg,#43cea2,#185a9d)",
     },
     {
-      label: "Tuần này",
+      label: t("statistic.this_week"),
       data: summary.week,
       icon: <FaCalendarWeek size={28} />,
       bg: "linear-gradient(135deg,#ff9966,#ff5e62)",
     },
     {
-      label: "Tháng này",
+      label: t("statistic.this_month"),
       data: summary.month,
       icon: <FaChartLine size={28} />,
       bg: "linear-gradient(135deg,#667eea,#764ba2)",
@@ -274,10 +276,10 @@ const DashboardPage = () => {
 
   return (
     <div className='overflow-y-scroll h-full'>
-      <Heading title='Báo cáo doanh thu & lợi nhuận' description='' keywords='' />
+      <Heading title={t("statistic.revenue_report")} description='' keywords='' />
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
-          Báo cáo doanh thu & lợi nhuận
+          {t("statistic.revenue_report")}
         </Typography>
 
         {/* Tổng quan */}
@@ -300,12 +302,12 @@ const DashboardPage = () => {
                   <Box>
                     <Typography variant='h6'>{s.label}</Typography>
                     <Typography>
-                      Doanh thu: <CountUp end={s.data.revenue} separator=',' /> ₫
+                      {t("statistic.revenue") + ":"} <CountUp end={s.data.revenue} separator=',' /> ₫
                     </Typography>
                     <Typography>
-                      Lợi nhuận: <CountUp end={s.data.profit} separator=',' /> ₫
+                      {t("statistic.profit") + ":"} <CountUp end={s.data.profit} separator=',' /> ₫
                     </Typography>
-                    <Typography>Tỷ suất: {s.data.margin.toFixed(1)}%</Typography>
+                    <Typography>{t("statistic.margin") + ":"} {s.data.margin.toFixed(1)}%</Typography>
                   </Box>
                 </Box>
               </CardContent>
@@ -319,12 +321,12 @@ const DashboardPage = () => {
             <Box display='flex' flexWrap='wrap' gap={3} alignItems='center'>
               {/* Chọn chế độ xem */}
               <FormControl size='medium' sx={{ minWidth: 160 }}>
-                <InputLabel>Chế độ xem</InputLabel>
-                <Select value={viewType} label='Chế độ xem' onChange={(e) => setViewType(e.target.value)}>
-                  <MenuItem value='day'>Ngày</MenuItem>
-                  <MenuItem value='week'>Tuần</MenuItem>
-                  <MenuItem value='month'>Tháng</MenuItem>
-                  <MenuItem value='year'>Năm</MenuItem>
+                <InputLabel>{t("statistic.view_mode")}</InputLabel>
+                <Select value={viewType} label={t("statistic.view_mode")} onChange={(e) => setViewType(e.target.value)}>
+                  <MenuItem value='day'>{t("statistic.day")}</MenuItem>
+                  <MenuItem value='week'>{t("statistic.week")}</MenuItem>
+                  <MenuItem value='month'>{t("statistic.month")}</MenuItem>
+                  <MenuItem value='year'>{t("statistic.year")}</MenuItem>
                 </Select>
               </FormControl>
 
@@ -333,7 +335,7 @@ const DashboardPage = () => {
                 <>
                   {viewType === "day" && (
                     <TextField
-                      label='Chọn ngày'
+                      label={t("statistic.select_date")}
                       type='date'
                       value={dayjs(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`).format(
                         "YYYY-MM-DD"
@@ -351,7 +353,7 @@ const DashboardPage = () => {
                   )}
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
-                      <InputLabel>Tuần</InputLabel>
+                      <InputLabel>{t("statistic.week")}</InputLabel>
                       <Select
                         value={week}
                         onChange={(e) => setWeek(Number(e.target.value))}
@@ -365,7 +367,7 @@ const DashboardPage = () => {
                       >
                         {Array.from({ length: 52 }, (_, i) => i + 1).map((w) => (
                           <MenuItem key={w} value={w}>
-                            Tuần {w}
+                            {t("statistic.week")} {w}
                           </MenuItem>
                         ))}
                       </Select>
@@ -374,7 +376,7 @@ const DashboardPage = () => {
                   {viewType === "month" && (
                     <>
                       <FormControl size='medium' sx={{ minWidth: 120 }}>
-                        <InputLabel>Tháng</InputLabel>
+                        <InputLabel>{t("statistic.month")}</InputLabel>
                         <Select
                           value={month}
                           onChange={(e) => setMonth(Number(e.target.value))}
@@ -388,23 +390,23 @@ const DashboardPage = () => {
                         >
                           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                             <MenuItem key={m} value={m}>
-                              Tháng {m}
+                              {t("statistic.month")} {m}
                             </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
 
                       <FormControl size='medium' sx={{ minWidth: 160 }}>
-                        <InputLabel>Chế độ hiển thị</InputLabel>
+                        <InputLabel>{t("statistic.display_mode")}</InputLabel>
                         <Select value={monthMode} onChange={(e) => setMonthMode(e.target.value)}>
-                          <MenuItem value='day'>Theo ngày</MenuItem>
-                          <MenuItem value='week'>Theo tuần</MenuItem>
+                          <MenuItem value='day'>{t("statistic.by_day")}</MenuItem>
+                          <MenuItem value='week'>{t("statistic.by_week")}</MenuItem>
                         </Select>
                       </FormControl>
                     </>
                   )}
                   <FormControl size='medium' sx={{ minWidth: 120 }}>
-                    <InputLabel>Năm</InputLabel>
+                    <InputLabel>{t("statistic.year")}</InputLabel>
                     <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
                       {Array.from({ length: 5 }, (_, i) => dayjs().year() - i).map((y) => (
                         <MenuItem key={y} value={y}>
@@ -427,18 +429,17 @@ const DashboardPage = () => {
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
               <Typography variant='h6'>
-                Biểu đồ theo{" "}
-                {viewType === "day" ? "ngày" : viewType === "week" ? "tuần" : viewType === "month" ? "tháng" : "năm"}
+                {t("statistic.chart_by") + " " + (viewType === "day" ? t("statistic.day") : viewType === "week" ? t("statistic.week") : viewType === "month" ? t("statistic.month") : t("statistic.year"))}
               </Typography>
               <FormControl size='small' sx={{ minWidth: 160 }}>
-                <InputLabel>Hiển thị</InputLabel>
+                <InputLabel>{t("statistic.display")}</InputLabel>
                 <Select value={chartMetric} onChange={(e) => setChartMetric(e.target.value)}>
-                  <MenuItem value='all'>Tất cả</MenuItem>
-                  <MenuItem value='revenue'>Doanh thu</MenuItem>
-                  <MenuItem value='cost'>Chi phí</MenuItem>
-                  <MenuItem value='waste'>Hao hụt</MenuItem>
-                  <MenuItem value='profit'>Lợi nhuận</MenuItem>
-                  <MenuItem value='margin'>Tỷ suất (%)</MenuItem>
+                  <MenuItem value='all'>{t("common.all")}</MenuItem>
+                  <MenuItem value='revenue'>{t("statistic.revenue")}</MenuItem>
+                  <MenuItem value='cost'>{t("statistic.cost")}</MenuItem>
+                  <MenuItem value='waste'>{t("statistic.waste")}</MenuItem>
+                  <MenuItem value='profit'>{t("statistic.profit")}</MenuItem>
+                  <MenuItem value='margin'>{t("statistic.margin_percent")}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -452,19 +453,19 @@ const DashboardPage = () => {
                 <Tooltip />
                 <Legend />
                 {(chartMetric === "all" || chartMetric === "revenue") && (
-                  <Bar yAxisId='left' dataKey='revenue' name='Doanh thu' fill='#8884d8' />
+                  <Bar yAxisId='left' dataKey='revenue' name={t("statistic.revenue")} fill='#8884d8' />
                 )}
                 {(chartMetric === "all" || chartMetric === "cost") && (
-                  <Bar yAxisId='left' dataKey='cost' name='Chi phí' fill='#82ca9d' />
+                  <Bar yAxisId='left' dataKey='cost' name={t("statistic.cost")} fill='#82ca9d' />
                 )}
                 {(chartMetric === "all" || chartMetric === "waste") && (
-                  <Bar yAxisId='left' dataKey='waste' name='Hao hụt' fill='#ffc658' />
+                  <Bar yAxisId='left' dataKey='waste' name={t("statistic.waste")} fill='#ffc658' />
                 )}
                 {(chartMetric === "all" || chartMetric === "profit") && (
-                  <Bar yAxisId='left' dataKey='profit' name='Lợi nhuận' fill='#ff7f50' />
+                  <Bar yAxisId='left' dataKey='profit' name={t("statistic.profit")} fill='#ff7f50' />
                 )}
                 {(chartMetric === "all" || chartMetric === "margin") && (
-                  <Line yAxisId='right' type='monotone' dataKey='margin' stroke='#000' name='Tỷ suất (%)' dot={false} />
+                  <Line yAxisId='right' type='monotone' dataKey='margin' stroke='#000' name={t("statistic.margin_percent")} dot={false} />
                 )}
               </ComposedChart>
             </ResponsiveContainer>
@@ -475,9 +476,9 @@ const DashboardPage = () => {
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              Giới thiệu phân tích
+              {t("statistic.analysis_intro")}
             </Typography>
-            
+
             <Button
               variant='contained'
               color='primary'
@@ -485,7 +486,7 @@ const DashboardPage = () => {
               onClick={handleAnalyze}
               disabled={loadingAnalysis}
             >
-              {loadingAnalysis ? <CircularProgress size={20} sx={{ color: "white" }} /> : "Phân tích dữ liệu"}
+              {loadingAnalysis ? <CircularProgress size={20} sx={{ color: "white" }} /> : t("statistic.analyze_data")}
             </Button>
           </CardContent>
         </Card>
@@ -494,33 +495,33 @@ const DashboardPage = () => {
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              Giả lập kịch bản
+              {t("statistic.scenario_sim")}
             </Typography>
 
             <Box display='flex' flexWrap='wrap' gap={2} mt={2}>
               <TextField
-                label='% Điều chỉnh Trend'
+                label={t("statistic.trend_adjust")}
                 type='number'
                 value={trendChange}
                 onChange={(e) => setTrendChange(Number(e.target.value))}
                 size='small'
               />
               <TextField
-                label='% Điều chỉnh Seasonality'
+                label={t("statistic.seasonal_adjust")}
                 type='number'
                 value={seasonalChange}
                 onChange={(e) => setSeasonalChange(Number(e.target.value))}
                 size='small'
               />
               <TextField
-                label='% Giảm chi phí'
+                label={t("statistic.cost_reduce")}
                 type='number'
                 value={costChange}
                 onChange={(e) => setCostChange(Number(e.target.value))}
                 size='small'
               />
               <Button variant='contained' color='secondary' onClick={handleScenario}>
-                Tạo kịch bản giả lập
+                {t("statistic.create_scenario")}
               </Button>
             </Box>
           </CardContent>
@@ -531,16 +532,16 @@ const DashboardPage = () => {
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                Biểu đồ doanh thu & lợi nhuận
+                {t("statistic.revenue_profit_chart")}
               </Typography>
 
               {decomposition && (
                 <Box mb={2} sx={{ backgroundColor: "#f0f7ff", borderRadius: 2, p: 2 }}>
                   <Typography variant='body1'>
-                    <b>Xu hướng:</b> {trendMean > 0 ? "Đang tăng" : trendMean < 0 ? "Đang giảm" : "Ổn định"}
+                    <b>{t("statistic.trend_label")}</b> {trendMean > 0 ? t("statistic.increasing") : trendMean < 0 ? t("statistic.decreasing") : t("statistic.stable")}
                   </Typography>
                   <Typography variant='body1'>
-                    <b>Tính mùa vụ:</b> {seasonalStrength} (dao động {seasonalAmplitude.toFixed(0)} ₫)
+                    <b>{t("statistic.seasonality_label")}</b> {seasonalStrength} ({t("statistic.fluctuation")} {seasonalAmplitude.toFixed(0)} ₫)
                   </Typography>
                 </Box>
               )}
@@ -548,13 +549,13 @@ const DashboardPage = () => {
               {scenarioData.length > 0 && (
                 <Box mt={2} sx={{ backgroundColor: "#fff8e1", borderRadius: 2, p: 2 }}>
                   <Typography variant='h6' gutterBottom>
-                    Kết quả giả lập
+                    {t("statistic.sim_results")}
                   </Typography>
                   <Typography>
-                    Doanh thu dự kiến (kịch bản): <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
+                    {t("statistic.expected_revenue_scenario")} <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
                   </Typography>
                   <Typography>
-                    Lợi nhuận dự kiến (kịch bản): <b>{scenarioData.at(-1)?.profit?.toLocaleString("vi-VN")}</b> ₫
+                    {t("statistic.expected_profit_scenario")} <b>{scenarioData.at(-1)?.profit?.toLocaleString("vi-VN")}</b> ₫
                   </Typography>
                 </Box>
               )}
@@ -566,8 +567,8 @@ const DashboardPage = () => {
                   <YAxis yAxisId='left' />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId='left' dataKey='revenue' name='Doanh thu' fill='#8884d8' />
-                  <Bar yAxisId='left' dataKey='profit' name='Lợi nhuận' fill='#82ca9d' />
+                  <Bar yAxisId='left' dataKey='revenue' name={t("statistic.revenue")} fill='#8884d8' />
+                  <Bar yAxisId='left' dataKey='profit' name={t("statistic.profit")} fill='#82ca9d' />
                   {/* Scenario line if any */}
                   {scenarioData.length > 0 && (
                     <Line
@@ -576,7 +577,7 @@ const DashboardPage = () => {
                       data={scenarioData}
                       stroke='#ff3b3b'
                       strokeDasharray='5 5'
-                      name='Kịch bản (Doanh thu)'
+                      name={t("statistic.scenario_label") + " (" + t("statistic.revenue") + ")"}
                       dot={false}
                       yAxisId='left'
                     />
@@ -592,7 +593,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                Phân tích thành phần thời gian
+                {t("statistic.time_decomposition")}
               </Typography>
 
               <Box display='flex' flexWrap='wrap' gap={1}>
@@ -619,7 +620,7 @@ const DashboardPage = () => {
 
                   <YAxis
                     label={{
-                      value: "Điểm chỉ số",
+                      value: t("statistic.index_point"),
                       angle: -90,
                       position: "insideLeft",
                     }}
@@ -653,16 +654,16 @@ const DashboardPage = () => {
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                Dự đoán kỳ tới
+                {t("statistic.next_period_forecast")}
               </Typography>
               <Typography>
-                Doanh thu dự kiến: <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
+                {t("statistic.expected_revenue")} <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
               </Typography>
               <Typography>
-                Lợi nhuận dự kiến: <b>{Number(forecast.predictedProfit || 0).toLocaleString("vi-VN")}</b> ₫
+                {t("statistic.expected_profit")} <b>{Number(forecast.predictedProfit || 0).toLocaleString("vi-VN")}</b> ₫
               </Typography>
               <Typography>
-                Tăng trưởng trung bình: <b>{forecast.avgGrowth || "-"}</b>
+                {t("statistic.avg_growth")} <b>{forecast.avgGrowth || "-"}</b>
               </Typography>
 
               <ResponsiveContainer width='100%' height={350}>
@@ -682,13 +683,13 @@ const DashboardPage = () => {
                   <Legend />
 
                   {/* Doanh thu */}
-                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name='Doanh thu thực tế' dot={false} />
+                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name={t("statistic.actual_revenue")} dot={false} />
                   <Line
                     type='monotone'
                     dataKey='predictedRevenue'
                     stroke='#ff3b3b'
                     strokeDasharray='5 5'
-                    name='Doanh thu dự đoán'
+                    name={t("statistic.predicted_revenue")}
                     dot={false}
                   />
                 </LineChart>
@@ -702,7 +703,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                Top món ăn bán chạy
+                {t("statistic.top_dishes")}
               </Typography>
 
               <ResponsiveContainer width='100%' height={300}>
@@ -725,7 +726,7 @@ const DashboardPage = () => {
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3, backgroundColor: "#f5f7fa" }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                Nhận định chi tiết theo món
+                {t("statistic.dish_insights")}
               </Typography>
               <Box display='flex' flexDirection='column' gap={1}>
                 {dishInsights.map((msg, i) => (

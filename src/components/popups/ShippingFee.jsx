@@ -4,8 +4,10 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, I
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { FaTimes } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate = false, readOnly = false }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     fromDistance: "",
     feePerKm: "",
@@ -41,11 +43,11 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
     const isPositiveInteger = (val) => /^\d+$/.test(val) && parseInt(val) >= 0;
 
     if (!isPositiveInteger(fromDistance)) {
-      toast.error("Khoảng cách bắt đầu phải là số nguyên dương.");
+      toast.error(t("shipping_fee.validation_from_distance"));
       return false;
     }
     if (!isPositiveInteger(feePerKm)) {
-      toast.error("Phí mỗi km phải là số nguyên dương.");
+      toast.error(t("shipping_fee.validation_fee_per_km"));
       return false;
     }
     return true;
@@ -55,11 +57,11 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
     if (!validate()) return;
 
     const confirm = await Swal.fire({
-      title: isUpdate ? "Xác nhận cập nhật Phí vận chuyển?" : "Xác nhận thêm mức phí mới?",
+      title: isUpdate ? t("shipping_fee.confirm_update") : t("shipping_fee.confirm_add"),
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
-      cancelButtonText: "Hủy",
+      confirmButtonText: isUpdate ? t("common.update") : t("common.add"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (!confirm.isConfirmed) return;
@@ -73,7 +75,7 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(isUpdate ? "Cập nhật thất bại" : "Thêm phí vận chuyển thất bại");
+      toast.error(isUpdate ? t("common.update_failed") : t("shipping_fee.add_failed"));
     } finally {
       setLoading(false);
     }
@@ -82,7 +84,11 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        {readOnly ? "Chi tiết Phí vận chuyển" : isUpdate ? "Cập nhật Phí vận chuyển" : "Thêm mức Phí vận chuyển"}
+        {readOnly
+          ? t("shipping_fee.detail_title")
+          : isUpdate
+          ? t("shipping_fee.update_title")
+          : t("shipping_fee.add_title")}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -91,7 +97,7 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
       <DialogContent dividers>
         <Box className='grid grid-cols-1 gap-4'>
           <TextField
-            label='Từ khoảng cách (km)'
+            label={t("shipping_fee.from_distance")}
             name='fromDistance'
             type='number'
             value={formData.fromDistance}
@@ -100,7 +106,7 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
             InputProps={{ readOnly: readOnly }}
           />
           <TextField
-            label='Phí mỗi km (VND)'
+            label={t("shipping_fee.fee_per_km")}
             name='feePerKm'
             type='number'
             value={formData.feePerKm}
@@ -114,10 +120,10 @@ const ShippingFeeModal = ({ open, onClose, onSubmit, initialData = {}, isUpdate 
       {!readOnly && (
         <DialogActions sx={{ px: 3 }}>
           <Button onClick={onClose} color='error' variant='outlined'>
-            Hủy
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
-            {loading ? "Đang lưu..." : isUpdate ? "Cập nhật" : "Lưu"}
+            {loading ? t("common.saving") : isUpdate ? t("common.update") : t("common.save")}
           </Button>
         </DialogActions>
       )}

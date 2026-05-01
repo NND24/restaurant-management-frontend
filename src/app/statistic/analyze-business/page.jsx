@@ -29,8 +29,10 @@ import { FaChartArea } from "react-icons/fa";
 import { analyzeBusinessResult } from "@/service/statistic";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
+import { useTranslation } from "react-i18next";
 
 const DashboardPage = () => {
+  const { t } = useTranslation();
   dayjs.extend(isoWeek);
 
   const [analysis, setAnalysis] = useState([]);
@@ -42,7 +44,7 @@ const DashboardPage = () => {
   const [viewType, setViewType] = useState("day");
   const [week, setWeek] = useState(dayjs().isoWeek());
   const [month, setMonth] = useState(dayjs().month() + 1);
-  const [monthMode, setMonthMode] = useState("day"); // 'day' hoặc 'week'
+  const [monthMode, setMonthMode] = useState("day"); // 'day' or 'week'
   const [year, setYear] = useState(dayjs().year());
   const [day, setDay] = useState(dayjs().format("DD")); // day of month (1-31)
 
@@ -101,9 +103,9 @@ const DashboardPage = () => {
 
   const forecastChartData = analysis.map((item, idx) => ({
     label: item.period,
-    revenue: item.revenue, // thực tế
+    revenue: item.revenue,
     profit: item.profit,
-    predictedRevenue: forecast?.predictedRevenueSeries?.[idx] ?? null, // dự đoán
+    predictedRevenue: forecast?.predictedRevenueSeries?.[idx] ?? null,
     predictedProfit: forecast?.predictedProfitSeries?.[idx] ?? null,
   }));
 
@@ -113,8 +115,7 @@ const DashboardPage = () => {
       ? analysis.map((a, i) => ({
           date:
             viewType === "hour"
-              ? // format period to HH:mm if possible
-                (() => {
+              ? (() => {
                   try {
                     const p = dayjs(a.period);
                     return p.isValid() ? p.format("HH:mm") : String(a.period).slice(11, 16);
@@ -131,17 +132,15 @@ const DashboardPage = () => {
 
   // convenience: sync a default day when month/year change
   useEffect(() => {
-    // ensure day is valid in month
     const daysInMonth = dayjs(`${year}-${String(month).padStart(2, "0")}-01`).daysInMonth();
     if (Number(day) > daysInMonth) setDay(String(daysInMonth));
   }, [month, year]);
 
   let trendMean = 0;
   let seasonalAmplitude = 0;
-  let seasonalStrength = "yếu";
+  let seasonalStrength = t("statistic.seasonal_weak");
 
   if (decomposition && analysis.length > 1) {
-    // 1️⃣ Tính trung bình độ dốc của trend
     const diffs = [];
     for (let i = 1; i < decomposition.trend.length; i++) {
       const prev = decomposition.trend[i - 1] ?? 0;
@@ -150,13 +149,14 @@ const DashboardPage = () => {
     }
     trendMean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
 
-    // 2️⃣ Độ dao động mùa vụ
     const seasonalVals = decomposition.seasonal.filter((v) => typeof v === "number");
     if (seasonalVals.length > 0) {
       const maxVal = Math.max(...seasonalVals);
       const minVal = Math.min(...seasonalVals);
       seasonalAmplitude = maxVal - minVal;
-      seasonalStrength = seasonalAmplitude > 0.1 * (Math.max(...analysis.map((a) => a.revenue)) || 1) ? "mạnh" : "yếu";
+      seasonalStrength = seasonalAmplitude > 0.1 * (Math.max(...analysis.map((a) => a.revenue)) || 1)
+        ? t("statistic.seasonal_strong")
+        : t("statistic.seasonal_weak");
     }
   }
 
@@ -175,13 +175,13 @@ const DashboardPage = () => {
     setScenarioData([
       ...baseData,
       {
-        label: "Dự đoán",
+        label: t("statistic.forecast_label"),
         revenue: forecast.predictedRevenue,
         profit: forecast.predictedProfit,
         isForecast: true,
       },
       {
-        label: "Kịch bản giả lập",
+        label: t("statistic.scenario_label"),
         revenue: scenarioRevenue,
         profit: scenarioProfit,
         isScenario: true,
@@ -193,54 +193,53 @@ const DashboardPage = () => {
     <div className='overflow-y-scroll h-full'>
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
-          Báo cáo & Dự đoán Kinh doanh
+          {t("statistic.analyze_business")}
         </Typography>
 
-        {/* --- Phần hướng dẫn & phân tích --- */}
+        {/* --- Introduction & analysis --- */}
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              🔍 Giới thiệu phân tích
+              {t("statistic.analysis_intro_title")}
             </Typography>
             <Typography variant='body1' color='text.secondary' sx={{ mb: 1 }}>
-              Hệ thống sẽ phân tích dữ liệu doanh thu sử dụng kỹ thuật <b>Time Series Decomposition</b> để tách thành 3
-              thành phần:
+              {t("statistic.analysis_intro_desc")}
             </Typography>
             <ul style={{ marginTop: 0 }}>
               <li>
-                <b>Trend</b> – xu hướng dài hạn (tăng/giảm theo thời gian)
+                <b>Trend</b> – {t("statistic.trend_desc")}
               </li>
               <li>
-                <b>Seasonality</b> – tính mùa vụ (ví dụ cuối tuần tăng, giữa tuần giảm)
+                <b>Seasonality</b> – {t("statistic.seasonality_desc")}
               </li>
               <li>
-                <b>Residual</b> – phần sai lệch ngẫu nhiên, khó dự đoán
+                <b>Residual</b> – {t("statistic.residual_desc")}
               </li>
             </ul>
           </CardContent>
         </Card>
 
-        {/* ===== Bộ lọc thời gian + Nút Phân tích ===== */}
+        {/* ===== Time filter + Analyze button ===== */}
         <Card sx={{ borderRadius: 3, mb: 4, boxShadow: 3, backgroundColor: "#fff" }}>
           <CardContent>
             <Box display='flex' flexWrap='wrap' gap={3} alignItems='center'>
-              {/* Chọn chế độ xem */}
+              {/* View mode selector */}
               <FormControl size='medium' sx={{ minWidth: 160 }}>
-                <InputLabel>Chế độ xem</InputLabel>
-                <Select value={viewType} label='Chế độ xem' onChange={(e) => setViewType(e.target.value)}>
-                  <MenuItem value='day'>Ngày</MenuItem>
-                  <MenuItem value='week'>Tuần</MenuItem>
-                  <MenuItem value='month'>Tháng</MenuItem>
-                  <MenuItem value='year'>Năm</MenuItem>
+                <InputLabel>{t("statistic.view_mode")}</InputLabel>
+                <Select value={viewType} label={t("statistic.view_mode")} onChange={(e) => setViewType(e.target.value)}>
+                  <MenuItem value='day'>{t("statistic.day")}</MenuItem>
+                  <MenuItem value='week'>{t("statistic.week")}</MenuItem>
+                  <MenuItem value='month'>{t("statistic.month")}</MenuItem>
+                  <MenuItem value='year'>{t("statistic.year")}</MenuItem>
                 </Select>
               </FormControl>
 
-              {/* Các bộ chọn phụ thuộc chế độ xem */}
+              {/* Sub-selectors */}
               {viewType !== "year" && (
                 <>
                   {viewType === "day" && (
                     <TextField
-                      label='Chọn ngày'
+                      label={t("statistic.select_day")}
                       type='date'
                       value={dayjs(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`).format(
                         "YYYY-MM-DD"
@@ -258,7 +257,7 @@ const DashboardPage = () => {
                   )}
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
-                      <InputLabel>Tuần</InputLabel>
+                      <InputLabel>{t("statistic.week")}</InputLabel>
                       <Select
                         value={week}
                         onChange={(e) => setWeek(Number(e.target.value))}
@@ -272,7 +271,7 @@ const DashboardPage = () => {
                       >
                         {Array.from({ length: 52 }, (_, i) => i + 1).map((w) => (
                           <MenuItem key={w} value={w}>
-                            Tuần {w}
+                            {t("statistic.week")} {w}
                           </MenuItem>
                         ))}
                       </Select>
@@ -281,27 +280,27 @@ const DashboardPage = () => {
                   {viewType === "month" && (
                     <>
                       <FormControl size='medium' sx={{ minWidth: 120 }}>
-                        <InputLabel>Tháng</InputLabel>
+                        <InputLabel>{t("statistic.month")}</InputLabel>
                         <Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
                           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                             <MenuItem key={m} value={m}>
-                              Tháng {m}
+                              {t("statistic.month")} {m}
                             </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
 
                       <FormControl size='medium' sx={{ minWidth: 160 }}>
-                        <InputLabel>Chế độ hiển thị</InputLabel>
+                        <InputLabel>{t("statistic.display_mode")}</InputLabel>
                         <Select value={monthMode} onChange={(e) => setMonthMode(e.target.value)}>
-                          <MenuItem value='day'>Theo ngày</MenuItem>
-                          <MenuItem value='week'>Theo tuần</MenuItem>
+                          <MenuItem value='day'>{t("statistic.by_day")}</MenuItem>
+                          <MenuItem value='week'>{t("statistic.by_week")}</MenuItem>
                         </Select>
                       </FormControl>
                     </>
                   )}
                   <FormControl size='medium' sx={{ minWidth: 120 }}>
-                    <InputLabel>Năm</InputLabel>
+                    <InputLabel>{t("statistic.year")}</InputLabel>
                     <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
                       {Array.from({ length: 5 }, (_, i) => dayjs().year() - i).map((y) => (
                         <MenuItem key={y} value={y}>
@@ -313,7 +312,7 @@ const DashboardPage = () => {
                 </>
               )}
 
-              {/* Nút Phân tích nằm bên phải */}
+              {/* Analyze button on the right */}
               <Box flex='1 1 auto' display='flex' justifyContent='flex-end'>
                 <Button
                   variant='contained'
@@ -322,63 +321,68 @@ const DashboardPage = () => {
                   onClick={handleAnalyze}
                   disabled={loadingAnalysis}
                 >
-                  {loadingAnalysis ? <CircularProgress size={20} sx={{ color: "white" }} /> : "Phân tích dữ liệu"}
+                  {loadingAnalysis ? <CircularProgress size={20} sx={{ color: "white" }} /> : t("statistic.analyze_data")}
                 </Button>
               </Box>
             </Box>
           </CardContent>
         </Card>
 
-        {/* ===== Scenario Simulation (tách riêng) ===== */}
+        {/* ===== Scenario Simulation ===== */}
         <Card sx={{ mb: 3, borderRadius: 3, backgroundColor: "#f5f7fa" }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              ⚙️ Giả lập kịch bản (Scenario Simulation)
+              {t("statistic.scenario_simulation_title")}
             </Typography>
             <Box display='flex' flexWrap='wrap' gap={2} mt={2}>
               <TextField
-                label='% Điều chỉnh Trend'
+                label={t("statistic.adjust_trend_percent")}
                 type='number'
                 value={trendChange}
                 onChange={(e) => setTrendChange(Number(e.target.value))}
                 size='small'
               />
               <TextField
-                label='% Điều chỉnh Seasonality'
+                label={t("statistic.adjust_seasonality_percent")}
                 type='number'
                 value={seasonalChange}
                 onChange={(e) => setSeasonalChange(Number(e.target.value))}
                 size='small'
               />
               <TextField
-                label='% Giảm chi phí'
+                label={t("statistic.reduce_cost_percent")}
                 type='number'
                 value={costChange}
                 onChange={(e) => setCostChange(Number(e.target.value))}
                 size='small'
               />
               <Button variant='contained' color='secondary' onClick={handleScenario}>
-                Tạo kịch bản giả lập
+                {t("statistic.create_scenario")}
               </Button>
             </Box>
           </CardContent>
         </Card>
 
-        {/* --- Biểu đồ doanh thu & lợi nhuận --- */}
+        {/* --- Revenue & profit chart --- */}
         {scenarioData.length > 0 && (
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📊 Biểu đồ doanh thu & lợi nhuận
+                {t("statistic.revenue_profit_chart")}
               </Typography>
 
               {decomposition && (
                 <Box mb={2} sx={{ backgroundColor: "#f0f7ff", borderRadius: 2, p: 2 }}>
                   <Typography variant='body1'>
-                    📈 <b>Xu hướng:</b> {trendMean > 0 ? "Đang tăng" : trendMean < 0 ? "Đang giảm" : "Ổn định"}
+                    <b>{t("statistic.trend_label")}:</b>{" "}
+                    {trendMean > 0
+                      ? t("statistic.trend_increasing")
+                      : trendMean < 0
+                      ? t("statistic.trend_decreasing")
+                      : t("statistic.trend_stable")}
                   </Typography>
                   <Typography variant='body1'>
-                    🌀 <b>Tính mùa vụ:</b> {seasonalStrength} (dao động {seasonalAmplitude.toFixed(0)} ₫)
+                    <b>{t("statistic.seasonality_label")}:</b> {seasonalStrength} ({t("statistic.fluctuation")} {seasonalAmplitude.toFixed(0)} ₫)
                   </Typography>
                 </Box>
               )}
@@ -386,13 +390,13 @@ const DashboardPage = () => {
               {scenarioData.length > 0 && (
                 <Box mt={2} sx={{ backgroundColor: "#fff8e1", borderRadius: 2, p: 2 }}>
                   <Typography variant='h6' gutterBottom>
-                    🧮 Kết quả giả lập
+                    {t("statistic.scenario_result")}
                   </Typography>
                   <Typography>
-                    Doanh thu dự kiến (kịch bản): <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
+                    {t("statistic.expected_revenue_scenario")}: <b>{scenarioData.at(-1)?.revenue?.toLocaleString("vi-VN")}</b> ₫
                   </Typography>
                   <Typography>
-                    Lợi nhuận dự kiến (kịch bản): <b>{scenarioData.at(-1)?.profit?.toLocaleString("vi-VN")}</b> ₫
+                    {t("statistic.expected_profit_scenario")}: <b>{scenarioData.at(-1)?.profit?.toLocaleString("vi-VN")}</b> ₫
                   </Typography>
                 </Box>
               )}
@@ -404,9 +408,8 @@ const DashboardPage = () => {
                   <YAxis yAxisId='left' />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId='left' dataKey='revenue' name='Doanh thu' fill='#8884d8' />
-                  <Bar yAxisId='left' dataKey='profit' name='Lợi nhuận' fill='#82ca9d' />
-                  {/* Scenario line if any */}
+                  <Bar yAxisId='left' dataKey='revenue' name={t("statistic.revenue")} fill='#8884d8' />
+                  <Bar yAxisId='left' dataKey='profit' name={t("statistic.profit")} fill='#82ca9d' />
                   {scenarioData.length > 0 && (
                     <Line
                       type='monotone'
@@ -414,7 +417,7 @@ const DashboardPage = () => {
                       data={scenarioData}
                       stroke='#ff3b3b'
                       strokeDasharray='5 5'
-                      name='Kịch bản (Doanh thu)'
+                      name={t("statistic.scenario_revenue")}
                       dot={false}
                       yAxisId='left'
                     />
@@ -425,12 +428,12 @@ const DashboardPage = () => {
           </Card>
         )}
 
-        {/* --- Biểu đồ decomposition --- */}
+        {/* --- Decomposition chart --- */}
         {decomposition && decompositionChartData.length > 0 && (
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📈 Phân tích thành phần thời gian (Time Series Decomposition)
+                {t("statistic.time_series_decomposition")}
               </Typography>
 
               <Box display='flex' flexWrap='wrap' gap={1}>
@@ -466,21 +469,21 @@ const DashboardPage = () => {
           </Card>
         )}
 
-        {/* --- Dự đoán kỳ tới & Scenario --- */}
+        {/* --- Next period forecast --- */}
         {forecast && (
           <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                📌 Dự đoán kỳ tới
+                {t("statistic.next_period_forecast")}
               </Typography>
               <Typography>
-                Doanh thu dự kiến: <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
+                {t("statistic.expected_revenue")}: <b>{Number(forecast.predictedRevenue || 0).toLocaleString("vi-VN")}</b> ₫
               </Typography>
               <Typography>
-                Lợi nhuận dự kiến: <b>{Number(forecast.predictedProfit || 0).toLocaleString("vi-VN")}</b> ₫
+                {t("statistic.expected_profit")}: <b>{Number(forecast.predictedProfit || 0).toLocaleString("vi-VN")}</b> ₫
               </Typography>
               <Typography>
-                Tăng trưởng trung bình: <b>{forecast.avgGrowth || "-"}</b>
+                {t("statistic.avg_growth")}: <b>{forecast.avgGrowth || "-"}</b>
               </Typography>
 
               <ResponsiveContainer width='100%' height={350}>
@@ -491,25 +494,25 @@ const DashboardPage = () => {
                   <Tooltip />
                   <Legend />
 
-                  {/* Doanh thu */}
-                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name='Doanh thu thực tế' dot={false} />
+                  {/* Revenue */}
+                  <Line type='monotone' dataKey='revenue' stroke='#8884d8' name={t("statistic.actual_revenue")} dot={false} />
                   <Line
                     type='monotone'
                     dataKey='predictedRevenue'
                     stroke='#ff3b3b'
                     strokeDasharray='5 5'
-                    name='Doanh thu dự đoán'
+                    name={t("statistic.predicted_revenue")}
                     dot={false}
                   />
 
-                  {/* Lợi nhuận */}
-                  <Line type='monotone' dataKey='profit' stroke='#82ca9d' name='Lợi nhuận thực tế' dot={false} />
+                  {/* Profit */}
+                  <Line type='monotone' dataKey='profit' stroke='#82ca9d' name={t("statistic.actual_profit")} dot={false} />
                   <Line
                     type='monotone'
                     dataKey='predictedProfit'
                     stroke='#ff9900'
                     strokeDasharray='5 5'
-                    name='Lợi nhuận dự đoán'
+                    name={t("statistic.predicted_profit")}
                     dot={false}
                   />
                 </LineChart>
@@ -518,12 +521,12 @@ const DashboardPage = () => {
           </Card>
         )}
 
-        {/* --- Món ăn bán chạy --- */}
+        {/* --- Top selling dishes --- */}
         {topDishes.length > 0 && (
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                🍽️ Top món ăn bán chạy
+                {t("statistic.top_selling_dishes")}
               </Typography>
 
               <ResponsiveContainer width='100%' height={300}>
@@ -533,20 +536,20 @@ const DashboardPage = () => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey='totalRevenue' fill='#8884d8' name='Doanh thu (₫)' />
-                  <Line type='monotone' dataKey='totalOrders' stroke='#82ca9d' name='Số đơn hàng' dot={false} />
+                  <Bar dataKey='totalRevenue' fill='#8884d8' name={t("statistic.revenue_vnd")} />
+                  <Line type='monotone' dataKey='totalOrders' stroke='#82ca9d' name={t("statistic.order_count")} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
 
-        {/* --- Nhận định chi tiết theo món --- */}
+        {/* --- Detailed dish insights --- */}
         {dishInsights.length > 0 && (
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3, backgroundColor: "#f5f7fa" }}>
             <CardContent>
               <Typography variant='h6' gutterBottom>
-                💡 Nhận định chi tiết theo món
+                {t("statistic.dish_insights")}
               </Typography>
               <Box display='flex' flexDirection='column' gap={1}>
                 {dishInsights.map((msg, i) => (

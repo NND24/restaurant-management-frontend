@@ -1,14 +1,17 @@
 import React from "react";
-
-const steps = [
-  { title: "Tạo tài khoản", description: "Tài khoản chủ cửa hàng" },
-  { title: "Thông tin cửa hàng", description: "Thông tin cơ bản" },
-  { title: "Địa chỉ", description: "Vị trí cửa hàng" },
-  { title: "Hồ sơ", description: "Giấy tờ pháp lý & một số ảnh" },
-  { title: "Xác nhận", description: "Hoàn tất đăng ký cửa hàng" },
-];
+import { useTranslation } from "react-i18next";
 
 const StepRegister = ({ currentStep = 0, vertical = false }) => {
+  const { t } = useTranslation();
+
+  const steps = [
+    { title: t("register.step_create_account"), description: t("register.step_create_account_desc") },
+    { title: t("register.step_store_info"), description: t("register.step_store_info_desc") },
+    { title: t("register.step_address"), description: t("register.step_address_desc") },
+    { title: t("register.step_profile"), description: t("register.step_profile_desc") },
+    { title: t("register.step_confirm"), description: t("register.step_confirm_desc") },
+  ];
+
   return (
     <ol className={`flex gap-1 ${vertical ? "flex-col items-start" : "flex-row justify-between items-center"}`}>
       {steps.map((step, index) => {

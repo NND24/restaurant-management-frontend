@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 import { getAllAdminStores, getAdminStoreById, approveStore, suspendStore } from "@/service/adminStore";
 import Heading from "@/components/Heading";
 import { FiSearch, FiX, FiCheck, FiSlash, FiRotateCcw, FiEye } from "react-icons/fi";
@@ -10,14 +11,22 @@ import { ThreeDots } from "react-loader-spinner";
 
 const ITEMS_PER_PAGE = 6;
 
-const STATUS_CONFIG = {
-  APPROVED: { label: "Đã duyệt", className: "bg-green-100 text-green-700" },
-  PENDING: { label: "Chờ duyệt", className: "bg-yellow-100 text-yellow-700" },
-  BLOCKED: { label: "Tạm khóa", className: "bg-red-100 text-red-700" },
+const getAddressString = (address) => {
+  if (!address) return "";
+  if (typeof address === "string") return address;
+  return address.full_address || "";
 };
 
 const StoreDetailModal = ({ store, onClose }) => {
+  const { t } = useTranslation();
   if (!store) return null;
+
+  const STATUS_CONFIG = {
+    APPROVED: { label: t("admin.approved"), className: "bg-green-100 text-green-700" },
+    PENDING: { label: t("admin.pending"), className: "bg-yellow-100 text-yellow-700" },
+    BLOCKED: { label: t("admin.blocked"), className: "bg-red-100 text-red-700" },
+  };
+
   const status = STATUS_CONFIG[store.status] || { label: store.status, className: "bg-gray-100 text-gray-700" };
   const hasAvatar = store.avatar?.url;
 
@@ -25,7 +34,7 @@ const StoreDetailModal = ({ store, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-lg font-bold text-gray-800">Chi tiết cửa hàng</h2>
+          <h2 className="text-lg font-bold text-gray-800">{t("admin.store_detail")}</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition">
             <FiX size={20} className="text-gray-600" />
           </button>
@@ -60,23 +69,23 @@ const StoreDetailModal = ({ store, onClose }) => {
 
           <div className="grid grid-cols-1 gap-3 text-sm">
             <div>
-              <span className="text-gray-500 font-medium">Địa chỉ:</span>
+              <span className="text-gray-500 font-medium">{t("admin.store_address")}:</span>
               <p className="text-gray-700 mt-0.5">{getAddressString(store.address) || "—"}</p>
             </div>
             {store.phone && (
               <div>
-                <span className="text-gray-500 font-medium">Số điện thoại:</span>
+                <span className="text-gray-500 font-medium">{t("admin.field_phone")}:</span>
                 <p className="text-gray-700 mt-0.5">{store.phone}</p>
               </div>
             )}
             {store.email && (
               <div>
-                <span className="text-gray-500 font-medium">Email:</span>
+                <span className="text-gray-500 font-medium">{t("admin.field_email")}:</span>
                 <p className="text-gray-700 mt-0.5">{store.email}</p>
               </div>
             )}
             <div>
-              <span className="text-gray-500 font-medium">Ngày đăng ký:</span>
+              <span className="text-gray-500 font-medium">{t("admin.col_registered_at")}:</span>
               <p className="text-gray-700 mt-0.5">
                 {store.createdAt ? new Date(store.createdAt).toLocaleDateString("vi-VN") : "—"}
               </p>
@@ -89,7 +98,7 @@ const StoreDetailModal = ({ store, onClose }) => {
             onClick={onClose}
             className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
           >
-            Đóng
+            {t("common.close")}
           </button>
         </div>
       </div>
@@ -97,13 +106,8 @@ const StoreDetailModal = ({ store, onClose }) => {
   );
 };
 
-const getAddressString = (address) => {
-  if (!address) return "";
-  if (typeof address === "string") return address;
-  return address.full_address || "";
-};
-
 const AdminStoresPage = () => {
+  const { t } = useTranslation();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,6 +116,12 @@ const AdminStoresPage = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
+  const STATUS_CONFIG = {
+    APPROVED: { label: t("admin.approved"), className: "bg-green-100 text-green-700" },
+    PENDING: { label: t("admin.pending"), className: "bg-yellow-100 text-yellow-700" },
+    BLOCKED: { label: t("admin.blocked"), className: "bg-red-100 text-red-700" },
+  };
+
   const fetchStores = async () => {
     try {
       setLoading(true);
@@ -119,7 +129,7 @@ const AdminStoresPage = () => {
       const data = Array.isArray(res) ? res : res?.data || res?.stores || [];
       setStores(data);
     } catch {
-      toast.error("Không thể tải danh sách cửa hàng!");
+      toast.error(t("admin.stores_load_fail"));
     } finally {
       setLoading(false);
     }
@@ -143,21 +153,21 @@ const AdminStoresPage = () => {
 
   const handleApprove = async (store) => {
     const result = await Swal.fire({
-      title: `Duyệt cửa hàng "${store.name}"?`,
+      title: t("admin.swal_approve_store", { name: store.name }),
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Đồng ý",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.confirm"),
+      cancelButtonText: t("common.cancel"),
       confirmButtonColor: "#16a34a",
     });
     if (!result.isConfirmed) return;
     setActionLoading(store._id);
     try {
       await approveStore(store._id);
-      toast.success("Đã duyệt cửa hàng!");
+      toast.success(t("admin.store_approve_success"));
       fetchStores();
     } catch {
-      toast.error("Duyệt cửa hàng thất bại!");
+      toast.error(t("admin.store_approve_fail"));
     } finally {
       setActionLoading(null);
     }
@@ -165,21 +175,21 @@ const AdminStoresPage = () => {
 
   const handleSuspend = async (store) => {
     const result = await Swal.fire({
-      title: `Tạm khóa cửa hàng "${store.name}"?`,
+      title: t("admin.swal_suspend_store", { name: store.name }),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Đồng ý",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.confirm"),
+      cancelButtonText: t("common.cancel"),
       confirmButtonColor: "#dc2626",
     });
     if (!result.isConfirmed) return;
     setActionLoading(store._id);
     try {
       await suspendStore(store._id);
-      toast.success("Đã tạm khóa cửa hàng!");
+      toast.success(t("admin.store_suspend_success"));
       fetchStores();
     } catch {
-      toast.error("Tạm khóa cửa hàng thất bại!");
+      toast.error(t("admin.store_suspend_fail"));
     } finally {
       setActionLoading(null);
     }
@@ -187,21 +197,21 @@ const AdminStoresPage = () => {
 
   const handleRestore = async (store) => {
     const result = await Swal.fire({
-      title: `Khôi phục cửa hàng "${store.name}"?`,
+      title: t("admin.swal_restore_store", { name: store.name }),
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Đồng ý",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.confirm"),
+      cancelButtonText: t("common.cancel"),
       confirmButtonColor: "#2563eb",
     });
     if (!result.isConfirmed) return;
     setActionLoading(store._id);
     try {
       await approveStore(store._id);
-      toast.success("Đã khôi phục cửa hàng!");
+      toast.success(t("admin.store_restore_success"));
       fetchStores();
     } catch {
-      toast.error("Khôi phục cửa hàng thất bại!");
+      toast.error(t("admin.store_restore_fail"));
     } finally {
       setActionLoading(null);
     }
@@ -225,19 +235,19 @@ const AdminStoresPage = () => {
 
   return (
     <div className="p-6">
-      <Heading title="Quản lý cửa hàng" description="" keywords="" />
+      <Heading title={t("admin.stores_title")} description="" keywords="" />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Cửa hàng</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Quản lý tất cả cửa hàng đăng ký trên hệ thống</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t("admin.stores_heading")}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{t("admin.stores_subtitle")}</p>
         </div>
         <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 w-full sm:w-72 shadow-sm">
           <FiSearch className="text-gray-400 flex-shrink-0" />
           <input
             type="text"
-            placeholder="Tìm theo tên hoặc địa chỉ..."
+            placeholder={t("admin.search_stores_placeholder")}
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-400"
@@ -256,18 +266,18 @@ const AdminStoresPage = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-gray-600 font-semibold text-left">
-                <th className="px-5 py-3">Cửa hàng</th>
-                <th className="px-5 py-3 hidden md:table-cell">Địa chỉ</th>
-                <th className="px-5 py-3">Trạng thái</th>
-                <th className="px-5 py-3 hidden sm:table-cell">Ngày tạo</th>
-                <th className="px-5 py-3 text-center">Thao tác</th>
+                <th className="px-5 py-3">{t("admin.col_store")}</th>
+                <th className="px-5 py-3 hidden md:table-cell">{t("admin.store_address")}</th>
+                <th className="px-5 py-3">{t("common.status")}</th>
+                <th className="px-5 py-3 hidden sm:table-cell">{t("admin.col_created_at")}</th>
+                <th className="px-5 py-3 text-center">{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {paginated.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center text-gray-400">
-                    Không tìm thấy cửa hàng nào.
+                    {t("admin.no_stores_found")}
                   </td>
                 </tr>
               ) : (
@@ -305,7 +315,7 @@ const AdminStoresPage = () => {
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
-                            title="Xem chi tiết"
+                            title={t("common.view_detail")}
                             disabled={loadingDetail}
                             onClick={() => handleViewDetail(store)}
                             className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition disabled:opacity-50"
@@ -314,7 +324,7 @@ const AdminStoresPage = () => {
                           </button>
                           {store.status === "PENDING" && (
                             <button
-                              title="Duyệt"
+                              title={t("admin.approve")}
                               disabled={isActing}
                               onClick={() => handleApprove(store)}
                               className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition disabled:opacity-50"
@@ -324,7 +334,7 @@ const AdminStoresPage = () => {
                           )}
                           {store.status === "APPROVED" && (
                             <button
-                              title="Tạm khóa"
+                              title={t("admin.block")}
                               disabled={isActing}
                               onClick={() => handleSuspend(store)}
                               className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition disabled:opacity-50"
@@ -334,7 +344,7 @@ const AdminStoresPage = () => {
                           )}
                           {store.status === "BLOCKED" && (
                             <button
-                              title="Khôi phục"
+                              title={t("admin.restore")}
                               disabled={isActing}
                               onClick={() => handleRestore(store)}
                               className="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 transition disabled:opacity-50"
@@ -361,7 +371,7 @@ const AdminStoresPage = () => {
             onClick={() => setCurrentPage((p) => p - 1)}
             className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
           >
-            Trước
+            {t("common.previous")}
           </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
@@ -381,7 +391,7 @@ const AdminStoresPage = () => {
             onClick={() => setCurrentPage((p) => p + 1)}
             className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
           >
-            Sau
+            {t("common.next")}
           </button>
         </div>
       )}

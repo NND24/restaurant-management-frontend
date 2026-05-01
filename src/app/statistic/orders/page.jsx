@@ -28,17 +28,7 @@ import DateRangePicker from "@/components/DateRangePicker";
 import dayjs from "dayjs";
 import { FaCalendarWeek, FaChartLine, FaMoneyBillWave } from "react-icons/fa";
 import Heading from "@/components/Heading";
-
-const STATUS_LABELS = {
-  pending: "Chờ xử lý",
-  confirmed: "Đã xác nhận",
-  finished: "Đã hoàn tất",
-  taken: "Đã lấy món",
-  delivering: "Đang giao",
-  delivered: "Đã giao",
-  done: "Hoàn thành",
-  cancelled: "Đã huỷ",
-};
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS = {
   pending: "#f59e0b",
@@ -71,6 +61,7 @@ function SummaryCard({ title, count, color, icon }) {
 }
 
 const page = () => {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState(null);
   const [statusRate, setStatusRate] = useState(null);
   const [overTimeData, setOverTimeData] = useState([]);
@@ -78,6 +69,17 @@ const page = () => {
   const [timeSlotData, setTimeSlotData] = useState([]);
   const [fromDate, setFromDate] = useState(dayjs().subtract(6, "day").format("YYYY-MM-DD"));
   const [toDate, setToDate] = useState(dayjs().format("YYYY-MM-DD"));
+
+  const STATUS_LABELS = {
+    pending: t("statistic.status_pending"),
+    confirmed: t("statistic.status_confirmed"),
+    finished: t("statistic.status_finished"),
+    taken: t("statistic.status_taken"),
+    delivering: t("statistic.status_delivering"),
+    delivered: t("statistic.status_delivered"),
+    done: t("statistic.status_done"),
+    cancelled: t("statistic.status_cancelled"),
+  };
 
   const fetchAllData = async () => {
     try {
@@ -117,28 +119,28 @@ const page = () => {
 
   const pieChartData = statusRate
     ? Object.entries(statusRate).map(([key, value]) => ({
-        name: key === "completed" ? "Đã hoàn tất" : "Đã huỷ",
+        name: key === "completed" ? t("statistic.status_finished") : t("statistic.status_cancelled"),
         value,
       }))
     : [];
 
   return (
     <div className='p-8 bg-gray-50 min-h-screen space-y-8 overflow-y-auto h-full'>
-      <Heading title='Thống kê đơn hàng' description='' keywords='' />
-      <h1 className='text-3xl font-semibold text-gray-800 mb-2'>Thống kê đơn hàng</h1>
+      <Heading title={t("statistic.orders_report")} description='' keywords='' />
+      <h1 className='text-3xl font-semibold text-gray-800 mb-2'>{t("statistic.orders_report")}</h1>
 
       {/* Summary Cards */}
       {summary && (
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
-          <SummaryCard title='Hôm nay' count={summary.today} color='#3b82f6' icon={<FaMoneyBillWave size={28} />} />
-          <SummaryCard title='Tuần này' count={summary.thisWeek} color='#10b981' icon={<FaCalendarWeek size={28} />} />
-          <SummaryCard title='Tháng này' count={summary.thisMonth} color='#f59e0b' icon={<FaChartLine size={28} />} />
+          <SummaryCard title={t("statistic.today")} count={summary.today} color='#3b82f6' icon={<FaMoneyBillWave size={28} />} />
+          <SummaryCard title={t("statistic.this_week")} count={summary.thisWeek} color='#10b981' icon={<FaCalendarWeek size={28} />} />
+          <SummaryCard title={t("statistic.this_month")} count={summary.thisMonth} color='#f59e0b' icon={<FaChartLine size={28} />} />
         </div>
       )}
 
       {/* Date Filter */}
       <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-center gap-3'>
-        <h3 className='text-lg font-medium text-gray-700'>Chọn khoảng thời gian</h3>
+        <h3 className='text-lg font-medium text-gray-700'>{t("statistic.select_date_range")}</h3>
         <DateRangePicker
           from={fromDate}
           to={toDate}
@@ -151,7 +153,7 @@ const page = () => {
 
       {/* Orders Over Time */}
       <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-        <h3 className='text-lg font-semibold mb-3 text-gray-800'>Đơn hàng theo thời gian</h3>
+        <h3 className='text-lg font-semibold mb-3 text-gray-800'>{t("statistic.orders_over_time")}</h3>
         <div className='w-full h-80'>
           <ResponsiveContainer width='100%' height='100%'>
             <LineChart data={overTimeData}>
@@ -203,7 +205,7 @@ const page = () => {
       {/* Orders by Time Slot */}
       {timeSlotData && timeSlotData.length > 0 && (
         <div className='bg-white rounded-xl shadow-md border border-gray-100 p-6'>
-          <h3 className='text-lg font-semibold mb-3 text-gray-800'>Đơn hàng theo khung giờ</h3>
+          <h3 className='text-lg font-semibold mb-3 text-gray-800'>{t("statistic.orders_by_time_slot")}</h3>
           <div className='w-full h-80'>
             <ResponsiveContainer width='100%' height='100%'>
               <BarChart data={timeSlotData}>
@@ -211,7 +213,7 @@ const page = () => {
                 <XAxis dataKey='timeSlot' />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey='orders' name='Số đơn' fill='#8b5cf6' radius={[6, 6, 0, 0]} />
+                <Bar dataKey='orders' name={t("statistic.order_count")} fill='#8b5cf6' radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

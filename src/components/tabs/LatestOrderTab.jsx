@@ -5,21 +5,9 @@ import { getAllOrders, updateOrder } from "@/service/order";
 import { useSocket } from "@/context/SocketContext";
 import { viVN } from "@/utils/constants";
 import { Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import generateOrderNumber from "../../utils/generateOrderNumber";
 import OrderDetailModal from "../orders/OrderDetailModal";
-
-const statusTypes = {
-  pending: "Đang chờ",
-  preparing: "Đang chuẩn bị",
-  delivered: "Đã giao",
-  cancelled: "Đã hủy",
-  completed: "Hoàn thành",
-  taken: "Đã lấy",
-  delivering: "Đang giao",
-  done: "Đã xong",
-  finished: "Đã thông báo tài xế",
-  confirmed: "Đang chuẩn bị",
-};
 
 const formatVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", {
@@ -29,12 +17,26 @@ const formatVND = (n) =>
   });
 
 const LatestOrder = ({ storeId }) => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDetailOrder, setOpenDetailOrder] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
   const { sendNotification, notifications } = useSocket();
+
+  const statusTypes = {
+    pending: t("orders.status_pending"),
+    preparing: t("orders.status_confirmed"),
+    delivered: t("orders.status_delivered"),
+    cancelled: t("orders.status_cancelled"),
+    completed: t("orders.status_completed"),
+    taken: t("orders.status_taken"),
+    delivering: t("orders.status_delivering"),
+    done: t("orders.status_done"),
+    finished: t("orders.status_finished"),
+    confirmed: t("orders.status_confirmed"),
+  };
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -57,28 +59,22 @@ const LatestOrder = ({ storeId }) => {
 
   const handleConfirm = async (order) => {
     try {
-      // 1️⃣ Tìm lại order gốc từ orders
       const originalOrder = orders.find((o) => o._id === order.id);
-
-      // 2️⃣ Tạo bản cập nhật từ order gốc
       const updatedOrder = { ...originalOrder, status: "confirmed" };
 
-      // 3️⃣ Gửi API
       await updateOrder({
         orderId: originalOrder._id,
         updatedData: updatedOrder,
       });
 
-      // 4️⃣ Gửi thông báo
       sendNotification({
         userId: originalOrder.userId,
-        title: "Cập nhật trạng thái đơn hàng",
-        message: `Đơn hàng #${originalOrder._id} đã được xác nhận.`,
+        title: t("orders.notification_status_update_title"),
+        message: t("orders.notification_confirmed_message", { id: originalOrder._id }),
         orderId: originalOrder._id,
         type: "info",
       });
 
-      // 5️⃣ Load lại danh sách
       fetchOrders();
     } catch (err) {
       console.error("Update failed:", err);
@@ -88,7 +84,7 @@ const LatestOrder = ({ storeId }) => {
   const rows = orders.map((o) => ({
     id: o._id,
     orderNo: `#${generateOrderNumber(o._id)}`,
-    customer: o.user?.name || o.shipInfo?.contactName || "Khách lạ",
+    customer: o.user?.name || o.shipInfo?.contactName || t("orders.unknown_customer"),
     quantity: o.items?.reduce((sum, i) => sum + (i.quantity || 0), 0),
     someItems: o.items,
     total: formatVND(o.finalTotal),
@@ -98,12 +94,12 @@ const LatestOrder = ({ storeId }) => {
   }));
 
   const columns = [
-    { field: "orderNo", headerName: "Mã đơn", width: 80, headerAlign: "center", align: "center" },
-    { field: "customer", headerName: "Khách hàng", width: 150, headerAlign: "center" },
-    { field: "quantity", headerName: "Số món", width: 80, headerAlign: "center", align: "center" },
+    { field: "orderNo", headerName: t("orders.order_code"), width: 80, headerAlign: "center", align: "center" },
+    { field: "customer", headerName: t("orders.customer"), width: 150, headerAlign: "center" },
+    { field: "quantity", headerName: t("orders.item_count"), width: 80, headerAlign: "center", align: "center" },
     {
       field: "someItems",
-      headerName: "Món ăn được đặt",
+      headerName: t("orders.ordered_dishes"),
       flex: 2,
       headerAlign: "center",
       align: "left",
@@ -113,7 +109,7 @@ const LatestOrder = ({ storeId }) => {
           .slice(0, 2)
           .map((i) => i.dishName || i.dish?.name)
           .join(", ");
-        const more = items.length > 2 ? ` +${items.length - 2} món khác` : "";
+        const more = items.length > 2 ? ` +${items.length - 2} ${t("orders.more_items")}` : "";
         return (
           <span>
             {preview}
@@ -122,19 +118,19 @@ const LatestOrder = ({ storeId }) => {
         );
       },
     },
-    { field: "total", headerName: "Tổng tiền", width: 100, headerAlign: "center", align: "center" },
+    { field: "total", headerName: t("orders.total_amount"), width: 100, headerAlign: "center", align: "center" },
     {
       field: "createdAt",
-      headerName: "Ngày tạo",
+      headerName: t("orders.created_at"),
       width: 180,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => <span>{new Date(params.value).toLocaleString("vi-VN") || ""}</span>,
     },
-    { field: "status", headerName: "Trạng thái", width: 100, headerAlign: "center", align: "center" },
+    { field: "status", headerName: t("orders.status"), width: 100, headerAlign: "center", align: "center" },
     {
       field: "action",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       flex: 1,
       sortable: false,
       filterable: false,
@@ -152,7 +148,7 @@ const LatestOrder = ({ storeId }) => {
             handleConfirm(params.row);
           }}
         >
-          Xác nhận
+          {t("orders.confirm_order_btn")}
         </Button>
       ),
     },
@@ -192,4 +188,3 @@ const LatestOrder = ({ storeId }) => {
 };
 
 export default LatestOrder;
-

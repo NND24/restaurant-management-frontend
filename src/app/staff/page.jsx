@@ -11,8 +11,10 @@ import StaffCreateModal from "@/components/staff/StaffCreateModal";
 import { DataGrid } from "@mui/x-data-grid";
 import { GridToolbar } from "node_modules/@mui/x-data-grid/internals";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 export default function StaffDataGrid() {
+  const { t } = useTranslation();
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +29,7 @@ export default function StaffDataGrid() {
       const res = await getAllStaff(storeId);
       if (res.success) setStaff(res.data.employees);
     } catch (err) {
-      toast.error("Lỗi khi load staff");
+      toast.error(t("staff.load_error"));
     } finally {
       setLoading(false);
     }
@@ -39,18 +41,18 @@ export default function StaffDataGrid() {
 
   const handleDeleteStaff = async (staffId) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Nhân viên này sẽ bị xóa vĩnh viễn.",
+      title: t("common.are_you_sure"),
+      text: t("staff.delete_confirm"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      cancelButtonText: "Hủy",
-      confirmButtonText: "Xóa",
+      cancelButtonText: t("common.cancel"),
+      confirmButtonText: t("common.delete"),
     });
     if (result.isConfirmed) {
       await deleteStaff({ storeId, userId: staffId });
       fetchStaff();
-      Swal.fire("Đã xóa!", "Nhân viên đã được xóa.", "success");
+      Swal.fire(t("common.deleted"), t("staff.deleted_msg"), "success");
     }
   };
 
@@ -58,16 +60,16 @@ export default function StaffDataGrid() {
     id: st._id,
     name: st.name,
     phonenumber: st.phonenumber,
-    gender: st.gender === "male" ? "Nam" : "Nữ",
-    role: st.role.includes("manager") ? "Quản lý" : st.role.includes("owner") ? "Chủ nhà hàng" : "Nhân viên",
+    gender: st.gender === "male" ? t("staff.male") : t("staff.female"),
+    role: st.role.includes("manager") ? t("staff.manager") : st.role.includes("owner") ? t("staff.owner") : t("staff.staff"),
     avatar: st.avatar.url || "/default-avatar.png",
   }));
 
   const columns = [
-    { field: "id", headerName: "Mã nhân viên", headerAlign: "center", width: 180 },
+    { field: "id", headerName: t("staff.id"), headerAlign: "center", width: 180 },
     {
       field: "name",
-      headerName: "Họ và tên",
+      headerName: t("staff.full_name"),
       width: 250,
       headerAlign: "center",
       renderCell: (params) => (
@@ -77,12 +79,12 @@ export default function StaffDataGrid() {
         </div>
       ),
     },
-    { field: "phonenumber", headerName: "Số điện thoại", headerAlign: "center", align: "center", width: 180 },
-    { field: "gender", headerName: "Giới tính", headerAlign: "center", align: "center", width: 80 },
-    { field: "role", headerName: "Chức vụ", headerAlign: "center", align: "center", width: 180 },
+    { field: "phonenumber", headerName: t("staff.phone"), headerAlign: "center", align: "center", width: 180 },
+    { field: "gender", headerName: t("staff.gender"), headerAlign: "center", align: "center", width: 80 },
+    { field: "role", headerName: t("staff.role"), headerAlign: "center", align: "center", width: 180 },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -92,7 +94,7 @@ export default function StaffDataGrid() {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -112,7 +114,7 @@ export default function StaffDataGrid() {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
+            data-tooltip-content={t("common.edit")}
             size='small'
             color='info'
             sx={{
@@ -131,7 +133,7 @@ export default function StaffDataGrid() {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xoá'
+            data-tooltip-content={t("common.delete")}
             size='small'
             color='error'
             sx={{
@@ -150,16 +152,16 @@ export default function StaffDataGrid() {
 
   return (
     <div className='page-shell'>
-      <Heading title='Nhân viên' description='' keywords='' />
+      <Heading title={t("staff.title")} description='' keywords='' />
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Nhân viên</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("staff.title")}</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
             onClick={() => setShowForm(true)}
             className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
             <FaPlus className='text-lg' />
-            <span>Thêm</span>
+            <span>{t("common.add")}</span>
           </button>
         </div>
       </div>
@@ -178,24 +180,24 @@ export default function StaffDataGrid() {
                 // Update
                 const res = await updateStaff({ userId: staffBeingEdited._id, staffData: formData });
                 if (res.success) {
-                  toast.success("Cập nhật nhân viên thành công!");
+                  toast.success(t("staff.update_success"));
                 } else {
-                  toast.error("Có lỗi xảy ra!");
+                  toast.error(t("common.error_occurred"));
                 }
               } else {
                 // Create
                 const res = await createStaff({ storeId, staffData: formData });
                 if (res.success) {
-                  toast.success("Thêm nhân viên thành công!");
+                  toast.success(t("staff.create_success"));
                 } else {
-                  toast.error("Có lỗi xảy ra!");
+                  toast.error(t("common.error_occurred"));
                 }
               }
               fetchStaff();
               setShowForm(false);
               setStaffBeingEdited(null);
             } catch (err) {
-              toast.error("Có lỗi xảy ra!");
+              toast.error(t("common.error_occurred"));
             }
           }}
           initialData={staffBeingEdited}
@@ -222,4 +224,3 @@ export default function StaffDataGrid() {
     </div>
   );
 }
-

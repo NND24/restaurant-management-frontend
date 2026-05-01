@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, IconButton } from "@mui/material";
@@ -14,6 +15,7 @@ import { getBatchesByStore, deleteBatch } from "@/service/ingredientBatch";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
@@ -59,23 +61,23 @@ const page = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Lô nguyên liệu này sẽ bị xóa vĩnh viễn.",
+      title: t("ingredient_batch.delete_confirm_title"),
+      text: t("ingredient_batch.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteBatch(id);
-        Swal.fire("Đã xóa!", "Lô nguyên liệu đã được xóa.", "success");
+        Swal.fire(t("ingredient_batch.delete_success_title"), t("ingredient_batch.delete_success_text"), "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa Lô nguyên liệu thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("ingredient_batch.delete_error_text"), "error");
       }
     }
   };
@@ -83,7 +85,7 @@ const page = () => {
   const columns = [
     {
       field: "batchCode",
-      headerName: "Mã lô",
+      headerName: t("ingredient_batch.batch_code"),
       width: 160,
       headerAlign: "center",
       align: "center",
@@ -91,14 +93,14 @@ const page = () => {
     },
     {
       field: "ingredientName",
-      headerName: "Lô nguyên liệu",
+      headerName: t("ingredient_batch.title"),
       width: 200,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.ingredientName || ""}</span>,
     },
     {
       field: "remainingQuantity",
-      headerName: "Còn lại",
+      headerName: t("ingredient_batch.remaining_quantity"),
       width: 160,
       headerAlign: "center",
       align: "center",
@@ -117,7 +119,7 @@ const page = () => {
     },
     {
       field: "totalCost",
-      headerName: "Tổng giá",
+      headerName: t("ingredient_batch.price"),
       width: 150,
       headerAlign: "center",
       align: "center",
@@ -125,7 +127,7 @@ const page = () => {
     },
     {
       field: "expiryDate",
-      headerName: "Hạn sử dụng",
+      headerName: t("ingredient_batch.expiry_date"),
       width: 160,
       headerAlign: "center",
       align: "center",
@@ -134,7 +136,7 @@ const page = () => {
     },
     {
       field: "status",
-      headerName: "Trạng thái",
+      headerName: t("ingredient_batch.status"),
       width: 130,
       headerAlign: "center",
       align: "center",
@@ -148,13 +150,17 @@ const page = () => {
               : "bg-gray-200 text-gray-600"
           }`}
         >
-          {params.row?.status === "active" ? "Hoạt động" : params.row?.status === "expired" ? "Hết hạn" : "Hết hàng"}
+          {params.row?.status === "active"
+            ? t("ingredient_batch.status_active")
+            : params.row?.status === "expired"
+            ? t("ingredient_batch.status_expired")
+            : t("ingredient_batch.status_out_of_stock")}
         </span>
       ),
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       width: 150,
       headerAlign: "center",
       align: "center",
@@ -163,7 +169,7 @@ const page = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -181,7 +187,7 @@ const page = () => {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
+            data-tooltip-content={t("common.edit")}
             size='small'
             color='info'
             sx={{
@@ -200,7 +206,7 @@ const page = () => {
           {!blockEdit && (
             <IconButton
               data-tooltip-id='dish-tooltip'
-              data-tooltip-content='Xoá'
+              data-tooltip-content={t("common.delete")}
               size='small'
               color='error'
               sx={{
@@ -248,8 +254,8 @@ const page = () => {
       )}
 
       <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
-        <Heading title='Lô nguyên liệu' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Lô nguyên liệu</span>
+        <Heading title={t("ingredient_batch.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("ingredient_batch.title")}</span>
 
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
@@ -257,7 +263,7 @@ const page = () => {
             className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
             <FaPlus className='text-lg' />
-            <span>Nhập lô mới</span>
+            <span>{t("ingredient_batch.import_new")}</span>
           </button>
         </div>
       </div>
@@ -282,4 +288,3 @@ const page = () => {
 };
 
 export default page;
-

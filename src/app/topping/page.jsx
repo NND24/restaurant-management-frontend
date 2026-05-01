@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, Tooltip, IconButton } from "@mui/material";
@@ -14,6 +15,7 @@ import { getStoreToppings, deleteTopping } from "@/service/topping";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
@@ -36,7 +38,7 @@ const page = () => {
       setAllToppings(list);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
-      setError("Lỗi tải danh sách món");
+      setError(t("topping.fetch_error"));
     } finally {
       setIsLoading(false);
     }
@@ -48,23 +50,23 @@ const page = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Món thêm này sẽ bị xóa vĩnh viễn.",
+      title: t("common.are_you_sure"),
+      text: t("topping.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteTopping(id);
-        Swal.fire("Đã xóa!", "Món thêm đã được xóa.", "success");
+        Swal.fire(t("common.deleted"), t("topping.delete_success_text"), "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa Món thêm thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("topping.delete_failed"), "error");
       }
     }
   };
@@ -72,14 +74,14 @@ const page = () => {
   const columns = [
     {
       field: "name",
-      headerName: "Tên Món thêm",
+      headerName: t("topping.column_name"),
       width: 200,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.name || ""}</span>,
     },
     {
       field: "price",
-      headerName: "Giá",
+      headerName: t("topping.column_price"),
       width: 120,
       headerAlign: "center",
       align: "center",
@@ -87,7 +89,7 @@ const page = () => {
     },
     {
       field: "ingredients",
-      headerName: "Nguyên liệu",
+      headerName: t("topping.column_ingredients"),
       flex: 1,
       headerAlign: "center",
       renderCell: (params) => (
@@ -96,7 +98,7 @@ const page = () => {
     },
     {
       field: "status",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       headerAlign: "center",
       align: "center",
       width: 140,
@@ -106,19 +108,19 @@ const page = () => {
 
         switch (params.value) {
           case "ACTIVE":
-            label = "Còn hàng";
+            label = t("topping.status_in_stock");
             className = "bg-green-100 text-green-800";
             break;
           case "OUT_OF_STOCK":
-            label = "Hết hàng";
+            label = t("topping.status_out_of_stock");
             className = "bg-red-100 text-red-600";
             break;
           case "INACTIVE":
-            label = "Ngừng bán";
+            label = t("topping.status_stopped");
             className = "bg-gray-200 text-gray-700";
             break;
           default:
-            label = "Không xác định";
+            label = t("common.unknown");
             className = "bg-gray-100 text-gray-500";
         }
 
@@ -134,7 +136,7 @@ const page = () => {
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -144,7 +146,7 @@ const page = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -164,7 +166,7 @@ const page = () => {
             <>
               <IconButton
                 data-tooltip-id='dish-tooltip'
-                data-tooltip-content='Chỉnh sửa'
+                data-tooltip-content={t("common.edit")}
                 size='small'
                 color='info'
                 sx={{
@@ -182,7 +184,7 @@ const page = () => {
 
               <IconButton
                 data-tooltip-id='dish-tooltip'
-                data-tooltip-content='Xoá'
+                data-tooltip-content={t("common.delete")}
                 size='small'
                 color='error'
                 sx={{
@@ -227,8 +229,8 @@ const page = () => {
       )}
 
       <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
-        <Heading title='Món thêm' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Món thêm</span>
+        <Heading title={t("topping.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("topping.title")}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -237,7 +239,7 @@ const page = () => {
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
-              <span>Thêm</span>
+              <span>{t("common.add")}</span>
             </button>
           </div>
         )}
@@ -263,4 +265,3 @@ const page = () => {
 };
 
 export default page;
-

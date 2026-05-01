@@ -5,10 +5,10 @@ import { getReturningCustomerRate, getAverageSpendingPerOrder, getNewCustomers }
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Users, DollarSign, RotateCcw } from "lucide-react";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const COLORS = ["#10b981", "#f87171"]; // Returning: green, New: red
 
-// 🔹 Thẻ thống kê đẹp, có icon và màu sắc
 function SummaryCard({ title, value, icon: Icon, color }) {
   return (
     <div
@@ -29,6 +29,7 @@ function SummaryCard({ title, value, icon: Icon, color }) {
 }
 
 const CustomerInsightPage = () => {
+  const { t } = useTranslation();
   const [returnRate, setReturnRate] = useState(0);
   const [avgSpending, setAvgSpending] = useState(0);
   const [newCustomerStats, setNewCustomerStats] = useState({
@@ -62,40 +63,40 @@ const CustomerInsightPage = () => {
   };
 
   const returnChartData = [
-    { name: "Khách quay lại", value: returnRate },
-    { name: "Khách mới", value: 100 - returnRate },
+    { name: t("statistic.returning_customers"), value: returnRate },
+    { name: t("statistic.new_customers"), value: 100 - returnRate },
   ];
 
   return (
     <div className='overflow-y-auto h-full p-6 bg-gradient-to-br from-gray-50 to-gray-100'>
-      <Heading title='Phân tích hành vi khách hàng' description='' keywords='' />
-      <h2 className='text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2'>Phân tích hành vi khách hàng</h2>
+      <Heading title={t("statistic.customers_report")} description='' keywords='' />
+      <h2 className='text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2'>{t("statistic.customers_report")}</h2>
 
-      {/* Tổng quan */}
+      {/* Overview */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8'>
         <SummaryCard
-          title='Tỷ lệ khách quay lại'
+          title={t("statistic.returning_rate")}
           value={`${returnRate.toFixed(1)}%`}
           icon={RotateCcw}
           color='#10b981'
         />
         <SummaryCard
-          title='Chi tiêu trung bình / đơn'
+          title={t("statistic.avg_spending_per_order")}
           value={`${avgSpending.toLocaleString()}₫`}
           icon={DollarSign}
           color='#3b82f6'
         />
         <SummaryCard
-          title='Khách mới (Tháng)'
+          title={t("statistic.new_customers_month")}
           value={newCustomerStats.thisMonth.toLocaleString()}
           icon={Users}
           color='#f59e0b'
         />
       </div>
 
-      {/* Biểu đồ Pie */}
+      {/* Pie Chart */}
       <div className='bg-white rounded-2xl shadow-md p-6 mb-8'>
-        <h3 className='text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2'>Tỷ lệ khách quay lại</h3>
+        <h3 className='text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2'>{t("statistic.returning_rate")}</h3>
         <div className='w-full h-72'>
           <ResponsiveContainer width='100%' height='100%'>
             <PieChart>
@@ -119,22 +120,22 @@ const CustomerInsightPage = () => {
         </div>
       </div>
 
-      {/* Thống kê chi tiết khách mới */}
+      {/* New customer detail stats */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
         <SummaryCard
-          title='Khách mới (Hôm nay)'
+          title={t("statistic.new_customers_today")}
           value={newCustomerStats.today.toLocaleString()}
           icon={Users}
           color='#06b6d4'
         />
         <SummaryCard
-          title='Khách mới (Tuần này)'
+          title={t("statistic.new_customers_this_week")}
           value={newCustomerStats.thisWeek.toLocaleString()}
           icon={Users}
           color='#8b5cf6'
         />
         <SummaryCard
-          title='Khách mới (Tháng này)'
+          title={t("statistic.new_customers_this_month")}
           value={newCustomerStats.thisMonth.toLocaleString()}
           icon={Users}
           color='#f43f5e'

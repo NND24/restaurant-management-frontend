@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, Tooltip, IconButton } from "@mui/material";
@@ -15,6 +16,7 @@ import WasteEditModal from "@/components/waste/WasteEditModal";
 import Heading from "@/components/Heading";
 
 const WastePage = () => {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const getRole = localStorageService.getRole();
@@ -55,52 +57,51 @@ const WastePage = () => {
   }, [storeId]);
 
   const reasonMap = {
-    expired: "Hết hạn",
-    spoiled: "Bị hỏng",
-    damaged: "Bị hư hại",
-    other: "Khác",
+    expired: t("waste.reason_expired"),
+    spoiled: t("waste.reason_spoiled"),
+    damaged: t("waste.reason_damaged"),
+    other: t("waste.reason_other"),
   };
 
-  // Cột hiển thị Waste
   const columns = [
     {
       field: "ingredientName",
-      headerName: "Nguyên liệu",
+      headerName: t("waste.ingredient"),
       flex: 1,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.ingredientName || ""}</span>,
     },
     {
       field: "quantity",
-      headerName: "Số lượng hỏng",
+      headerName: t("waste.quantity"),
       width: 150,
       headerAlign: "center",
       align: "center",
     },
     {
       field: "reason",
-      headerName: "Lý do",
+      headerName: t("waste.reason"),
       flex: 1,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => {
         if (params.value === "other") {
-          return params.row?.otherReason || "Khác";
+          return params.row?.otherReason || t("waste.reason_other");
         }
-        return reasonMap[params.value] || "Không xác định";
+        return reasonMap[params.value] || t("waste.reason_unknown");
       },
     },
     {
       field: "staff",
-      headerName: "Nhân viên ghi nhận",
+      headerName: t("waste.staff"),
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderCell: (params) => params.row?.staff?.name || "Hệ thống ghi nhận",
+      renderCell: (params) => params.row?.staff?.name || t("waste.system_recorded"),
     },
     {
       field: "date",
-      headerName: "Ngày ghi nhận",
+      headerName: t("waste.date"),
       width: 180,
       headerAlign: "center",
       align: "center",
@@ -108,7 +109,7 @@ const WastePage = () => {
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       width: 120,
@@ -118,7 +119,7 @@ const WastePage = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -136,7 +137,7 @@ const WastePage = () => {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Chỉnh sửa'
+            data-tooltip-content={t("common.edit")}
             size='small'
             color='info'
             sx={{
@@ -182,8 +183,8 @@ const WastePage = () => {
       )}
 
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
-        <Heading title='Nguyên liệu hỏng' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Nguyên liệu hỏng</span>
+        <Heading title={t("waste.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("waste.title")}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -192,7 +193,7 @@ const WastePage = () => {
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
-              <span>Thêm</span>
+              <span>{t("common.add")}</span>
             </button>
           </div>
         )}
@@ -218,4 +219,3 @@ const WastePage = () => {
 };
 
 export default WastePage;
-

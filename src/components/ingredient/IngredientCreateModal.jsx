@@ -15,8 +15,10 @@ import { FaTimes } from "react-icons/fa";
 import { createIngredient } from "@/service/ingredient";
 import { getIngredientCategoriesByStore } from "@/service/ingredientCategory";
 import { getUnits } from "@/service/unit";
+import { useTranslation } from "react-i18next";
 
 const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -79,7 +81,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        Thêm nguyên liệu
+        {t("ingredient.add_title")}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -88,18 +90,18 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
       <DialogContent dividers>
         <Box className='space-y-4'>
           <TextField
-            label='Tên nguyên liệu'
+            label={t("ingredient.name")}
             name='name'
             value={formData.name}
             onChange={handleChange}
             fullWidth
             required
             error={!formData.name}
-            helperText={!formData.name ? "Tên là bắt buộc" : ""}
+            helperText={!formData.name ? t("ingredient.validation_name_required") : ""}
           />
 
           <TextField
-            label='Mô tả'
+            label={t("common.description")}
             name='description'
             value={formData.description}
             onChange={handleChange}
@@ -111,7 +113,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               select
-              label='Loại đơn vị'
+              label={t("ingredient.unit_type")}
               name='unitType'
               value={formData.unitType || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, unitType: e.target.value, unit: "" }))}
@@ -128,21 +130,21 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
                 },
               }}
             >
-              <MenuItem value='weight'>Khối lượng</MenuItem>
-              <MenuItem value='volume'>Thể tích</MenuItem>
-              <MenuItem value='count'>Đếm</MenuItem>
+              <MenuItem value='weight'>{t("ingredient.unit_type_weight")}</MenuItem>
+              <MenuItem value='volume'>{t("ingredient.unit_type_volume")}</MenuItem>
+              <MenuItem value='count'>{t("ingredient.unit_type_count")}</MenuItem>
             </TextField>
 
             <TextField
               select
-              label='Đơn vị tính'
+              label={t("ingredient.unit")}
               name='unit'
               value={formData.unit}
               onChange={handleChange}
               fullWidth
               required
               sx={{ flex: 1 }}
-              disabled={!formData.unitType} // disable nếu chưa chọn loại
+              disabled={!formData.unitType}
               SelectProps={{
                 MenuProps: {
                   PaperProps: {
@@ -165,7 +167,7 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
 
           <TextField
             select
-            label='Loại nguyên liệu'
+            label={t("ingredient.category")}
             name='category'
             value={formData.category}
             onChange={handleChange}
@@ -198,20 +200,27 @@ const IngredientCreateModal = ({ open, onClose, storeId, onCreated }) => {
             inputProps={{ min: 0 }}
           /> */}
 
-          <TextField select label='Trạng thái' name='status' value={formData.status} onChange={handleChange} fullWidth>
-            <MenuItem value='ACTIVE'>Đang sử dụng</MenuItem>
-            <MenuItem value='OUT_OF_STOCK'>Hết hàng</MenuItem>
-            <MenuItem value='INACTIVE'>Ngưng sử dụng</MenuItem>
+          <TextField
+            select
+            label={t("common.status")}
+            name='status'
+            value={formData.status}
+            onChange={handleChange}
+            fullWidth
+          >
+            <MenuItem value='ACTIVE'>{t("ingredient.status_in_use")}</MenuItem>
+            <MenuItem value='OUT_OF_STOCK'>{t("common.out_of_stock")}</MenuItem>
+            <MenuItem value='INACTIVE'>{t("ingredient.status_inactive")}</MenuItem>
           </TextField>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3 }}>
         <Button onClick={onClose} color='error' variant='outlined'>
-          Hủy
+          {t("common.cancel")}
         </Button>
         <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu"}
+          {loading ? t("common.saving") : t("common.save")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import Dropzone from "react-dropzone";
+import { useTranslation } from "react-i18next";
 import {
   getAllSystemCategories,
   createSystemCategory,
@@ -18,6 +19,7 @@ import { ThreeDots } from "react-loader-spinner";
 const ITEMS_PER_PAGE = 6;
 
 const CategoryFormModal = ({ category, onClose, onSaved }) => {
+  const { t } = useTranslation();
   const isEdit = !!category;
   const [name, setName] = useState(category?.name || "");
   const [imageFile, setImageFile] = useState(null);
@@ -35,7 +37,7 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || name.trim().length < 2) {
-      setNameError("Tên danh mục ít nhất 2 ký tự");
+      setNameError(t("admin.category_name_min"));
       return;
     }
     setSaving(true);
@@ -50,15 +52,15 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
       const payload = { name: name.trim(), image: imageData };
       if (isEdit) {
         await updateSystemCategory(category._id, payload);
-        toast.success("Cập nhật danh mục thành công!");
+        toast.success(t("admin.category_update_success"));
       } else {
         await createSystemCategory(payload);
-        toast.success("Tạo danh mục thành công!");
+        toast.success(t("admin.category_create_success"));
       }
       onSaved();
       onClose();
     } catch (err) {
-      toast.error(err?.message || (isEdit ? "Cập nhật thất bại!" : "Tạo danh mục thất bại!"));
+      toast.error(err?.message || (isEdit ? t("admin.category_update_fail") : t("admin.category_create_fail")));
     } finally {
       setSaving(false);
     }
@@ -69,7 +71,7 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-800">
-            {isEdit ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
+            {isEdit ? t("admin.edit_category") : t("admin.add_category")}
           </h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition">
             <FiX size={20} className="text-gray-600" />
@@ -79,7 +81,7 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Image upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Hình ảnh</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t("admin.field_image")}</label>
             <Dropzone
               maxFiles={1}
               accept={{ "image/*": [] }}
@@ -101,7 +103,7 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
                     <>
                       <FiImage size={32} className="text-gray-300 mb-2" />
                       <p className="text-sm text-gray-400 text-center">
-                        Kéo thả hoặc click để chọn ảnh
+                        {t("admin.image_drop_hint")}
                       </p>
                     </>
                   )}
@@ -112,12 +114,12 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tên danh mục</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("admin.field_category_name")}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => { setName(e.target.value); setNameError(""); }}
-              placeholder="Nhập tên danh mục..."
+              placeholder={t("admin.placeholder_category_name")}
               className={`w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition ${
                 nameError ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#fc6011]"
               }`}
@@ -131,14 +133,14 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
               onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
             >
-              Hủy
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 py-2.5 rounded-xl bg-[#fc6011] text-white text-sm font-semibold hover:bg-[#e55010] transition disabled:opacity-60"
             >
-              {saving ? "Đang lưu..." : isEdit ? "Lưu" : "Tạo"}
+              {saving ? t("common.saving") : isEdit ? t("common.save") : t("common.create")}
             </button>
           </div>
         </form>
@@ -148,6 +150,7 @@ const CategoryFormModal = ({ category, onClose, onSaved }) => {
 };
 
 const AdminSystemCategoryPage = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -160,7 +163,7 @@ const AdminSystemCategoryPage = () => {
       const data = await getAllSystemCategories();
       setCategories(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("Không thể tải danh mục!");
+      toast.error(t("admin.categories_load_fail"));
     } finally {
       setLoading(false);
     }
@@ -172,21 +175,21 @@ const AdminSystemCategoryPage = () => {
 
   const handleDelete = async (cat) => {
     const result = await Swal.fire({
-      title: `Xóa danh mục "${cat.name}"?`,
-      text: "Hành động này không thể hoàn tác!",
+      title: t("admin.swal_delete_category", { name: cat.name }),
+      text: t("common.irreversible_warning"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
       confirmButtonColor: "#dc2626",
     });
     if (!result.isConfirmed) return;
     try {
       await deleteSystemCategory(cat._id);
-      toast.success("Đã xóa danh mục!");
+      toast.success(t("admin.category_delete_success"));
       fetchCategories();
     } catch {
-      toast.error("Xóa danh mục thất bại!");
+      toast.error(t("admin.category_delete_fail"));
     }
   };
 
@@ -207,20 +210,20 @@ const AdminSystemCategoryPage = () => {
 
   return (
     <div className="p-6">
-      <Heading title="Quản lý danh mục" description="" keywords="" />
+      <Heading title={t("admin.system_categories_title")} description="" keywords="" />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Danh mục</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Quản lý danh mục món ăn trên toàn hệ thống</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t("admin.categories_heading")}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{t("admin.categories_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 flex-1 sm:w-56 shadow-sm">
             <FiSearch className="text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Tìm danh mục..."
+              placeholder={t("admin.search_categories_placeholder")}
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-400"
@@ -236,14 +239,14 @@ const AdminSystemCategoryPage = () => {
             className="flex items-center gap-2 px-4 py-2 bg-[#fc6011] text-white rounded-xl text-sm font-semibold hover:bg-[#e55010] transition shadow-sm whitespace-nowrap"
           >
             <FiPlus size={16} />
-            Thêm
+            {t("common.add")}
           </button>
         </div>
       </div>
 
       {/* Grid */}
       {paginated.length === 0 ? (
-        <div className="text-center text-gray-400 py-16">Không tìm thấy danh mục nào.</div>
+        <div className="text-center text-gray-400 py-16">{t("admin.no_categories_found")}</div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {paginated.map((cat) => {
@@ -266,20 +269,20 @@ const AdminSystemCategoryPage = () => {
                   <p className="text-sm font-semibold text-gray-800 truncate">{cat.name}</p>
                   <div className="flex items-center gap-1 mt-2">
                     <button
-                      title="Chỉnh sửa"
+                      title={t("common.edit")}
                       onClick={() => setModal({ category: cat })}
                       className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs text-indigo-600 hover:bg-indigo-50 transition font-medium"
                     >
                       <FiEdit2 size={13} />
-                      Sửa
+                      {t("common.edit")}
                     </button>
                     <button
-                      title="Xóa"
+                      title={t("common.delete")}
                       onClick={() => handleDelete(cat)}
                       className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs text-red-500 hover:bg-red-50 transition font-medium"
                     >
                       <FiTrash2 size={13} />
-                      Xóa
+                      {t("common.delete")}
                     </button>
                   </div>
                 </div>
@@ -297,7 +300,7 @@ const AdminSystemCategoryPage = () => {
             onClick={() => setCurrentPage((p) => p - 1)}
             className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
           >
-            Trước
+            {t("common.previous")}
           </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
@@ -317,7 +320,7 @@ const AdminSystemCategoryPage = () => {
             onClick={() => setCurrentPage((p) => p + 1)}
             className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
           >
-            Sau
+            {t("common.next")}
           </button>
         </div>
       )}

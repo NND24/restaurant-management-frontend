@@ -13,8 +13,10 @@ import { addShipingFee, deleteShippingFee, getAllShippingFee, updateShippingFee 
 import ShippingFeeModal from "@/components/popups/ShippingFee";
 import { viVN } from "@/utils/constants";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const ShippingFeePage = () => {
+  const { t } = useTranslation();
   const [fees, setFees] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
@@ -24,7 +26,7 @@ const ShippingFeePage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  // === Load dữ liệu ===
+  // === Load data ===
   const fetchShippingFee = async () => {
     try {
       setLoading(true);
@@ -32,11 +34,11 @@ const ShippingFeePage = () => {
       if (res.status === "success") {
         setFees(res.data);
       } else {
-        toast.error(res.message || "Lỗi khi tải danh sách phí vận chuyển");
+        toast.error(res.message || t("shipping_fee.load_error"));
       }
       setLoading(false);
     } catch {
-      toast.error("Không thể kết nối đến server.");
+      toast.error(t("shipping_fee.connect_error"));
       setLoading(false);
     }
   };
@@ -50,14 +52,14 @@ const ShippingFeePage = () => {
     try {
       const res = await addShipingFee(storeId, data);
       if (res?.status === "success") {
-        toast.success("Thêm mức giá vận chuyển thành công");
+        toast.success(t("shipping_fee.create_success"));
         setShowForm(false);
         fetchShippingFee();
       } else {
-        toast.error(res.message || "Lỗi khi tạo mức giá");
+        toast.error(res.message || t("shipping_fee.create_error"));
       }
     } catch {
-      toast.error("Lỗi khi tạo mức giá");
+      toast.error(t("shipping_fee.create_error"));
     }
   };
 
@@ -65,39 +67,39 @@ const ShippingFeePage = () => {
     try {
       const res = await updateShippingFee(storeId, feeBeingEdited._id, data);
       if (res?.status === "success") {
-        toast.success("Cập nhật mức giá thành công");
+        toast.success(t("shipping_fee.update_success"));
         setShowForm(false);
         setFeeBeingEdited(null);
         fetchShippingFee();
       } else {
-        toast.error(res.message || "Lỗi khi cập nhật mức giá");
+        toast.error(res.message || t("shipping_fee.update_error"));
       }
     } catch {
-      toast.error("Lỗi khi cập nhật mức giá");
+      toast.error(t("shipping_fee.update_error"));
     }
   };
 
   const handleDeleteShippingFee = async (shippingFeeId) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Mức vận chuyển này sẽ bị xóa vĩnh viễn.",
+      title: t("common.are_you_sure"),
+      text: t("shipping_fee.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         const res = await deleteShippingFee(storeId, shippingFeeId);
         if (res.status === "success") {
-          Swal.fire("Đã xóa!", "Mức giá đã được xóa.", "success");
+          Swal.fire(t("common.deleted"), t("shipping_fee.delete_success_text"), "success");
           fetchShippingFee();
         }
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa mức giá thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("shipping_fee.delete_error"), "error");
       }
     }
   };
@@ -108,10 +110,10 @@ const ShippingFeePage = () => {
       if (res.status === "success") {
         fetchShippingFee();
       } else {
-        toast.error(res.message || "Lỗi khi thay đổi trạng thái");
+        toast.error(res.message || t("shipping_fee.toggle_status_error"));
       }
     } catch {
-      toast.error("Có lỗi xảy ra khi cập nhật trạng thái.");
+      toast.error(t("common.error_occurred"));
     }
   };
 
@@ -126,14 +128,14 @@ const ShippingFeePage = () => {
   const columns = [
     {
       field: "fromDistance",
-      headerName: "Mốc khoảng cách (km)",
+      headerName: t("shipping_fee.min_distance"),
       headerAlign: "center",
       align: "center",
       flex: 1,
     },
     {
       field: "feePerKm",
-      headerName: "Mức giá mỗi km",
+      headerName: t("shipping_fee.fee"),
       headerAlign: "center",
       align: "center",
       flex: 1,
@@ -145,7 +147,7 @@ const ShippingFeePage = () => {
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -194,17 +196,17 @@ const ShippingFeePage = () => {
 
   return (
     <div className='page-shell'>
-      <Heading title='Phí vận chuyển' description='' keywords='' />
+      <Heading title={t("shipping_fee.title")} description='' keywords='' />
       {/* Header */}
       <div className='flex justify-between gap-2 border-b pb-2 mb-2'>
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Phí vận chuyển</span>
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("shipping_fee.title")}</span>
         <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
           <button
             onClick={() => setShowForm(true)}
             className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
             <FaPlus className='text-lg' />
-            <span>Thêm</span>
+            <span>{t("common.add")}</span>
           </button>
         </div>
       </div>
@@ -247,4 +249,3 @@ const ShippingFeePage = () => {
 };
 
 export default ShippingFeePage;
-

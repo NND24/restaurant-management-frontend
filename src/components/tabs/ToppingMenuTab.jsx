@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import LabelWithIcon from "@/components/LableWithIcon";
 import Modal from "../Modal";
 import { getAllTopping, addToppingGroupOnly } from "@/service/topping";
@@ -11,6 +12,7 @@ import localStorageService from "@/utils/localStorageService";
 import { DataGrid } from "@mui/x-data-grid";
 
 const ToppingMenuTab = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const storeData = localStorage.getItem("store");
   const storeId = JSON.parse(storeData)?._id;
@@ -31,7 +33,7 @@ const ToppingMenuTab = () => {
       setToppingGroups(response?.data || []);
     } catch (err) {
       console.error("Error fetching toppings:", err);
-      setError("Lỗi khi tải topping");
+      setError(t("toppings.load_error"));
     } finally {
       setIsLoading(false);
     }
@@ -60,18 +62,18 @@ const ToppingMenuTab = () => {
     s
       ?.toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(/[̀-ͯ]/g, "");
   const filteredGroups = toppingGroups.filter((g) => !search || normalized(g.name).includes(normalized(search)));
 
   const columns = [
     {
       field: "name",
-      headerName: "Tên nhóm",
+      headerName: t("toppings.col_group_name"),
       flex: 1,
     },
     {
       field: "toppings",
-      headerName: "Số topping",
+      headerName: t("toppings.col_topping_count"),
       width: 150,
       valueGetter: (params) => params.row?.toppings?.length || 0,
     },
@@ -83,15 +85,15 @@ const ToppingMenuTab = () => {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleAddGroup}
-        title='Thêm Nhóm Topping'
-        confirmTitle='Lưu'
-        closeTitle='Hủy'
+        title={t("toppings.add_group_modal_title")}
+        confirmTitle={t("common.save")}
+        closeTitle={t("common.cancel")}
       >
         <input
           type='text'
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
-          placeholder='Nhập tên nhóm topping'
+          placeholder={t("toppings.group_name_placeholder")}
           className='w-full p-2 border rounded-md'
           required
         />
@@ -102,12 +104,12 @@ const ToppingMenuTab = () => {
           type='text'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder='Tìm nhóm topping...'
+          placeholder={t("toppings.search_placeholder")}
           className='flex-1 border rounded-lg px-4 py-2'
         />
         {!blockEdit && (
           <div className='ml-3'>
-            <LabelWithIcon title='Thêm nhóm' iconPath='/assets/plus.png' onClick={() => setIsModalOpen(true)} />
+            <LabelWithIcon title={t("toppings.add_group_btn")} iconPath='/assets/plus.png' onClick={() => setIsModalOpen(true)} />
           </div>
         )}
       </div>
@@ -128,4 +130,3 @@ const ToppingMenuTab = () => {
 };
 
 export default ToppingMenuTab;
-

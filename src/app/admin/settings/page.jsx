@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import Dropzone from "react-dropzone";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { updateUser } from "@/service/user";
 import { changePassword } from "@/service/auth";
@@ -10,6 +11,7 @@ import { uploadAvatar } from "@/service/upload";
 import Heading from "@/components/Heading";
 
 const AdminSettingsPage = () => {
+  const { t } = useTranslation();
   const { user, fetchUser } = useAuth();
 
   const [profile, setProfile] = useState({
@@ -30,19 +32,19 @@ const AdminSettingsPage = () => {
 
   const validateProfile = () => {
     const errs = {};
-    if (!profile.name.trim() || profile.name.trim().length < 2) errs.name = "Tên ít nhất 2 ký tự";
-    if (!profile.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) errs.email = "Email không hợp lệ";
-    if (profile.phonenumber && !/^\d{10,11}$/.test(profile.phonenumber)) errs.phonenumber = "Số điện thoại 10-11 chữ số";
+    if (!profile.name.trim() || profile.name.trim().length < 2) errs.name = t("admin.validation_name_min");
+    if (!profile.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) errs.email = t("admin.validation_email_invalid");
+    if (profile.phonenumber && !/^\d{10,11}$/.test(profile.phonenumber)) errs.phonenumber = t("admin.validation_phone");
     return errs;
   };
 
   const validatePassword = () => {
     const errs = {};
-    if (!passwords.oldPassword) errs.oldPassword = "Vui lòng nhập mật khẩu hiện tại";
-    if (!passwords.newPassword || passwords.newPassword.length < 8) errs.newPassword = "Mật khẩu ít nhất 8 ký tự";
+    if (!passwords.oldPassword) errs.oldPassword = t("settings.validation_old_password_required");
+    if (!passwords.newPassword || passwords.newPassword.length < 8) errs.newPassword = t("admin.validation_password_min");
     const pwChecks = [/[A-Z]/, /[a-z]/, /[0-9]/];
-    if (!pwChecks.every((r) => r.test(passwords.newPassword))) errs.newPassword = "Cần có chữ hoa, chữ thường và số";
-    if (passwords.newPassword !== passwords.confirmPassword) errs.confirmPassword = "Mật khẩu xác nhận không khớp";
+    if (!pwChecks.every((r) => r.test(passwords.newPassword))) errs.newPassword = t("settings.validation_password_complexity");
+    if (passwords.newPassword !== passwords.confirmPassword) errs.confirmPassword = t("settings.validation_password_mismatch");
     return errs;
   };
 
@@ -53,10 +55,10 @@ const AdminSettingsPage = () => {
     setSavingProfile(true);
     try {
       await updateUser(profile);
-      toast.success("Cập nhật thông tin thành công!");
+      toast.success(t("settings.profile_update_success"));
       if (user?._id) await fetchUser(user._id);
     } catch (err) {
-      toast.error(err?.message || "Cập nhật thất bại!");
+      toast.error(err?.message || t("settings.profile_update_fail"));
     } finally {
       setSavingProfile(false);
     }
@@ -69,10 +71,10 @@ const AdminSettingsPage = () => {
     setSavingPassword(true);
     try {
       await changePassword({ oldPassword: passwords.oldPassword, newPassword: passwords.newPassword });
-      toast.success("Đổi mật khẩu thành công!");
+      toast.success(t("settings.password_change_success"));
       setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      toast.error(err?.message || "Đổi mật khẩu thất bại!");
+      toast.error(err?.message || t("settings.password_change_fail"));
     } finally {
       setSavingPassword(false);
     }
@@ -85,10 +87,10 @@ const AdminSettingsPage = () => {
       const formData = new FormData();
       formData.append("file", file);
       await uploadAvatar(formData);
-      toast.success("Cập nhật ảnh đại diện thành công!");
+      toast.success(t("settings.avatar_update_success"));
       if (user?._id) await fetchUser(user._id);
     } catch {
-      toast.error("Tải ảnh thất bại!");
+      toast.error(t("settings.avatar_upload_fail"));
     }
   };
 
@@ -99,19 +101,19 @@ const AdminSettingsPage = () => {
 
   const newPw = passwords.newPassword;
   const pwRequirements = [
-    { label: "Ít nhất 8 ký tự", met: newPw.length >= 8 },
-    { label: "Có chữ hoa (A-Z)", met: /[A-Z]/.test(newPw) },
-    { label: "Có chữ thường (a-z)", met: /[a-z]/.test(newPw) },
-    { label: "Có chữ số (0-9)", met: /[0-9]/.test(newPw) },
+    { label: t("settings.pw_req_min_length"), met: newPw.length >= 8 },
+    { label: t("settings.pw_req_uppercase"), met: /[A-Z]/.test(newPw) },
+    { label: t("settings.pw_req_lowercase"), met: /[a-z]/.test(newPw) },
+    { label: t("settings.pw_req_number"), met: /[0-9]/.test(newPw) },
   ];
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-8">
-      <Heading title="Cài đặt tài khoản" description="" keywords="" />
+      <Heading title={t("settings.page_title")} description="" keywords="" />
 
       {/* Profile section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-5">Thông tin cá nhân</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-5">{t("settings.personal_info_heading")}</h2>
 
         {/* Avatar */}
         <div className="flex flex-col items-center mb-6">
@@ -130,47 +132,47 @@ const AdminSettingsPage = () => {
                     className="rounded-full object-cover"
                   />
                   <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <span className="text-white text-xs font-medium">Thay đổi</span>
+                    <span className="text-white text-xs font-medium">{t("settings.avatar_change_label")}</span>
                   </div>
                 </div>
               </div>
             )}
           </Dropzone>
-          <p className="text-xs text-gray-400 mt-2">Click vào ảnh để thay đổi</p>
+          <p className="text-xs text-gray-400 mt-2">{t("settings.avatar_click_hint")}</p>
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("admin.field_full_name")}</label>
             <input
               type="text"
               value={profile.name}
               onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
-              placeholder="Nhập tên..."
+              placeholder={t("admin.placeholder_name")}
               className={inputClass(profileErrors.name)}
             />
             {profileErrors.name && <p className="text-red-500 text-xs mt-1">{profileErrors.name}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("admin.field_email")}</label>
             <input
               type="email"
               value={profile.email}
               onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))}
-              placeholder="Nhập email..."
+              placeholder={t("admin.placeholder_email")}
               className={inputClass(profileErrors.email)}
             />
             {profileErrors.email && <p className="text-red-500 text-xs mt-1">{profileErrors.email}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("admin.field_phone")}</label>
             <input
               type="text"
               value={profile.phonenumber}
               onChange={(e) => setProfile((p) => ({ ...p, phonenumber: e.target.value }))}
-              placeholder="Nhập số điện thoại..."
+              placeholder={t("admin.placeholder_phone")}
               className={inputClass(profileErrors.phonenumber)}
             />
             {profileErrors.phonenumber && <p className="text-red-500 text-xs mt-1">{profileErrors.phonenumber}</p>}
@@ -181,35 +183,35 @@ const AdminSettingsPage = () => {
             disabled={savingProfile}
             className="w-full py-2.5 rounded-xl bg-[#fc6011] text-white font-semibold text-sm hover:bg-[#e55010] transition disabled:opacity-60"
           >
-            {savingProfile ? "Đang lưu..." : "Lưu thông tin"}
+            {savingProfile ? t("common.saving") : t("settings.save_profile_btn")}
           </button>
         </form>
       </div>
 
       {/* Password section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-5">Đổi mật khẩu</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-5">{t("settings.change_password_heading")}</h2>
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu hiện tại</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("settings.field_old_password")}</label>
             <input
               type="password"
               value={passwords.oldPassword}
               onChange={(e) => setPasswords((p) => ({ ...p, oldPassword: e.target.value }))}
-              placeholder="Nhập mật khẩu hiện tại..."
+              placeholder={t("settings.placeholder_old_password")}
               className={inputClass(passwordErrors.oldPassword)}
             />
             {passwordErrors.oldPassword && <p className="text-red-500 text-xs mt-1">{passwordErrors.oldPassword}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("settings.field_new_password")}</label>
             <input
               type="password"
               value={passwords.newPassword}
               onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
-              placeholder="Nhập mật khẩu mới..."
+              placeholder={t("settings.placeholder_new_password")}
               className={inputClass(passwordErrors.newPassword)}
             />
             {newPw && (
@@ -228,12 +230,12 @@ const AdminSettingsPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu mới</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("settings.field_confirm_password")}</label>
             <input
               type="password"
               value={passwords.confirmPassword}
               onChange={(e) => setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))}
-              placeholder="Nhập lại mật khẩu mới..."
+              placeholder={t("settings.placeholder_confirm_password")}
               className={inputClass(passwordErrors.confirmPassword)}
             />
             {passwordErrors.confirmPassword && <p className="text-red-500 text-xs mt-1">{passwordErrors.confirmPassword}</p>}
@@ -244,7 +246,7 @@ const AdminSettingsPage = () => {
             disabled={savingPassword}
             className="w-full py-2.5 rounded-xl bg-gray-800 text-white font-semibold text-sm hover:bg-gray-700 transition disabled:opacity-60"
           >
-            {savingPassword ? "Đang đổi..." : "Đổi mật khẩu"}
+            {savingPassword ? t("settings.changing_password_btn") : t("settings.change_password_btn")}
           </button>
         </form>
       </div>

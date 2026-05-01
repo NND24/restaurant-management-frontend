@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, IconButton } from "@mui/material";
@@ -14,12 +15,12 @@ import { getUnits, deleteUnit } from "@/service/unit";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const getRole = localStorageService.getRole();
   const blockEdit = getRole === "staff";
   const storeData = typeof window !== "undefined" && localStorage.getItem("store");
   const storeId = storeData ? JSON.parse(storeData)?._id : "";
 
-  // ✅ đổi lại tên state cho đúng
   const [units, setUnits] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +30,6 @@ const page = () => {
   const [openEditUnit, setOpenEditUnit] = useState(false);
   const [selectedUnitId, setSelectedUnitId] = useState(null);
 
-  // 📦 Lấy danh sách đơn vị của cửa hàng
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -49,69 +49,67 @@ const page = () => {
     if (storeId) fetchData();
   }, [storeId]);
 
-  // 🗑 Xoá đơn vị
   const handleDelete = async (id, storeId) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn muốn xoá?",
-      text: "Đơn vị này sẽ bị xóa.",
+      title: t("unit.delete_confirm_title"),
+      text: t("unit.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xoá",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteUnit(id, storeId);
-        Swal.fire("Đã xoá!", "Đơn vị đã được xóa.", "success");
+        Swal.fire(t("unit.delete_success_title"), t("unit.delete_success_text"), "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xoá đơn vị thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("unit.delete_error_text"), "error");
       }
     }
   };
 
-  // 🧱 Cột DataGrid
   const columns = [
     {
       field: "name",
-      headerName: "Tên đơn vị",
+      headerName: t("unit.name"),
       flex: 1.5,
       headerAlign: "center",
       align: "center",
     },
     {
       field: "type",
-      headerName: "Loại",
+      headerName: t("unit.type"),
       headerAlign: "center",
       align: "center",
       flex: 1,
       renderCell: (params) => {
         const typeMap = {
-          weight: "Khối lượng",
-          volume: "Thể tích",
-          count: "Số lượng",
+          weight: t("unit.type_weight"),
+          volume: t("unit.type_volume"),
+          count: t("unit.type_count"),
         };
         return typeMap[params.row?.type] || params.row?.type;
       },
     },
     {
       field: "conversion",
-      headerName: "Quy đổi",
+      headerName: t("unit.conversion"),
       headerAlign: "center",
       align: "center",
       flex: 2,
       valueGetter: (_, row) => {
-        if (!row.baseUnit && row.ratio === 1) return "Đơn vị gốc";
+        if (!row.baseUnit && row.ratio === 1) return t("unit.base_unit");
         return `1 ${row.name} = ${row.ratio} ${row.baseUnit}`;
       },
     },
 
     {
       field: "isActive",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       headerAlign: "center",
       align: "center",
       flex: 1,
@@ -121,13 +119,13 @@ const page = () => {
             params.row.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
           }`}
         >
-          {params.row.isActive ? "Hoạt động" : "Ngưng"}
+          {params.row.isActive ? t("common.active") : t("common.inactive")}
         </span>
       ),
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -135,7 +133,6 @@ const page = () => {
       flex: 1,
       renderCell: (params) => (
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
-          {/* 👁 Xem chi tiết */}
           <IconButton
             size='small'
             color='primary'
@@ -148,7 +145,6 @@ const page = () => {
             👁️
           </IconButton>
 
-          {/* ✏️ Sửa */}
           {!blockEdit && (
             <IconButton
               size='small'
@@ -163,7 +159,6 @@ const page = () => {
             </IconButton>
           )}
 
-          {/* 🗑 Xoá */}
           {!blockEdit && (
             <IconButton
               size='small'
@@ -208,8 +203,8 @@ const page = () => {
       )}
 
       <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
-        <Heading title='Đơn vị' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Đơn vị</span>
+        <Heading title={t("unit.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("unit.title")}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -218,7 +213,7 @@ const page = () => {
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
-              <span>Thêm</span>
+              <span>{t("common.add")}</span>
             </button>
           </div>
         )}
@@ -244,4 +239,3 @@ const page = () => {
 };
 
 export default page;
-

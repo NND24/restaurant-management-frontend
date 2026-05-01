@@ -14,8 +14,10 @@ import {
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { FaTimes } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, readOnly = false, onSubmit }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -61,29 +63,29 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
 
   const validate = () => {
     if (!formData.name.trim()) {
-      toast.error("Họ tên không được để trống.");
+      toast.error(t("staff.validation_name_required"));
       return false;
     }
     if (!formData.email.trim()) {
-      toast.error("Email không được để trống.");
+      toast.error(t("staff.validation_email_required"));
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
-      toast.error("Email không đúng định dạng.");
+      toast.error(t("staff.validation_email_invalid"));
       return false;
     }
     if (!formData.phonenumber.trim()) {
-      toast.error("Số điện thoại không được để trống.");
+      toast.error(t("staff.validation_phone_required"));
       return false;
     }
     if (!/^\d+$/.test(formData.phonenumber.trim())) {
-      toast.error("Số điện thoại chỉ được chứa chữ số.");
+      toast.error(t("staff.validation_phone_digits_only"));
       return false;
     }
 
     if (!isUpdate && !formData.password?.trim()) {
-      toast.error("Mật khẩu không được để trống.");
+      toast.error(t("staff.validation_password_required"));
       return false;
     }
     return true;
@@ -93,11 +95,11 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
     if (!validate()) return;
 
     const confirm = await Swal.fire({
-      title: isUpdate ? "Xác nhận cập nhật nhân viên?" : "Xác nhận thêm nhân viên?",
+      title: isUpdate ? t("staff.confirm_update") : t("staff.confirm_add"),
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
-      cancelButtonText: "Hủy",
+      confirmButtonText: isUpdate ? t("common.update") : t("common.add"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (!confirm.isConfirmed) return;
@@ -108,7 +110,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(isUpdate ? "Cập nhật thất bại" : "Thêm nhân viên thất bại");
+      toast.error(isUpdate ? t("common.update_failed") : t("staff.add_failed"));
     } finally {
       setLoading(false);
     }
@@ -117,7 +119,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", borderBottom: "1px solid #e0e0e0" }}>
-        {readOnly ? "Thông tin nhân viên" : isUpdate ? "Cập nhật nhân viên" : "Thêm nhân viên mới"}
+        {readOnly ? t("staff.info_title") : isUpdate ? t("staff.update_title") : t("staff.add_title")}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -126,7 +128,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
       <DialogContent dividers>
         <Box className='space-y-4'>
           <TextField
-            label='Họ tên'
+            label={t("staff.full_name")}
             name='name'
             value={formData.name}
             onChange={handleChange}
@@ -134,7 +136,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             InputProps={{ readOnly: readOnly ? true : false }}
           />
           <TextField
-            label='Email'
+            label={t("staff.email")}
             name='email'
             value={formData.email}
             onChange={handleChange}
@@ -142,7 +144,7 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
             InputProps={{ readOnly: readOnly ? true : false }}
           />
           <TextField
-            label='Số điện thoại'
+            label={t("staff.phone")}
             name='phonenumber'
             value={formData.phonenumber}
             onChange={handleChange}
@@ -151,32 +153,32 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
           />
           <TextField
             select
-            label='Giới tính'
+            label={t("staff.gender")}
             name='gender'
             value={formData.gender}
             onChange={handleChange}
             fullWidth
             InputProps={{ readOnly: readOnly ? true : false }}
           >
-            <MenuItem value='male'>Nam</MenuItem>
-            <MenuItem value='female'>Nữ</MenuItem>
-            <MenuItem value='other'>Khác</MenuItem>
+            <MenuItem value='male'>{t("staff.male")}</MenuItem>
+            <MenuItem value='female'>{t("staff.female")}</MenuItem>
+            <MenuItem value='other'>{t("staff.other")}</MenuItem>
           </TextField>
           <TextField
             select
-            label='Vai trò'
+            label={t("staff.role")}
             name='role'
             value={formData.role}
             onChange={handleChange}
             fullWidth
             InputProps={{ readOnly: readOnly ? true : false }}
           >
-            <MenuItem value='staff'>Nhân viên</MenuItem>
-            <MenuItem value='manager'>Quản lý</MenuItem>
+            <MenuItem value='staff'>{t("staff.staff")}</MenuItem>
+            <MenuItem value='manager'>{t("staff.manager")}</MenuItem>
           </TextField>
           {!isUpdate && (
             <TextField
-              label='Mật khẩu'
+              label={t("staff.password")}
               name='password'
               type='password'
               value={formData.password}
@@ -190,10 +192,10 @@ const StaffCreateModal = ({ open, onClose, initialData = {}, isUpdate = false, r
       {!readOnly && (
         <DialogActions sx={{ px: 3 }}>
           <Button onClick={onClose} color='error' variant='outlined'>
-            Hủy
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSave} color='primary' variant='contained' disabled={loading}>
-            {loading ? "Đang lưu..." : isUpdate ? "Cập nhật" : "Lưu"}
+            {loading ? t("common.saving") : isUpdate ? t("common.update") : t("common.save")}
           </Button>
         </DialogActions>
       )}

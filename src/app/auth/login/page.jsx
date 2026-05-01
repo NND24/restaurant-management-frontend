@@ -9,13 +9,15 @@ import { loginUser, getOwnStore, logoutUser } from "@/service/auth";
 import localStorageService from "@/utils/localStorageService";
 import { useAuth } from "@/context/AuthContext";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const Page = () => {
   const router = useRouter();
   const [showPass, setShowPass] = useState(false);
+  const { t } = useTranslation();
   const schema = yup.object().shape({
-    email: yup.string().email("Email không hợp lệ!").required("Vui lòng nhập Email!"),
-    password: yup.string().required("Vui lòng nhập mật khẩu!"),
+    email: yup.string().email(t("auth.email_invalid")).required(t("auth.email_required")),
+    password: yup.string().required(t("auth.password_required")),
   });
   const getRole = localStorageService.getRole();
   const { user, setUser, setUserId } = useAuth();
@@ -36,7 +38,7 @@ const Page = () => {
         if (storeResult.message == "No store found for this user") {
           return "NOT_REGISTERED";
         }
-        toast.error(storeResult.message || "Lỗi khi lấy thông tin cửa hàng!");
+        toast.error(storeResult.message || t("auth.store_error"));
         return "NONE";
       }
     } catch (err) {
@@ -54,14 +56,14 @@ const Page = () => {
       try {
         const loginResult = await loginUser(values);
         if (!loginResult.success) {
-          toast.error(loginResult.message || "Đăng nhập thất bại!");
+          toast.error(loginResult.message || t("auth.login_failed"));
           return;
         }
 
         // Admin users bypass store status check
         const roles = Array.isArray(loginResult.role) ? loginResult.role : [loginResult.role].filter(Boolean);
         if (roles.includes("admin")) {
-          toast.success("Đăng nhập thành công!");
+          toast.success(t("auth.login_success"));
           router.push("/admin/stores");
           return;
         }
@@ -69,19 +71,19 @@ const Page = () => {
         const status = await checkStoreStatus();
         switch (status) {
           case "APPROVED":
-            toast.success("Đăng nhập thành công!");
+            toast.success(t("auth.login_success"));
             router.push(loginResult?.role.includes("staff") ? "/orders/current" : "/statistic/revenue");
             break;
           case "PENDING":
-            toast.success("Đăng nhập thành công!");
+            toast.success(t("auth.login_success"));
             router.push("/auth/verification-pending");
             break;
           case "BLOCKED":
-            toast.success("Đăng nhập thành công!");
+            toast.success(t("auth.login_success"));
             router.push("/auth/blocked");
             break;
           case "NOT_REGISTERED":
-            toast.error("Bạn chưa đăng ký cửa hàng!");
+            toast.error(t("auth.no_store"));
             localStorageService.clearAll();
             await logoutUser();
             router.push("/auth/register");
@@ -90,7 +92,7 @@ const Page = () => {
             break;
         }
       } catch (err) {
-        toast.error("Đăng nhập thất bại!");
+        toast.error(t("auth.login_failed"));
       }
       formik.resetForm();
     },
@@ -98,7 +100,7 @@ const Page = () => {
 
   return (
     <div className='min-h-screen flex'>
-      <Heading title='Đăng nhập' description='' keywords='' />
+      <Heading title={t("auth.login_title")} description='' keywords='' />
       {/* Left Image */}
       <div className='hidden md:flex w-1/2 bg-gradient-to-br from-orange-200 to-orange-400 items-center justify-center'>
         <Image
@@ -113,7 +115,7 @@ const Page = () => {
       {/* Right Form */}
       <div className='flex w-full md:w-1/2 justify-center items-center bg-white'>
         <div className='w-full max-w-md p-10'>
-          <h3 className='text-[#4A4B4D] text-3xl font-bold mb-6 text-center'>Đăng nhập</h3>
+          <h3 className='text-[#4A4B4D] text-3xl font-bold mb-6 text-center'>{t("auth.login_title")}</h3>
 
           <form onSubmit={formik.handleSubmit} className='space-y-5'>
             {/* Email */}
@@ -130,7 +132,7 @@ const Page = () => {
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  placeholder='Nhập email của bạn'
+                  placeholder={t("auth.email_placeholder")}
                   className='bg-transparent w-full outline-none text-gray-700 placeholder-gray-400'
                 />
               </div>
@@ -153,7 +155,7 @@ const Page = () => {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  placeholder='Nhập mật khẩu của bạn'
+                  placeholder={t("auth.password_placeholder")}
                   className='bg-transparent w-full outline-none text-gray-700 placeholder-gray-400'
                 />
                 <Image
@@ -179,13 +181,13 @@ const Page = () => {
                   : "bg-[#f5854d] cursor-not-allowed"
               }`}
             >
-              Đăng nhập
+              {t("auth.login")}
             </button>
 
             {/* Register link */}
             <p className='text-center mt-4 text-gray-600'>
               <a href='/auth/register' className='hover:underline font-medium text-[#4A4B4D]'>
-                Đăng ký cửa hàng
+                {t("auth.register")}
               </a>
             </p>
           </form>

@@ -5,6 +5,7 @@ import { getVoucherUsageSummary, getTopUsedVouchers, getVoucherRevenueImpact } f
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const SummaryCard = ({ title, value, color, icon }) => (
   <div className='flex items-center justify-between bg-white rounded-xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all'>
@@ -22,6 +23,7 @@ const SummaryCard = ({ title, value, color, icon }) => (
 );
 
 const page = () => {
+  const { t } = useTranslation();
   const [from, setFrom] = useState(format(new Date(), "yyyy-MM-01"));
   const [to, setTo] = useState(format(new Date(), "yyyy-MM-dd"));
   const [limit, setLimit] = useState(5);
@@ -43,7 +45,7 @@ const page = () => {
       setTopVouchers(Array.isArray(topRes?.data) ? topRes.data : []);
       setRevenueImpact(revenueRes?.data || {});
     } catch (err) {
-      toast.error("Lỗi khi tải dữ liệu giảm giá");
+      toast.error(t("statistic.voucher_load_error"));
     } finally {
       setLoading(false);
     }
@@ -55,19 +57,19 @@ const page = () => {
 
   return (
     <div className='bg-gray-50 min-h-screen p-8 space-y-8 overflow-y-auto h-full'>
-      <Heading title='Thống kê giảm giá' description='' keywords='' />
+      <Heading title={t("statistic.vouchers_report")} description='' keywords='' />
       <div>
-        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>Thống kê giảm giá</h1>
+        <h1 className='text-3xl font-semibold text-gray-800 mb-1'>{t("statistic.vouchers_report")}</h1>
         <p className='text-gray-500'>
-          Theo dõi hiệu quả và ảnh hưởng của các mã khuyến mãi trong khoảng thời gian nhất định
+          {t("statistic.vouchers_report_desc")}
         </p>
       </div>
 
-      {/* Bộ lọc thời gian */}
+      {/* Time filter */}
       <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-center gap-4'>
         <div className='flex flex-wrap items-end gap-4 w-full md:w-auto'>
           <div>
-            <label className='block text-sm text-gray-600 mb-1'>Từ ngày</label>
+            <label className='block text-sm text-gray-600 mb-1'>{t("statistic.from_date")}</label>
             <input
               type='date'
               value={from}
@@ -76,7 +78,7 @@ const page = () => {
             />
           </div>
           <div>
-            <label className='block text-sm text-gray-600 mb-1'>Đến ngày</label>
+            <label className='block text-sm text-gray-600 mb-1'>{t("statistic.to_date")}</label>
             <input
               type='date'
               value={to}
@@ -85,7 +87,7 @@ const page = () => {
             />
           </div>
           <div>
-            <label className='block text-sm text-gray-600 mb-1'>Top giảm giá</label>
+            <label className='block text-sm text-gray-600 mb-1'>{t("statistic.top_vouchers_label")}</label>
             <input
               type='number'
               min='1'
@@ -100,32 +102,32 @@ const page = () => {
           onClick={fetchAll}
           className='bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition-all'
         >
-          Làm mới dữ liệu
+          {t("statistic.refresh_data")}
         </button>
       </div>
 
       {loading ? (
-        <div className='text-center py-10 text-gray-500'>Đang tải dữ liệu...</div>
+        <div className='text-center py-10 text-gray-500'>{t("statistic.loading_data")}</div>
       ) : (
         <>
-          {/* Tổng quan sử dụng */}
+          {/* Usage overview */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Tổng quan sử dụng</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>{t("statistic.usage_overview")}</h3>
             <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
               <SummaryCard
-                title='Số lượt sử dụng'
+                title={t("statistic.usage_count")}
                 value={usageSummary?.requestedTimeFrameUsed || 0}
                 color='#3b82f6'
                 icon={<i className='fa-solid fa-ticket text-xl' />}
               />
               <SummaryCard
-                title='Số giảm giá phát hành'
+                title={t("statistic.vouchers_issued")}
                 value={usageSummary?.totalIssued || 0}
                 color='#10b981'
                 icon={<i className='fa-solid fa-bullhorn text-xl' />}
               />
               <SummaryCard
-                title='Tỷ lệ sử dụng'
+                title={t("statistic.usage_rate")}
                 value={`${usageSummary?.usageRate?.toFixed(1) || 0}%`}
                 color='#f59e0b'
                 icon={<i className='fa-solid fa-percent text-xl' />}
@@ -133,12 +135,12 @@ const page = () => {
             </div>
           </div>
 
-          {/* Top giảm giá */}
+          {/* Top vouchers */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Top {limit} giảm giá được sử dụng nhiều nhất</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>{t("statistic.top_vouchers_used", { limit })}</h3>
             {topVouchers.length === 0 ? (
               <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5 text-gray-500 text-center'>
-                Không có dữ liệu
+                {t("statistic.no_data")}
               </div>
             ) : (
               <div className='bg-white rounded-xl shadow-md border border-gray-100 p-5'>
@@ -146,8 +148,8 @@ const page = () => {
                   <thead className='bg-gray-100 text-gray-600 uppercase text-xs'>
                     <tr>
                       <th className='px-4 py-2'>#</th>
-                      <th className='px-4 py-2'>Mã giảm giá</th>
-                      <th className='px-4 py-2 text-right'>Số lượt sử dụng</th>
+                      <th className='px-4 py-2'>{t("statistic.voucher_code")}</th>
+                      <th className='px-4 py-2 text-right'>{t("statistic.usage_count")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -164,18 +166,18 @@ const page = () => {
             )}
           </div>
 
-          {/* Ảnh hưởng doanh thu */}
+          {/* Revenue impact */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Ảnh hưởng doanh thu</h3>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>{t("statistic.revenue_impact")}</h3>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
               <SummaryCard
-                title='Tổng giá trị giảm giá'
+                title={t("statistic.total_discount_amount")}
                 value={`${(revenueImpact?.totalDiscountAmount || 0).toLocaleString()}₫`}
                 color='#8b5cf6'
                 icon={<i className='fa-solid fa-coins text-xl' />}
               />
               <SummaryCard
-                title='Tỉ lệ giảm giá trung bình'
+                title={t("statistic.avg_discount_ratio")}
                 value={`${(revenueImpact?.discountRatio || 0).toLocaleString()}%`}
                 color='#ef4444'
                 icon={<i className='fa-solid fa-chart-pie text-xl' />}

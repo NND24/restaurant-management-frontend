@@ -6,15 +6,18 @@ import LatestTab from "@/components/tabs/LatestOrderTab";
 import VerifyTab from "@/components/tabs/VerifyOrderTab";
 import localStorageService from "@/utils/localStorageService";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const page = () => {
+  const { t } = useTranslation();
   const storeData = localStorageService.getStore();
   const [storeId, setStoreId] = useState(localStorageService.getStoreId());
-  const [tabData, setTabData] = useState([
-    { label: "Mới", component: <LatestTab storeId={storeId} /> },
-    { label: "Đã xác nhận", component: <VerifyTab storeId={storeId} /> },
-  ]);
   const [activeTab, setActiveTab] = useState(0); // Default tab index
+
+  const tabData = [
+    { label: t("orders.new"), component: <LatestTab storeId={storeId} /> },
+    { label: t("orders.confirmed"), component: <VerifyTab storeId={storeId} /> },
+  ];
 
   // Load the stored active tab index from localStorage when the page loads
   useEffect(() => {
@@ -39,7 +42,7 @@ const page = () => {
 
   return (
     <div className='page-shell'>
-      <Heading title='Đơn hàng hiện tại' description='' keywords='' />
+      <Heading title={t("orders.title")} description='' keywords='' />
       <Tabs key={activeTab} tabs={tabData} defaultActiveTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );

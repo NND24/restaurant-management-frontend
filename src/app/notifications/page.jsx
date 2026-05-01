@@ -1,9 +1,12 @@
 "use client";
 import Notification from "../../components/Notification";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateNotificationStatus } from "@/service/notification";
 import { useSocket } from "@/context/SocketContext";
+
 const page = () => {
+  const { t } = useTranslation();
   const { socket, notifications, setNotifications } = useSocket();
   const handleNotificationStatusChange = async (id) => {
     await updateNotificationStatus(id);

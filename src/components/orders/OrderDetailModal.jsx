@@ -16,8 +16,10 @@ import { getOrder } from "@/service/order";
 import LatestOrder from "@/components/fragment/LatestOrder";
 import ConfirmedOrder from "@/components/fragment/ConfirmedOrder";
 import HistoryOrder from "@/components/fragment/HistoryOrder";
+import { useTranslation } from "react-i18next";
 
 const OrderDetailModal = ({ open, onClose, orderId }) => {
+  const { t } = useTranslation();
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +32,7 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
       setOrder(response?.data);
     } catch (err) {
       console.error("Failed to fetch order:", err);
-      setError("Lỗi khi tải đơn hàng.");
+      setError(t("orders.load_error"));
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +45,7 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
   }, [open, orderId]);
 
   const getOrderComponent = () => {
-    if (!order) return <p>Không tìm thấy đơn hàng</p>;
+    if (!order) return <p>{t("orders.not_found")}</p>;
     switch (order?.status) {
       case "pending":
         return <LatestOrder order={order} />;
@@ -72,7 +74,7 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        Chi tiết đơn hàng
+        {t("orders.detail_title")}
         <IconButton aria-label='close' onClick={onClose} sx={{ position: "absolute", right: 8, top: 8 }}>
           <FaTimes />
         </IconButton>
@@ -92,7 +94,7 @@ const OrderDetailModal = ({ open, onClose, orderId }) => {
 
       <DialogActions sx={{ px: 3 }}>
         <Button onClick={onClose} color='primary' variant='contained'>
-          Đóng
+          {t("common.close")}
         </Button>
       </DialogActions>
     </Dialog>

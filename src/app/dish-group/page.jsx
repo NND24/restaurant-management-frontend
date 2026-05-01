@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DataGrid } from "@mui/x-data-grid";
 import localStorageService from "@/utils/localStorageService";
 import { Box, IconButton } from "@mui/material";
@@ -14,6 +15,7 @@ import { useRouter } from "next/navigation";
 import Heading from "@/components/Heading";
 
 const page = () => {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const getRole = localStorageService.getRole();
@@ -38,7 +40,7 @@ const page = () => {
       setAllDishGroups(list);
     } catch (err) {
       console.error("Failed to fetch dishes", err);
-      setError("Lỗi tải danh sách món");
+      setError(t("dish_group.fetch_error"));
     } finally {
       setIsLoading(false);
     }
@@ -50,23 +52,23 @@ const page = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Nhóm món ăn này sẽ bị xóa vĩnh viễn.",
+      title: t("common.are_you_sure"),
+      text: t("dish_group.delete_confirm_text"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("common.delete"),
+      cancelButtonText: t("common.cancel"),
     });
 
     if (result.isConfirmed) {
       try {
         await deleteDishGroupById(id);
-        Swal.fire("Đã xóa!", "Nhóm món ăn đã được xóa.", "success");
+        Swal.fire(t("common.deleted"), t("dish_group.delete_success_text"), "success");
         fetchData();
       } catch (err) {
-        Swal.fire("Lỗi!", err.message || "Xóa Nhóm món ăn thất bại", "error");
+        Swal.fire(t("common.error"), err.message || t("dish_group.delete_failed"), "error");
       }
     }
   };
@@ -74,21 +76,21 @@ const page = () => {
   const columns = [
     {
       field: "name",
-      headerName: "Tên nhóm món ăn",
+      headerName: t("dish_group.column_name"),
       width: 250,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.name || ""}</span>,
     },
     {
       field: "dishes",
-      headerName: "Danh sách món ăn",
+      headerName: t("dish_group.column_dishes"),
       flex: 1,
       headerAlign: "center",
       renderCell: (params) => <span>{params.row?.dishes?.map((t) => t.name).join(", ") || "—"}</span>,
     },
     {
       field: "isActive",
-      headerName: "Trạng thái",
+      headerName: t("common.status"),
       headerAlign: "center",
       align: "center",
       width: 130,
@@ -98,13 +100,13 @@ const page = () => {
             params.row?.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
           }`}
         >
-          {params.row?.isActive ? "Hoạt động" : "Ngưng"}
+          {params.row?.isActive ? t("common.active") : t("dish_group.status_inactive")}
         </span>
       ),
     },
     {
       field: "actions",
-      headerName: "Hành động",
+      headerName: t("common.actions"),
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -114,7 +116,7 @@ const page = () => {
         <div className='flex justify-center items-center space-x-1 w-full h-full'>
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Danh sách món ăn phụ thuộc'
+            data-tooltip-content={t("dish_group.tooltip_dishes")}
             size='small'
             color='primary'
             sx={{
@@ -131,7 +133,7 @@ const page = () => {
 
           <IconButton
             data-tooltip-id='dish-tooltip'
-            data-tooltip-content='Xem chi tiết'
+            data-tooltip-content={t("common.view_detail")}
             size='small'
             color='primary'
             sx={{
@@ -150,7 +152,7 @@ const page = () => {
           {!blockEdit && (
             <IconButton
               data-tooltip-id='dish-tooltip'
-              data-tooltip-content='Chỉnh sửa'
+              data-tooltip-content={t("common.edit")}
               size='small'
               color='info'
               sx={{
@@ -170,7 +172,7 @@ const page = () => {
           {!blockEdit && (
             <IconButton
               data-tooltip-id='dish-tooltip'
-              data-tooltip-content='Xoá'
+              data-tooltip-content={t("common.delete")}
               size='small'
               color='error'
               sx={{
@@ -220,8 +222,8 @@ const page = () => {
       )}
 
       <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
-        <Heading title='Nhóm món ăn' description='' keywords='' />
-        <span className='text-xl font-semibold text-[#4a4b4d]'>Nhóm món ăn</span>
+        <Heading title={t("dish_group.title")} description='' keywords='' />
+        <span className='text-xl font-semibold text-[#4a4b4d]'>{t("dish_group.title")}</span>
 
         {!blockEdit && (
           <div className='flex gap-3 mt-2 md:mt-0 justify-end'>
@@ -230,7 +232,7 @@ const page = () => {
               className='px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
             >
               <FaPlus className='text-lg' />
-              <span>Thêm</span>
+              <span>{t("common.add")}</span>
             </button>
           </div>
         )}
@@ -256,4 +258,3 @@ const page = () => {
 };
 
 export default page;
-

@@ -41,6 +41,7 @@ import {
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import Heading from "@/components/Heading";
+import { useTranslation } from "react-i18next";
 
 const COLORS = [
   "#0088FE",
@@ -56,6 +57,7 @@ const COLORS = [
 ];
 
 const DashboardPage = () => {
+  const { t } = useTranslation();
   dayjs.extend(isoWeek);
 
   const [byItem, setByItem] = useState([]);
@@ -74,7 +76,7 @@ const DashboardPage = () => {
   const [recommendedDishes, setRecommendedDishes] = useState([]);
   const [recommendedDishesByCategory, setRecommendedDishesByCategory] = useState([]);
 
-  // ===== Helper: Tạo params theo viewType =====
+  // ===== Helper: Build params by viewType =====
   const buildParams = () => {
     const params = { period: viewType };
 
@@ -148,9 +150,9 @@ const DashboardPage = () => {
     fetchRecommendedByCategory();
   }, []);
 
-  // ===== Tính margin =====
+  // ===== Calculate margin =====
   const byItemWithMargin = byItem.map((item) => {
-    const dishName = item.dishName || item._id?.dishName || "Không rõ món";
+    const dishName = item.dishName || item._id?.dishName || t("statistic.unknown_dish");
     const time = item.time || item._id?.time || null;
     const margin = item.totalRevenue > 0 ? (item.totalProfit / item.totalRevenue) * 100 : 0;
 
@@ -162,7 +164,7 @@ const DashboardPage = () => {
     };
   });
 
-  // Giải phẳng dữ liệu theo nhóm món (byGroup)
+  // Flatten group data (byGroup)
   const flattenedGroups = byGroup.flatMap((item) =>
     (item.groups || []).map((g) => ({
       ...g,
@@ -171,7 +173,7 @@ const DashboardPage = () => {
   );
 
   const byGroupWithMargin = flattenedGroups.map((g) => {
-    const groupName = g.group || g._id?.group || "Không rõ nhóm";
+    const groupName = g.group || g._id?.group || t("statistic.unknown_group");
     const margin = g.totalRevenue > 0 ? (g.totalProfit / g.totalRevenue) * 100 : 0;
 
     return {
@@ -196,7 +198,7 @@ const DashboardPage = () => {
     }
   };
 
-  // Pivot dữ liệu để LineChart hiểu
+  // Pivot data for LineChart
   const pivotedData = Object.values(
     byGroupWithMargin.reduce((acc, item) => {
       if (!acc[item.time]) acc[item.time] = { time: item.time };
@@ -205,12 +207,12 @@ const DashboardPage = () => {
     }, {})
   );
 
-  // Lấy tất cả groupName để vẽ nhiều Line
+  // Get all groupNames to draw multiple Lines
   const groupNames = [...new Set(byGroupWithMargin.map((g) => g.groupName))];
 
-  // Gom nhóm món ăn theo danh mục
+  // Group dishes by category
   const groupedByCategory = recommendedDishesByCategory.reduce((acc, dish) => {
-    const categoryName = dish.category?.name || dish.category || "Khác";
+    const categoryName = dish.category?.name || dish.category || t("statistic.other_category");
     if (!acc[categoryName]) acc[categoryName] = [];
     if (acc[categoryName].length < 5) acc[categoryName].push(dish);
     return acc;
@@ -218,33 +220,33 @@ const DashboardPage = () => {
 
   return (
     <div className='overflow-y-scroll h-full'>
-      <Heading title='Thống kê món ăn' description='' keywords='' />
+      <Heading title={t("statistic.items_report")} description='' keywords='' />
       <Box p={3}>
         <Typography variant='h4' fontWeight='bold' gutterBottom>
-          Thống kê món ăn
+          {t("statistic.items_report")}
         </Typography>
 
-        {/* ===== Bộ lọc ===== */}
+        {/* ===== Filters ===== */}
         <Card sx={{ mb: 3, borderRadius: 3, boxShadow: 2, backgroundColor: "#fff" }}>
           <CardContent>
             <Box display='flex' flexWrap='wrap' gap={3} alignItems='center'>
-              {/* Chọn chế độ xem */}
+              {/* View mode selector */}
               <FormControl size='medium' sx={{ minWidth: 160 }}>
-                <InputLabel>Chế độ xem</InputLabel>
-                <Select value={viewType} label='Chế độ xem' onChange={(e) => setViewType(e.target.value)}>
-                  <MenuItem value='day'>Ngày</MenuItem>
-                  <MenuItem value='week'>Tuần</MenuItem>
-                  <MenuItem value='month'>Tháng</MenuItem>
-                  <MenuItem value='year'>Năm</MenuItem>
+                <InputLabel>{t("statistic.view_mode")}</InputLabel>
+                <Select value={viewType} label={t("statistic.view_mode")} onChange={(e) => setViewType(e.target.value)}>
+                  <MenuItem value='day'>{t("statistic.day")}</MenuItem>
+                  <MenuItem value='week'>{t("statistic.week")}</MenuItem>
+                  <MenuItem value='month'>{t("statistic.month")}</MenuItem>
+                  <MenuItem value='year'>{t("statistic.year")}</MenuItem>
                 </Select>
               </FormControl>
 
-              {/* Các bộ chọn phụ thuộc chế độ xem */}
+              {/* Sub-selectors depending on view mode */}
               {viewType !== "year" && (
                 <>
                   {viewType === "day" && (
                     <TextField
-                      label='Chọn ngày'
+                      label={t("statistic.select_day")}
                       type='date'
                       value={dayjs(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`).format(
                         "YYYY-MM-DD"
@@ -262,7 +264,7 @@ const DashboardPage = () => {
                   )}
                   {viewType === "week" && (
                     <FormControl size='medium' sx={{ minWidth: 120 }}>
-                      <InputLabel>Tuần</InputLabel>
+                      <InputLabel>{t("statistic.week")}</InputLabel>
                       <Select
                         value={week}
                         onChange={(e) => setWeek(Number(e.target.value))}
@@ -276,7 +278,7 @@ const DashboardPage = () => {
                       >
                         {Array.from({ length: 52 }, (_, i) => i + 1).map((w) => (
                           <MenuItem key={w} value={w}>
-                            Tuần {w}
+                            {t("statistic.week")} {w}
                           </MenuItem>
                         ))}
                       </Select>
@@ -285,7 +287,7 @@ const DashboardPage = () => {
                   {viewType === "month" && (
                     <>
                       <FormControl size='medium' sx={{ minWidth: 120 }}>
-                        <InputLabel>Tháng</InputLabel>
+                        <InputLabel>{t("statistic.month")}</InputLabel>
                         <Select
                           value={month}
                           onChange={(e) => setMonth(Number(e.target.value))}
@@ -299,23 +301,23 @@ const DashboardPage = () => {
                         >
                           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                             <MenuItem key={m} value={m}>
-                              Tháng {m}
+                              {t("statistic.month")} {m}
                             </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
 
                       <FormControl size='medium' sx={{ minWidth: 160 }}>
-                        <InputLabel>Chế độ hiển thị</InputLabel>
+                        <InputLabel>{t("statistic.display_mode")}</InputLabel>
                         <Select value={monthMode} onChange={(e) => setMonthMode(e.target.value)}>
-                          <MenuItem value='day'>Theo ngày</MenuItem>
-                          <MenuItem value='week'>Theo tuần</MenuItem>
+                          <MenuItem value='day'>{t("statistic.by_day")}</MenuItem>
+                          <MenuItem value='week'>{t("statistic.by_week")}</MenuItem>
                         </Select>
                       </FormControl>
                     </>
                   )}
                   <FormControl size='medium' sx={{ minWidth: 120 }}>
-                    <InputLabel>Năm</InputLabel>
+                    <InputLabel>{t("statistic.year")}</InputLabel>
                     <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
                       {Array.from({ length: 5 }, (_, i) => dayjs().year() - i).map((y) => (
                         <MenuItem key={y} value={y}>
@@ -327,24 +329,24 @@ const DashboardPage = () => {
                 </>
               )}
 
-              {/* Nút Phân tích nằm bên phải */}
+              {/* Analyze button placeholder */}
               <Box flex='1 1 auto' display='flex' justifyContent='flex-end'></Box>
             </Box>
           </CardContent>
         </Card>
 
-        {/* ===== Biểu đồ Nhóm (LineChart / BarChart - Recharts) ===== */}
+        {/* ===== Group Chart (LineChart / BarChart - Recharts) ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 6 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>Doanh thu theo Nhóm</Typography>
+              <Typography variant='h6'>{t("statistic.revenue_by_group")}</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
-                <InputLabel>Hiển thị theo</InputLabel>
+                <InputLabel>{t("statistic.display_by")}</InputLabel>
                 <Select value={pieGroupType} onChange={(e) => setPieGroupType(e.target.value)}>
-                  <MenuItem value='revenue'>Doanh Thu</MenuItem>
-                  <MenuItem value='quantity'>Số Lượng</MenuItem>
-                  <MenuItem value='profit'>Lợi nhuận</MenuItem>
-                  <MenuItem value='margin'>Tỷ suất (%)</MenuItem>
+                  <MenuItem value='revenue'>{t("statistic.revenue")}</MenuItem>
+                  <MenuItem value='quantity'>{t("statistic.quantity")}</MenuItem>
+                  <MenuItem value='profit'>{t("statistic.profit")}</MenuItem>
+                  <MenuItem value='margin'>{t("statistic.margin_percent")}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -352,7 +354,7 @@ const DashboardPage = () => {
             <ResponsiveContainer width='100%' height={400}>
               <LineChart data={pivotedData}>
                 <CartesianGrid strokeDasharray='3 3' />
-                <XAxis dataKey='time' /> {/* 👉 Hiển thị ngày ở trục X */}
+                <XAxis dataKey='time' />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -363,7 +365,7 @@ const DashboardPage = () => {
                     dataKey={name}
                     name={name}
                     strokeWidth={2}
-                    stroke={`hsl(${(idx * 50) % 360}, 70%, 50%)`} // màu tự động khác nhau
+                    stroke={`hsl(${(idx * 50) % 360}, 70%, 50%)`}
                     dot={{ r: 3 }}
                   />
                 ))}
@@ -372,13 +374,13 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* ===== Top Món Ăn ===== */}
+        {/* ===== Top Dishes ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>Top Món Ăn Bán Chạy</Typography>
+              <Typography variant='h6'>{t("statistic.top_best_selling_dishes")}</Typography>
               <FormControl size='small' sx={{ minWidth: 120 }}>
-                <InputLabel>Hiển thị</InputLabel>
+                <InputLabel>{t("statistic.show")}</InputLabel>
                 <Select value={itemLimit} onChange={(e) => setItemLimit(Number(e.target.value))}>
                   {[5, 10, 20, 50].map((n) => (
                     <MenuItem key={n} value={n}>
@@ -393,11 +395,11 @@ const DashboardPage = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Món ăn</TableCell>
-                    <TableCell align='center'>Số lượng</TableCell>
-                    <TableCell align='center'>Doanh thu</TableCell>
-                    <TableCell align='center'>Lợi nhuận</TableCell>
-                    <TableCell align='center'>Tỷ suất (%)</TableCell>
+                    <TableCell>{t("statistic.dish_name")}</TableCell>
+                    <TableCell align='center'>{t("statistic.quantity")}</TableCell>
+                    <TableCell align='center'>{t("statistic.revenue")}</TableCell>
+                    <TableCell align='center'>{t("statistic.profit")}</TableCell>
+                    <TableCell align='center'>{t("statistic.margin_percent")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -429,18 +431,18 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* ===== Biểu đồ Món Ăn (PieChart - Recharts) ===== */}
+        {/* ===== Dish Pie Chart (PieChart - Recharts) ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3, mb: 4 }}>
           <CardContent>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-              <Typography variant='h6'>Tỷ lệ Theo Món</Typography>
+              <Typography variant='h6'>{t("statistic.ratio_by_dish")}</Typography>
               <FormControl size='small' sx={{ minWidth: 140 }}>
-                <InputLabel>Hiển thị theo</InputLabel>
+                <InputLabel>{t("statistic.display_by")}</InputLabel>
                 <Select value={pieType} onChange={(e) => setPieType(e.target.value)}>
-                  <MenuItem value='revenue'>Doanh Thu</MenuItem>
-                  <MenuItem value='quantity'>Số Lượng</MenuItem>
-                  <MenuItem value='profit'>Lợi nhuận</MenuItem>
-                  <MenuItem value='margin'>Tỷ suất (%)</MenuItem>
+                  <MenuItem value='revenue'>{t("statistic.revenue")}</MenuItem>
+                  <MenuItem value='quantity'>{t("statistic.quantity")}</MenuItem>
+                  <MenuItem value='profit'>{t("statistic.profit")}</MenuItem>
+                  <MenuItem value='margin'>{t("statistic.margin_percent")}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -466,20 +468,19 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* ===== Gợi ý món ăn mới ===== */}
+        {/* ===== New dish suggestions ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              Gợi ý món ăn mới
+              {t("statistic.new_dish_suggestions")}
             </Typography>
             <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
-              Hệ thống sẽ phân tích dữ liệu kinh doanh của cửa hàng (các món bán chạy, nhóm nguyên liệu dùng nhiều,...)
-              kết hợp với kiến thức về ngành F&B để đề xuất những món mới mà cửa hàng có thể đưa vào thực đơn.
-              <br />- Những gợi ý này chỉ mang tính chất hỗ trợ, giúp chủ cửa hàng:
+              {t("statistic.new_dish_suggestions_desc")}
+              <br />- {t("statistic.new_dish_suggestions_note")}
               <ul style={{ marginTop: 4, marginLeft: 10 }}>
-                <li>+ Mở rộng thực đơn dựa trên thế mạnh hiện tại,</li>
-                <li>+ Tận dụng nguyên liệu sẵn có để tối ưu chi phí,</li>
-                <li>+ Tăng khả năng thu hút khách hàng mới.</li>
+                <li>+ {t("statistic.suggestion_expand_menu")}</li>
+                <li>+ {t("statistic.suggestion_use_ingredients")}</li>
+                <li>+ {t("statistic.suggestion_attract_customers")}</li>
               </ul>
             </Typography>
 
@@ -509,7 +510,7 @@ const DashboardPage = () => {
                           {dish.description}
                         </Typography>
                         <Typography variant='subtitle2' fontWeight='bold' color='text.primary'>
-                          Nguyên liệu chính:
+                          {t("statistic.main_ingredients")}:
                         </Typography>
                         <Typography variant='body2'>{dish.mainIngredients.join(", ")}</Typography>
                       </CardContent>
@@ -518,31 +519,28 @@ const DashboardPage = () => {
                 ))}
               </Grid>
             ) : (
-              <Typography>Đang phân tích dữ liệu & gợi ý món ăn...</Typography>
+              <Typography>{t("statistic.analyzing_dishes")}</Typography>
             )}
           </CardContent>
         </Card>
 
-        {/* ===== Gợi ý món ăn theo danh mục ===== */}
+        {/* ===== Dish suggestions by category ===== */}
         <Card sx={{ borderRadius: 3, boxShadow: 3, mt: 4 }}>
           <CardContent>
             <Typography variant='h6' gutterBottom>
-              Gợi ý món ăn theo danh mục
+              {t("statistic.dish_suggestions_by_category")}
             </Typography>
             <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
-              Dựa trên từng danh mục món ăn mà cửa hàng đang kinh doanh, hệ thống đưa ra danh sách các món được đề xuất
-              phù hợp với mỗi danh mục. Điều này giúp bạn dễ dàng biết được danh mục nào đang thiếu món, có thể bổ sung
-              món gì để menu trở nên đa dạng và cân đối hơn.
+              {t("statistic.dish_suggestions_by_category_desc")}
               <br />
-              Ví dụ: Nếu danh mục "Món chiên" đang ít món, hệ thống sẽ gợi ý thêm các món phù hợp như gà chiên sốt,
-              khoai tây lắc phô mai,...
+              {t("statistic.dish_suggestions_by_category_example")}
             </Typography>
 
             {recommendedDishesByCategory.length > 0 ? (
               Object.entries(groupedByCategory).map(([category, dishes]) => (
                 <Box key={category} mb={2}>
                   <Typography variant='subtitle1' fontWeight='bold' sx={{ mb: 1 }}>
-                    Các món {category}:
+                    {t("statistic.category_dishes", { category })}:
                   </Typography>
 
                   <Typography variant='body2' color='text.secondary'>
@@ -551,7 +549,7 @@ const DashboardPage = () => {
                 </Box>
               ))
             ) : (
-              <Typography>Đang phân tích dữ liệu & gợi ý món ăn theo danh mục...</Typography>
+              <Typography>{t("statistic.analyzing_dishes_by_category")}</Typography>
             )}
           </CardContent>
         </Card>

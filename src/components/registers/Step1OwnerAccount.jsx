@@ -3,8 +3,10 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
+  const { t } = useTranslation();
   const [localOwner, setLocalOwner] = useState(formData.owner);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -22,16 +24,16 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
   const handleNext = async () => {
     const { name, email, phonenumber, gender, password, confirmPassword } = localOwner;
 
-    if (!name.trim()) return toast.error("Tên không được để trống");
-    if (!email.includes("@")) return toast.error("Email không hợp lệ");
-    if (!/^\d{9,11}$/.test(phonenumber)) return toast.error("Số điện thoại không hợp lệ");
-    if (!password || password.length < 6) return toast.error("Mật khẩu phải có ít nhất 6 ký tự");
-    if (password !== confirmPassword) return toast.error("Mật khẩu nhập lại không khớp");
-    if (!gender) return toast.error("Vui lòng chọn giới tính");
+    if (!name.trim()) return toast.error(t("auth.name_required"));
+    if (!email.includes("@")) return toast.error(t("auth.email_invalid"));
+    if (!/^\d{9,11}$/.test(phonenumber)) return toast.error(t("auth.phone_invalid"));
+    if (!password || password.length < 6) return toast.error(t("auth.password_min"));
+    if (password !== confirmPassword) return toast.error(t("auth.password_mismatch"));
+    if (!gender) return toast.error(t("auth.gender_required"));
 
     const res = await checkOwnerInfo(localOwner);
     if (res.status !== "success") {
-      toast.error(res.message || "Đã xảy ra lỗi khi kiểm tra");
+      toast.error(res.message || t("auth.check_error"));
       return;
     }
 
@@ -42,9 +44,9 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
   return (
     <div className='w-full max-w-4xl mx-auto rounded-3xl bg-white shadow-xl p-8 md:p-12'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-        {/* Họ tên */}
+        {/* Full name */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Họ tên</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.owner_name")}</label>
           <div className='relative flex items-center rounded-lg px-3 py-2 border bg-[#f5f5f5] border-gray-300'>
             <FaUser className='text-gray-400' />
             <input
@@ -52,7 +54,7 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
               name='name'
               value={localOwner.name}
               onChange={handleChange}
-              placeholder='Nhập họ tên'
+              placeholder={t("auth.owner_name_placeholder")}
               className='ml-3 w-full pr-10 bg-transparent outline-none text-gray-700 placeholder-gray-400 rounded-lg'
             />
           </div>
@@ -60,7 +62,7 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
 
         {/* Email */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Email</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.email")}</label>
           <div className='relative flex items-center rounded-lg px-3 py-2 border bg-[#f5f5f5] border-gray-300'>
             <FaEnvelope className='text-gray-400' />
             <input
@@ -74,9 +76,9 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
           </div>
         </div>
 
-        {/* Số điện thoại */}
+        {/* Phone */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Số điện thoại</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.owner_phone")}</label>
           <div className='relative flex items-center rounded-lg px-3 py-2 border bg-[#f5f5f5] border-gray-300'>
             <FaPhone className='text-gray-400' />
             <input
@@ -84,15 +86,15 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
               name='phonenumber'
               value={localOwner.phonenumber}
               onChange={handleChange}
-              placeholder='Nhập số điện thoại'
+              placeholder={t("auth.owner_phone_placeholder")}
               className='ml-3 w-full pr-10 bg-transparent outline-none text-gray-700 placeholder-gray-400 rounded-lg'
             />
           </div>
         </div>
 
-        {/* Giới tính */}
+        {/* Gender */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Giới tính</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.owner_gender")}</label>
           <div className='relative flex items-center border border-gray-300 rounded-lg px-3 py-2 bg-[#f5f5f5]'>
             <select
               name='gender'
@@ -100,9 +102,9 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
               onChange={handleChange}
               className='w-full bg-transparent outline-none text-gray-700 appearance-none pr-6'
             >
-              <option value='male'>Nam</option>
-              <option value='female'>Nữ</option>
-              <option value='other'>Khác</option>
+              <option value='male'>{t("auth.gender_male")}</option>
+              <option value='female'>{t("auth.gender_female")}</option>
+              <option value='other'>{t("auth.gender_other")}</option>
             </select>
 
             <div className='pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400'>
@@ -113,9 +115,9 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
           </div>
         </div>
 
-        {/* Mật khẩu */}
+        {/* Password */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Mật khẩu</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.password")}</label>
           <div className='relative flex items-center rounded-lg px-3 py-2 border bg-[#f5f5f5] border-gray-300'>
             <FaLock className='text-gray-400' />
             <input
@@ -136,9 +138,9 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
           </div>
         </div>
 
-        {/* Nhập lại mật khẩu */}
+        {/* Confirm password */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Nhập lại mật khẩu</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.owner_confirm_password")}</label>
           <div className='relative flex items-center rounded-lg px-3 py-2 border bg-[#f5f5f5] border-gray-300'>
             <FaLock className='text-gray-400' />
             <input
@@ -165,13 +167,13 @@ const Step1OwnerAccount = ({ formData, setFormData, nextStep }) => {
           href='/auth/login'
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-semibold transition'
         >
-          Quay lại đăng nhập
+          {t("auth.back_to_login")}
         </Link>
         <button
           onClick={handleNext}
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
         >
-          Tiếp tục
+          {t("auth.continue")}
         </button>
       </div>
     </div>

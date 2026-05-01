@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaUpload } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
+  const { t } = useTranslation();
   const [preview, setPreview] = useState({
     IC_front: null,
     IC_back: null,
@@ -10,7 +12,6 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
     storePicture: [],
   });
 
-  // ✅ Sync preview với formData khi component mount hoặc formData thay đổi
   useEffect(() => {
     if (formData.paperWork) {
       setPreview({
@@ -65,19 +66,19 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
     const { IC_front, IC_back, businessLicense, storePicture } = formData.paperWork || {};
 
     if (!IC_front) {
-      toast.error("Vui lòng chọn CMND/CCCD mặt trước");
+      toast.error(t("auth.ic_front_required"));
       return;
     }
     if (!IC_back) {
-      toast.error("Vui lòng chọn CMND/CCCD mặt sau");
+      toast.error(t("auth.ic_back_required"));
       return;
     }
     if (!businessLicense) {
-      toast.error("Vui lòng chọn Giấy phép kinh doanh");
+      toast.error(t("auth.business_license_required"));
       return;
     }
     if (!storePicture || storePicture.length === 0) {
-      toast.error("Vui lòng chọn ít nhất 1 ảnh cửa hàng");
+      toast.error(t("auth.store_pictures_required"));
       return;
     }
 
@@ -88,9 +89,8 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
     <div className='mb-4'>
       <label className='block font-medium mb-1'>{label}</label>
 
-      {/* Nút chọn ảnh */}
       <label className='px-4 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 inline-flex items-center gap-2 mb-2'>
-        <FaUpload /> Chọn ảnh
+        <FaUpload /> {t("auth.choose_photo")}
         <input
           type='file'
           accept='image/*'
@@ -100,7 +100,6 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
         />
       </label>
 
-      {/* Preview ảnh hiển thị dưới nút */}
       {!multiple && preview[field] && (
         <div className='relative w-48 h-w-48 border rounded-lg overflow-hidden shadow hover:shadow-lg transition'>
           <img src={preview[field]} alt='preview' className='w-full h-full object-cover' />
@@ -114,18 +113,18 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
 
   return (
     <div className='w-full rounded-2xl border m-2 border-gray-100 bg-white p-6 md:p-10 lg:p-16 shadow-lg'>
-      <h2 className='text-3xl font-bold text-center text-gray-800 mb-10'>Bổ sung giấy tờ</h2>
+      <h2 className='text-3xl font-bold text-center text-gray-800 mb-10'>{t("auth.paperwork_title")}</h2>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-        {renderFileInput("CMND/CCCD Mặt Trước", "IC_front")}
-        {renderFileInput("CMND/CCCD Mặt Sau", "IC_back")}
-        {renderFileInput("Giấy phép kinh doanh", "businessLicense")}
-        {renderFileInput("Ảnh cửa hàng (nhiều ảnh)", "storePicture", true)}
+        {renderFileInput(t("auth.ic_front"), "IC_front")}
+        {renderFileInput(t("auth.ic_back"), "IC_back")}
+        {renderFileInput(t("auth.business_license"), "businessLicense")}
+        {renderFileInput(t("auth.store_pictures"), "storePicture", true)}
       </div>
 
       {preview.storePicture.length > 0 && (
         <>
-          <h3 className='text-lg font-semibold mt-10 mb-2'>Xem trước ảnh cửa hàng</h3>
+          <h3 className='text-lg font-semibold mt-10 mb-2'>{t("auth.store_picture_preview")}</h3>
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
             {preview.storePicture.map((src, index) => (
               <img
@@ -144,13 +143,13 @@ const Step4Paperwork = ({ formData, setFormData, nextStep, prevStep }) => {
           onClick={prevStep}
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-400 hover:to-gray-500 text-white font-semibold transition'
         >
-          Quay lại
+          {t("auth.back")}
         </button>
         <button
           onClick={handleNextStep}
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
         >
-          Tiếp tục
+          {t("auth.continue")}
         </button>
       </div>
     </div>

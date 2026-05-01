@@ -2,11 +2,12 @@
 import { getAllSystemCategories } from "@/service/systemCategory";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
 
-  // Ref cho input file
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
@@ -75,8 +76,8 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
       store: {
         ...prev.store,
         [name]: {
-          file, // <-- Lưu File object thật
-          preview: url, // Đổi key từ url → preview (cho rõ ràng)
+          file,
+          preview: url,
         },
       },
     }));
@@ -84,17 +85,17 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
 
   const handleNextStep = () => {
     if (!formData.store.name || !formData.store.name.trim()) {
-      toast.error("Vui lòng nhập tên cửa hàng");
+      toast.error(t("auth.store_name_required"));
       return;
     }
 
     if (!formData.store.avatar?.file) {
-      toast.error("Vui lòng chọn ảnh đại diện cho cửa hàng");
+      toast.error(t("auth.store_avatar_required"));
       return;
     }
 
     if (!formData.store.storeCategory || formData.store.storeCategory.length === 0) {
-      toast.error("Vui lòng chọn ít nhất 1 danh mục cho cửa hàng");
+      toast.error(t("auth.store_category_required"));
       return;
     }
 
@@ -104,34 +105,34 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
   return (
     <div className='w-full max-w-4xl mx-auto rounded-3xl bg-white shadow-xl p-8 md:px-12 lg:px-20 xl:px-32'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        {/* Tên cửa hàng */}
+        {/* Store name */}
         <div className='md:col-span-2'>
-          <label className='block font-semibold text-gray-700 mb-1'>Tên cửa hàng</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.store_name")}</label>
           <input
             type='text'
             name='name'
             value={formData.store.name}
             onChange={handleChange}
-            placeholder='Nhập tên cửa hàng'
+            placeholder={t("auth.store_name_placeholder")}
             className='w-full px-3 py-2 border bg-[#f5f5f5] border-gray-300 rounded-lg shadow-sm transition'
           />
         </div>
 
-        {/* Mô tả - cũng chiếm toàn bộ cột */}
+        {/* Description */}
         <div className='md:col-span-2'>
-          <label className='block font-semibold text-gray-700 mb-1'>Mô tả</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.confirm_store_description")}</label>
           <textarea
             name='description'
             value={formData.store.description}
             onChange={handleChange}
-            placeholder='Giới thiệu ngắn về cửa hàng'
+            placeholder={t("auth.store_description_placeholder")}
             className='w-full px-3 py-2 border bg-[#f5f5f5] border-gray-300 rounded-lg shadow-sm h-[100px] resize-none transition'
           />
         </div>
 
-        {/* Danh mục cửa hàng */}
+        {/* Category */}
         <div className='md:col-span-2'>
-          <label className='block font-semibold text-gray-700 mb-1'>Danh mục cửa hàng</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.store_category_label")}</label>
           <div className='flex flex-wrap gap-3'>
             {categories.map((cat) => (
               <label
@@ -152,13 +153,13 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
 
         {/* Avatar */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Ảnh đại diện</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.store_avatar_label")}</label>
           <button
             type='button'
             onClick={() => avatarInputRef.current?.click()}
             className='w-full flex justify-center items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white transition font-medium'
           >
-            Chọn ảnh đại diện
+            {t("auth.store_avatar_btn")}
           </button>
           <input
             type='file'
@@ -181,13 +182,13 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
 
         {/* Cover */}
         <div>
-          <label className='block font-semibold text-gray-700 mb-1'>Ảnh bìa</label>
+          <label className='block font-semibold text-gray-700 mb-1'>{t("auth.store_cover_label")}</label>
           <button
             type='button'
             onClick={() => coverInputRef.current?.click()}
             className='w-full flex justify-center items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white transition font-medium'
           >
-            Chọn ảnh bìa
+            {t("auth.store_cover_btn")}
           </button>
           <input
             type='file'
@@ -213,13 +214,13 @@ const Step2BasicStoreInfo = ({ formData, setFormData, nextStep, prevStep }) => {
           onClick={prevStep}
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-400 hover:to-gray-500 text-white font-semibold transition'
         >
-          Quay lại
+          {t("auth.back")}
         </button>
         <button
           onClick={handleNextStep}
           className='px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
         >
-          Tiếp tục
+          {t("auth.continue")}
         </button>
       </div>
     </div>

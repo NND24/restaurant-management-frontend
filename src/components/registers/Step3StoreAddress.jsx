@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import MapboxComponent from "../../components/registers/MapboxContainer";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inputClass }) => {
+  const { t } = useTranslation();
   const [locationReady, setLocationReady] = useState(false);
   const [localAddress, setLocalAddress] = useState({
     full_address: "",
@@ -11,10 +13,8 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
     lon: null,
   });
 
-  // Cờ để kiểm tra đã lấy vị trí mặc định chưa
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Sync local state với storeInfo khi mount hoặc storeInfo thay đổi
   useEffect(() => {
     if (storeInfo.address) {
       setLocalAddress({
@@ -25,7 +25,6 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
     }
   }, [storeInfo.address]);
 
-  // Chỉ lấy vị trí hiện tại khi chưa có dữ liệu trước đó
   useEffect(() => {
     if (hasInitialized) return;
     if (storeInfo.address?.lat && storeInfo.address?.lon) {
@@ -89,7 +88,7 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
   const handleNextStep = () => {
     const { full_address, lat, lon } = localAddress;
     if (!lat || !lon || !full_address?.trim()) {
-      toast.error("Vui lòng điền đầy đủ thông tin địa chỉ, bao gồm vị trí trên bản đồ!");
+      toast.error(t("auth.store_address_required"));
       return;
     }
     nextStep();
@@ -97,21 +96,21 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
 
   return (
     <div>
-      <h2 className='text-xl font-semibold mb-4'>Địa chỉ cửa hàng</h2>
+      <h2 className='text-xl font-semibold mb-4'>{t("auth.store_address_title")}</h2>
       <div className='bg-gray-50 p-6 rounded-lg shadow'>
         <div>
-          <label className='font-medium block mb-1'>Địa chỉ</label>
+          <label className='font-medium block mb-1'>{t("auth.store_address_label")}</label>
           <input
             type='text'
             name='full_address'
-            placeholder='Số nhà, đường, quận/huyện...'
+            placeholder={t("auth.store_address_placeholder")}
             value={localAddress.full_address}
             onChange={handleChange}
             className={inputClass}
           />
         </div>
 
-        <label className='font-medium block mb-2 mt-4'>Chọn vị trí trên bản đồ</label>
+        <label className='font-medium block mb-2 mt-4'>{t("auth.store_map_label")}</label>
         {locationReady ? (
           <MapboxComponent
             currentLatitude={localAddress.lat}
@@ -119,7 +118,7 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
             onLocationSelect={handleLocationSelect}
           />
         ) : (
-          <p className='text-sm text-gray-500 mt-2'>Đang lấy vị trí của bạn...</p>
+          <p className='text-sm text-gray-500 mt-2'>{t("auth.store_location_loading")}</p>
         )}
 
         <div className='flex justify-between mt-10'>
@@ -128,7 +127,7 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
             onClick={prevStep}
             className='px-6 py-2 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-400 hover:to-gray-500 text-white font-semibold transition'
           >
-            Quay lại
+            {t("auth.back")}
           </button>
 
           <button
@@ -136,7 +135,7 @@ const Step3StoreAddress = ({ storeInfo, updateStoreInfo, nextStep, prevStep, inp
             onClick={handleNextStep}
             className='px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-500 text-white font-semibold transition'
           >
-            Tiếp tục
+            {t("auth.continue")}
           </button>
         </div>
       </div>
